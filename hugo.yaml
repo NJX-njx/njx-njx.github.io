@@ -1,0 +1,90 @@
+baseURL: "https://njx-njx.github.io/"
+languageCode: "en-us"
+title: "Njx'Log"
+theme: "PaperMod"
+
+enableRobotsTXT: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+
+minify:
+  disableXML: true
+  minifyOutput: true
+
+params:
+  env: production
+  title: Njx'Log
+  description: "Documenting my learning notes."
+  keywords: [Blog, Portfolio, PaperMod]
+  author: jiaxing ni
+  DateFormat: "January 2, 2006"
+  defaultTheme: auto
+  disableThemeToggle: false
+
+  ShowReadingTime: true
+  ShowShareButtons: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowWordCount: true
+  ShowRssButtonInSectionTermList: true
+  UseHugoToc: true
+  disableSpecial1stPost: false
+  disableScrollToTop: false
+  comments: false
+  hidemeta: false
+  hideSummary: false
+  showtoc: true
+  tocopen: false
+
+  assets:
+    favicon: "/favicon.ico"
+
+  label:
+    text: "Njx'Log"
+    icon: /apple-touch-icon.png
+    iconHeight: 35
+
+  # home-info mode
+  homeInfoParams:
+    Title: "👋 Welcome to Njx’Log"
+    Content: >
+        Hi, this is jiaxing ni. I’m documenting my learning notes in this blog since 2017.
+        
+        Based on the number of grammar mistakes in my posts, you can tell how much ChatGPT is involved 😉.
+
+  socialIcons:
+    - name: twitter
+      url: "https://x.com/XS6393865633072"
+    - name: github
+      url: "https://github.com/NJX-njx"
+
+menu:
+  main:
+    - identifier: posts
+      name: Posts
+      url: /posts/
+      weight: 10
+    - identifier: archives
+      name: Archive
+      url: /archives/
+      weight: 20
+    - identifier: search
+      name: Search
+      url: /search/
+      weight: 30
+    - identifier: tags
+      name: Tags
+      url: /tags/
+      weight: 40
+    - identifier: faq
+      name: FAQ
+      url: /faq/
+      weight: 50
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
