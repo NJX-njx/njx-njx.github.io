@@ -14,7 +14,7 @@ minify:
 
 params:
   env: production
-  title: Njx'Log
+  title: Njx's Blog
   description: "Documenting my learning notes."
   keywords: [Blog, Portfolio, PaperMod]
   author: jiaxing ni
