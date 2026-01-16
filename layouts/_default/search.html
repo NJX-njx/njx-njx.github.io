@@ -1,0 +1,609 @@
+{{- define "main" }}
+
+<header class="page-header">
+    <h1>{{- (printf "%s&nbsp;" .Title ) | htmlUnescape -}}
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+    </h1>
+    {{- if .Description }}
+    <div class="post-description">
+        {{ .Description }}
+    </div>
+    {{- end }}
+</header>
+
+<!-- Original Search Box -->
+<div id="searchbox">
+    <input id="searchInput" autofocus placeholder="{{ .Params.placeholder | default (printf "%s ↵" .Title) }}"
+        aria-label="search" type="search" autocomplete="off" maxlength="64">
+    <ul id="searchResults" aria-label="search results"></ul>
+</div>
+
+<!-- AI Assistant Section -->
+<div id="ai-assistant">
+    <div class="ai-header">
+        <h2>🤖 Ask AI Assistant</h2>
+        <p class="ai-description">Ask questions about my blog posts. The AI will search relevant articles and provide answers based on their content.</p>
+    </div>
+    
+    <!-- API Key Configuration -->
+    <div id="api-config" class="api-config">
+        <details>
+            <summary>Configure API Key</summary>
+            <div class="api-config-content">
+                <label for="api-provider">Provider:</label>
+                <select id="api-provider">
+                    <option value="deepseek" selected>DeepSeek Official (推荐)</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="aistudio" disabled>Baidu AI Studio (不支持浏览器)</option>
+                </select>
+                <label for="api-key">API Key:</label>
+                <input type="password" id="api-key" placeholder="输入你的 API Key">
+                <button id="save-api-key">Save</button>
+                <span id="api-status"></span>
+            </div>
+        </details>
+    </div>
+
+    <!-- Chat Interface -->
+    <div id="chat-container">
+        <div id="chat-messages">
+            <div class="message assistant">
+                <div class="message-content">
+                    👋 你好！我是 Njx'Log 的 AI 助手。你可以向我提问关于博客文章的问题，我会检索相关文章并为你解答。
+                </div>
+            </div>
+        </div>
+        
+        <div id="chat-input-container">
+            <textarea id="chat-input" placeholder="输入你的问题..." rows="2"></textarea>
+            <button id="send-button" title="发送">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* AI Assistant Styles */
+#ai-assistant {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border);
+}
+
+.ai-header h2 {
+    margin-bottom: 8px;
+    font-size: 1.5em;
+}
+
+.ai-description {
+    color: var(--secondary);
+    margin-bottom: 20px;
+    font-size: 0.95em;
+}
+
+/* API Config */
+.api-config {
+    margin-bottom: 20px;
+}
+
+.api-config details {
+    background: var(--code-bg);
+    border-radius: var(--radius);
+    padding: 10px 15px;
+}
+
+.api-config summary {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.api-config-content {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.api-config-content label {
+    font-size: 0.9em;
+    color: var(--secondary);
+}
+
+.api-config-content select,
+.api-config-content input {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--theme);
+    color: var(--primary);
+    font-size: 0.9em;
+}
+
+.api-config-content input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.api-config-content button {
+    padding: 8px 16px;
+    background: var(--primary);
+    color: var(--theme);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.api-config-content button:hover {
+    opacity: 0.9;
+}
+
+#api-status {
+    font-size: 0.85em;
+    color: var(--secondary);
+}
+
+/* Chat Container */
+#chat-container {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--code-bg);
+    max-width: 700px;
+}
+
+#chat-messages {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.message {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.message.user {
+    align-items: flex-end;
+}
+
+.message.assistant {
+    align-items: flex-start;
+}
+
+.message-content {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    line-height: 1.5;
+    font-size: 0.95em;
+}
+
+.message.user .message-content {
+    background: var(--primary);
+    color: var(--theme);
+    border-bottom-right-radius: 4px;
+}
+
+.message.assistant .message-content {
+    background: var(--theme);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+}
+
+.message-content p {
+    margin: 0 0 10px 0;
+}
+
+.message-content p:last-child {
+    margin-bottom: 0;
+}
+
+.message-content a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.message.assistant .message-content a {
+    color: var(--primary);
+}
+
+.message-content ul, .message-content ol {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.message-content code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.sources {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.85em;
+}
+
+.sources-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--secondary);
+}
+
+.source-link {
+    display: block;
+    padding: 4px 0;
+    color: var(--primary);
+}
+
+/* Loading animation */
+.loading {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px;
+}
+
+.loading span {
+    width: 8px;
+    height: 8px;
+    background: var(--secondary);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.loading span:nth-child(1) { animation-delay: -0.32s; }
+.loading span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+/* Chat Input */
+#chat-input-container {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    border-top: 1px solid var(--border);
+    background: var(--theme);
+}
+
+#chat-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--code-bg);
+    color: var(--primary);
+    font-size: 0.95em;
+    resize: none;
+    font-family: inherit;
+}
+
+#chat-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+#send-button {
+    padding: 10px 16px;
+    background: var(--primary);
+    color: var(--theme);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+}
+
+#send-button:hover {
+    opacity: 0.9;
+}
+
+#send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Error message */
+.error-message {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+</style>
+
+<script>
+(function() {
+    // Configuration - API Providers
+    const CONFIG = {
+        aistudio: {
+            baseUrl: 'https://aistudio.baidu.com/llm/lmapi/v3/chat/completions',
+            model: 'deepseek-v3'
+        },
+        deepseek: {
+            baseUrl: 'https://api.deepseek.com/chat/completions',
+            model: 'deepseek-chat'
+        },
+        openai: {
+            baseUrl: 'https://api.openai.com/v1/chat/completions',
+            model: 'gpt-4o-mini'
+        }
+    };
+
+    // State
+    let searchIndex = null;
+    let fuse = null;
+
+    // DOM Elements
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendButton = document.getElementById('send-button');
+    const apiKeyInput = document.getElementById('api-key');
+    const apiProviderSelect = document.getElementById('api-provider');
+    const saveApiKeyButton = document.getElementById('save-api-key');
+    const apiStatus = document.getElementById('api-status');
+
+    // Initialize
+    async function init() {
+        // Load saved API config
+        const savedProvider = localStorage.getItem('ai-provider');
+        const savedKey = localStorage.getItem('ai-api-key');
+        if (savedProvider) apiProviderSelect.value = savedProvider;
+        if (savedKey) {
+            apiKeyInput.value = savedKey;
+            apiStatus.textContent = '✓ Saved';
+            apiStatus.style.color = '#27ae60';
+        }
+
+        // Load search index
+        try {
+            const response = await fetch('/index.json');
+            searchIndex = await response.json();
+            
+            // Initialize Fuse.js for fuzzy search
+            if (typeof Fuse !== 'undefined') {
+                fuse = new Fuse(searchIndex, {
+                    keys: ['title', 'content', 'summary'],
+                    threshold: 0.4,
+                    includeScore: true,
+                    ignoreLocation: true
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load search index:', error);
+        }
+
+        // Event listeners
+        saveApiKeyButton.addEventListener('click', saveApiConfig);
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    function saveApiConfig() {
+        const provider = apiProviderSelect.value;
+        const key = apiKeyInput.value.trim();
+        
+        if (key) {
+            localStorage.setItem('ai-provider', provider);
+            localStorage.setItem('ai-api-key', key);
+            apiStatus.textContent = '✓ Saved';
+            apiStatus.style.color = '#27ae60';
+        } else {
+            localStorage.removeItem('ai-api-key');
+            apiStatus.textContent = '✗ No key';
+            apiStatus.style.color = '#e74c3c';
+        }
+    }
+
+    function searchRelevantPosts(query, limit = 3) {
+        if (!searchIndex || searchIndex.length === 0) return [];
+        
+        if (fuse) {
+            const results = fuse.search(query);
+            return results.slice(0, limit).map(r => r.item);
+        }
+        
+        // Fallback: simple keyword matching
+        const keywords = query.toLowerCase().split(/\s+/);
+        const scored = searchIndex.map(post => {
+            const text = `${post.title} ${post.content} ${post.summary}`.toLowerCase();
+            const score = keywords.reduce((acc, kw) => acc + (text.includes(kw) ? 1 : 0), 0);
+            return { ...post, score };
+        });
+        
+        return scored
+            .filter(p => p.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, limit);
+    }
+
+    function addMessage(content, isUser, sources = []) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+        
+        let html = `<div class="message-content">${content}`;
+        
+        if (sources.length > 0) {
+            html += `<div class="sources">
+                <div class="sources-title">📚 Related Articles:</div>
+                ${sources.map(s => `<a href="${s.permalink}" class="source-link">→ ${s.title}</a>`).join('')}
+            </div>`;
+        }
+        
+        html += '</div>';
+        messageDiv.innerHTML = html;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        return messageDiv;
+    }
+
+    function addLoadingMessage() {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message assistant';
+        messageDiv.id = 'loading-message';
+        messageDiv.innerHTML = `
+            <div class="loading">
+                <span></span><span></span><span></span>
+            </div>
+        `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeLoadingMessage() {
+        const loading = document.getElementById('loading-message');
+        if (loading) loading.remove();
+    }
+
+    async function sendMessage() {
+        const query = chatInput.value.trim();
+        if (!query) return;
+
+        const apiKey = localStorage.getItem('ai-api-key');
+        const provider = localStorage.getItem('ai-provider') || 'deepseek';
+        
+        if (!apiKey) {
+            addMessage('⚠️ 请先配置 API Key！展开上方的 "Configure API Key" 进行设置。<br><br>💡 推荐使用 <a href="https://platform.deepseek.com/" target="_blank">DeepSeek 官方 API</a>（注册即送额度）', false);
+            return;
+        }
+
+        // Add user message
+        addMessage(query, true);
+        chatInput.value = '';
+        sendButton.disabled = true;
+
+        // Search for relevant posts
+        const relevantPosts = searchRelevantPosts(query);
+        
+        // Build context from relevant posts
+        let context = '';
+        if (relevantPosts.length > 0) {
+            context = relevantPosts.map(post => 
+                `Article: "${post.title}"\nURL: ${post.permalink}\nContent: ${post.content.substring(0, 2000)}...`
+            ).join('\n\n---\n\n');
+        }
+
+        // Show loading
+        addLoadingMessage();
+
+        try {
+            const config = CONFIG[provider];
+            const systemPrompt = `你是 Njx'Log 博客的 AI 助手，由倪家兴（Jiaxing Ni）创建。
+
+## 你的身份
+- 你是一个专注于技术博客的智能助手
+- 博客主题涵盖：大模型（LLM）、多模态AI、RAG系统、机器学习等
+
+## 你的职责
+1. 根据提供的博客文章内容回答用户问题
+2. 帮助用户理解技术概念
+3. 推荐相关的博客文章
+4. 如果问题超出博客内容范围，提供通用但有帮助的回答
+
+## 回答风格
+- 使用清晰、简洁的语言
+- 适当使用 Markdown 格式（加粗、列表、代码块等）
+- 引用文章时注明来源
+- 如果不确定，诚实说明
+- 支持中英文双语回答，根据用户语言自动切换
+
+## 博客作者背景
+- 北京理工大学 计算机/徐特立英才班
+- 专注于：LLM 微调、RAG、多模态融合、RLHF
+- 有百度 Hackathon、字节 Xpert 等项目经验`;
+
+            const userPrompt = context 
+                ? `以下是相关的博客文章内容：\n\n${context}\n\n---\n\n用户问题：${query}`
+                : `用户问题：${query}\n\n（博客中未找到直接相关的文章）`;
+
+            const response = await fetch(config.baseUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: config.model,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 2000
+                })
+            });
+
+            removeLoadingMessage();
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'API request failed');
+            }
+
+            const data = await response.json();
+            const answer = data.choices[0].message.content;
+            
+            // Convert markdown to simple HTML
+            const formattedAnswer = formatMarkdown(answer);
+            addMessage(formattedAnswer, false, relevantPosts);
+
+        } catch (error) {
+            removeLoadingMessage();
+            addMessage(`<span class="error-message">❌ Error: ${error.message}</span>`, false);
+        }
+
+        sendButton.disabled = false;
+        chatInput.focus();
+    }
+
+    function formatMarkdown(text) {
+        return text
+            // Code blocks
+            .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+            // Inline code
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            // Bold
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            // Italic
+            .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+            // Links
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+            // Line breaks
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>')
+            // Wrap in paragraph
+            .replace(/^(.+)$/, '<p>$1</p>');
+    }
+
+    // Wait for Fuse.js to load (it's loaded by PaperMod's search)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+
+{{- end }}{{/* end main */}}

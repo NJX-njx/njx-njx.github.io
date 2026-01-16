@@ -39,18 +39,18 @@ params:
   tocopen: false
 
   assets:
-    favicon: "/favicon.ico"
+    favicon: "/favicon.svg"
 
   label:
     text: "Njx'Log"
-    icon: /apple-touch-icon.png
+    icon: /favicon.svg
     iconHeight: 35
 
   # home-info mode
   homeInfoParams:
     Title: "👋 Welcome to Njx’Log"
     Content: >
-        Hi, this is jiaxing ni. I’m documenting my learning notes in this blog since 2017.
+        Hi, this is jiaxing ni. I’m documenting my learning notes in this blog since 2026.
         
         Based on the number of grammar mistakes in my posts, you can tell how much ChatGPT is involved 😉.
 
@@ -78,10 +78,14 @@ menu:
       name: Tags
       url: /tags/
       weight: 40
+    - identifier: about
+      name: About
+      url: /about/
+      weight: 50
     - identifier: faq
       name: FAQ
       url: /faq/
-      weight: 50
+      weight: 60
 
 outputs:
   home:

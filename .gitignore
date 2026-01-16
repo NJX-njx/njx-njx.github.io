@@ -1,0 +1,40 @@
+# Hugo build output
+public/
+resources/_gen/
+
+# Hugo cache
+.hugo_build.lock
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv/
+venv/
+
+# Node.js (if using any build tools)
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
