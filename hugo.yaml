@@ -41,11 +41,11 @@ params:
   tocopen: false
 
   assets:
-    favicon: "/favicon.svg"
+    favicon: "/kpbl.png"
 
   label:
     text: "Njx'Log"
-    icon: /favicon.svg
+    icon: /kpbl.png
     iconHeight: 35
 
   # home-info mode
@@ -57,7 +57,7 @@ params:
         Posts started in 2023 and are updated as I learn more.
 
   images:
-    - "/favicon.svg"
+    - "/kpbl.png"
 
   socialIcons:
     - name: twitter
