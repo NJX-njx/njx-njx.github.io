@@ -7,4 +7,6 @@ tags: ["first", "hello"]
 
 ## Hello World
 
-This is my first post on my new blog!
+This blog is a running notebook for AI/ML experiments, LLM tooling, and engineering notes.
+
+If you are new here, start with the search page or the tags list to find topics you care about.

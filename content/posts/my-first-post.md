@@ -9,13 +9,13 @@ summary: "A short summary of my first post."
 
 ## Introduction
 
-This is the content of my first post. I am setting up my blog using Hugo and PaperMod.
+This blog focuses on practical AI/ML engineering notes: LLM fine-tuning, RAG pipelines, evaluation, and deployment.
 
 ### Why Blog?
 
-*   To document learning
-*   To share knowledge
-*   To practice writing
+*   To document experiments and results
+*   To share reusable implementation details
+*   To improve technical writing
 
 > "The faintest ink is better than the best memory."
 

@@ -1,5 +1,7 @@
 baseURL: "https://njx-njx.github.io/"
-languageCode: "en-us"
+languageCode: "zh-cn"
+defaultContentLanguage: "zh-cn"
+hasCJKLanguage: true
 title: "Njx'Log"
 theme: "PaperMod"
 
@@ -15,8 +17,8 @@ minify:
 params:
   env: production
   title: Njx's Blog
-  description: "Documenting my learning notes."
-  keywords: [Blog, Portfolio, PaperMod]
+  description: "记录 AI/ML 与工程实践的学习笔记。"
+  keywords: [AI, ML, LLM, RAG, Multimodal, MLOps, Engineering]
   author: jiaxing ni
   DateFormat: "January 2, 2006"
   defaultTheme: auto
@@ -48,11 +50,14 @@ params:
 
   # home-info mode
   homeInfoParams:
-    Title: "👋 Welcome to Njx’Log"
+    Title: "👋 Welcome to Njx'Log"
     Content: >
-        Hi, this is jiaxing ni. I’m documenting my learning notes in this blog since 2026.
+        Hi, this is Jiaxing Ni. I share my AI/ML learning notes, experiments, and engineering write-ups here.
         
-        Based on the number of grammar mistakes in my posts, you can tell how much ChatGPT is involved 😉.
+        Posts started in 2023 and are updated as I learn more.
+
+  images:
+    - "/favicon.svg"
 
   socialIcons:
     - name: twitter
