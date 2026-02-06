@@ -33,8 +33,8 @@
     </div>
 
     <div class="ai-safety">
-        Outputs are AI-generated and may be inaccurate. Do not paste secrets. Direct browser calls might fail due to CORS. Prefer a server/worker proxy if possible.
-        <a href="https://platform.deepseek.com/" target="_blank" rel="noopener noreferrer">Get a key</a>.
+        Outputs are AI-generated. Direct browser calls might fail due to CORS. 
+        <a id="provider-signup-link" href="https://www.volcengine.com/product/doubao" target="_blank" rel="noopener noreferrer">Get a key</a>.
     </div>
 
     <div id="api-config" class="api-config">
@@ -43,9 +43,9 @@
             <div class="api-config-content">
                 <label for="api-provider">Provider:</label>
                 <select id="api-provider">
-                    <option value="deepseek" selected>DeepSeek Official (推荐)</option>
+                    <option value="doubao" selected>豆包 Doubao-Seed (推荐)</option>
+                    <option value="deepseek">DeepSeek</option>
                     <option value="openai">OpenAI</option>
-                    <option value="aistudio" disabled>Baidu AI Studio (不支持浏览器)</option>
                 </select>
                 <label for="api-key">API Key:</label>
                 <input type="password" id="api-key" placeholder="输入你的 API Key">
@@ -56,6 +56,16 @@
     </div>
 
     <div id="chat-container">
+        <div id="chat-toolbar">
+            <button id="clear-chat" title="清空对话">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Clear
+            </button>
+        </div>
+
         <div id="chat-messages">
             <div class="message assistant">
                 <div class="message-content">
@@ -65,7 +75,7 @@
         </div>
 
         <div id="chat-input-container">
-            <textarea id="chat-input" placeholder="输入你的问题..." rows="2"></textarea>
+            <textarea id="chat-input" placeholder="输入你的问题..." rows="1"></textarea>
             <button id="send-button" title="发送">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="22" y1="2" x2="11" y2="13"></line>
