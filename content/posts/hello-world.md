@@ -7,6 +7,8 @@ tags: ["first", "hello"]
 
 ## Hello World
 
-This blog is a running notebook for AI/ML experiments, LLM tooling, and engineering notes.
+I recently read an interview with my idol Wenli, in which she mentioned how having her own blog helped her learn about AI. I also hope to have a blog where I can continue my ideas and let others see them.
+
+I want to keep moving forward on the path of AI.
 
 If you are new here, start with the search page or the tags list to find topics you care about.

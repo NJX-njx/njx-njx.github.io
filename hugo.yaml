@@ -45,13 +45,15 @@ params:
 
   label:
     text: "Njx'Log"
-    icon: /kpbl.png
+    icon: "/kpbl.png"
     iconHeight: 35
 
   # home-info mode
   homeInfoParams:
     Title: "👋 Welcome to Njx'Log"
     Content: >
+        ![Profile](/kpbl.png)
+
         Hi, this is Jiaxing Ni. I share my AI/ML learning notes, experiments, and engineering write-ups here.
         
         Posts started in 2023 and are updated as I learn more.
