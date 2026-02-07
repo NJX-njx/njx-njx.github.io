@@ -1,6 +1,6 @@
 ---
 title: "Hello World"
-date: 2026-1-27T10:00:00+08:00
+date: 2026-01-27T10:00:00+08:00
 draft: false
 tags: ["first", "hello"]
 ---
