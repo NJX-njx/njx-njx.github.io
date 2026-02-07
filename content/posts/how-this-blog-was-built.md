@@ -1,6 +1,6 @@
 ---
 title: "Building Njx'Log: The Full Stack of Hugo, PaperMod, and GitHub Pages"
-date: 2026-02-07T14:30:00+08:00
+date: 2026-02-07T08:00:00+08:00
 draft: false
 tags: ["hugo", "papermod", "blog", "cicd"]
 categories: ["Tech"]
