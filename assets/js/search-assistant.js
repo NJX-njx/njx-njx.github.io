@@ -33,12 +33,19 @@
 - 如果不确定，诚实说明
 - 支持中英文双语回答，根据用户语言自动切换`;
 
+    // Storage key prefix for namespacing
+    const STORAGE_PREFIX = 'njxlog_';
+
     let searchIndex = null;
     let fuse = null;
     let abortController = null;
     let chatHistory = []; // Stores {role, content}
 
-    // DOM Elements
+    // DOM Elements - Search Box
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+
+    // DOM Elements - AI Chat
     const chatMessages = document.getElementById('chat-messages');
     const chatInput = document.getElementById('chat-input');
     const sendButton = document.getElementById('send-button');
@@ -48,13 +55,13 @@
     const apiStatus = document.getElementById('api-status');
     const clearChatButton = document.getElementById('clear-chat');
     
-    // UI Init
+    // UI Init - gracefully handle missing elements
     if (!chatMessages || !chatInput || !sendButton) return;
 
     async function init() {
-        // Load Settings
-        const savedProvider = localStorage.getItem('ai-provider');
-        const savedKey = localStorage.getItem('ai-api-key');
+        // Load Settings - use sessionStorage for better security (cleared on tab close)
+        const savedProvider = sessionStorage.getItem(STORAGE_PREFIX + 'provider');
+        const savedKey = sessionStorage.getItem(STORAGE_PREFIX + 'api-key');
         if (savedProvider && CONFIG[savedProvider]) {
             apiProviderSelect.value = savedProvider;
         } else {
@@ -63,7 +70,7 @@
         
         if (savedKey) {
             apiKeyInput.value = savedKey;
-            apiStatus.textContent = '✓ Saved';
+            apiStatus.textContent = '✓ Session';
             apiStatus.className = 'status-success';
         }
 
@@ -82,6 +89,22 @@
             }
         } catch (error) {
             console.error('Failed to load search index:', error);
+        }
+
+        // ===== Search Box Logic =====
+        if (searchInput && searchResults) {
+            let searchDebounce = null;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchDebounce);
+                searchDebounce = setTimeout(() => performSearch(this.value), 150);
+            });
+            // Allow keyboard navigation
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    searchResults.innerHTML = '';
+                    searchInput.blur();
+                }
+            });
         }
 
         // Bind Events
@@ -132,12 +155,13 @@
         const key = apiKeyInput.value.trim();
         
         if (key) {
-            localStorage.setItem('ai-provider', provider);
-            localStorage.setItem('ai-api-key', key);
-            apiStatus.textContent = '✓ Saved';
+            // Use sessionStorage - cleared when browser tab closes (more secure)
+            sessionStorage.setItem(STORAGE_PREFIX + 'provider', provider);
+            sessionStorage.setItem(STORAGE_PREFIX + 'api-key', key);
+            apiStatus.textContent = '✓ Session';
             apiStatus.className = 'status-success';
         } else {
-            localStorage.removeItem('ai-api-key');
+            sessionStorage.removeItem(STORAGE_PREFIX + 'api-key');
             apiStatus.textContent = '✗ No key';
             apiStatus.className = 'status-error';
         }
@@ -175,8 +199,8 @@
         const query = chatInput.value.trim();
         if (!query) return;
 
-        const apiKey = localStorage.getItem('ai-api-key');
-        const provider = localStorage.getItem('ai-provider') || 'doubao';
+        const apiKey = sessionStorage.getItem(STORAGE_PREFIX + 'api-key');
+        const provider = sessionStorage.getItem(STORAGE_PREFIX + 'provider') || 'doubao';
         
         if (!apiKey) {
             addMessage({ 
@@ -385,17 +409,98 @@
 
     function parseMarkdown(text) {
         if (!text) return '';
-        // Simple Markdown Parser (can be replaced with marked.js if available)
-        // Safety: We carefully construct regex to avoid XSS for standard text
-        return text
-            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") // Escape HTML first
-            .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>') // Code blocks
-            .replace(/`([^`]+)`/g, '<code>$1</code>') // Inline code
+        
+        // Store code blocks temporarily to protect them from line break replacement
+        const codeBlocks = [];
+        const inlineCodes = [];
+        
+        // Extract and protect fenced code blocks
+        let processed = text.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+            const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+            codeBlocks.push({ lang, code });
+            return placeholder;
+        });
+        
+        // Extract and protect inline code
+        processed = processed.replace(/`([^`]+)`/g, (match, code) => {
+            const placeholder = `__INLINE_CODE_${inlineCodes.length}__`;
+            inlineCodes.push(code);
+            return placeholder;
+        });
+        
+        // Escape HTML in remaining content
+        processed = processed
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        
+        // Apply formatting
+        processed = processed
             .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // Bold
-            .replace(/\*([^*]+)\*/g, '<em>$1</em>') // Italic
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>') // Links
-            .replace(/\n\n/g, '<br><br>') // Paragraphs
-            .replace(/\n/g, '<br>'); // Line breaks
+            .replace(/\*([^*]+)\*/g, '<em>$1</em>'); // Italic
+        
+        // Links - only allow safe protocols (http, https, mailto, relative paths)
+        processed = processed.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+            const trimmedUrl = url.trim();
+            // Allow only safe protocols or relative URLs
+            if (/^(https?:\/\/|mailto:|\/|#)/.test(trimmedUrl) || !/^[a-z]+:/i.test(trimmedUrl)) {
+                const safeUrl = trimmedUrl.replace(/"/g, '&quot;');
+                return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+            }
+            // Reject dangerous protocols (javascript:, data:, etc.)
+            return `${text} (${trimmedUrl})`;
+        });
+        
+        // Line breaks (only in non-code content)
+        processed = processed
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n/g, '<br>');
+        
+        // Restore inline code
+        inlineCodes.forEach((code, i) => {
+            const escapedCode = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            processed = processed.replace(`__INLINE_CODE_${i}__`, `<code>${escapedCode}</code>`);
+        });
+        
+        // Restore code blocks
+        codeBlocks.forEach((block, i) => {
+            const escapedCode = block.code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            processed = processed.replace(
+                `__CODE_BLOCK_${i}__`, 
+                `<pre><code class="language-${block.lang}">${escapedCode}</code></pre>`
+            );
+        });
+        
+        return processed;
+    }
+
+    // ===== Search Box Functions =====
+    function performSearch(query) {
+        if (!searchResults) return;
+        
+        query = query.trim();
+        if (!query) {
+            searchResults.innerHTML = '';
+            return;
+        }
+        
+        const results = searchRelevantPosts(query, 10);
+        
+        if (results.length === 0) {
+            searchResults.innerHTML = '<li class="no-results">No results found</li>';
+            return;
+        }
+        
+        searchResults.innerHTML = results.map(post => {
+            const title = escapeHtml(post.title);
+            const summary = escapeHtml((post.summary || post.content || '').substring(0, 100));
+            return `<li><a href="${post.permalink}"><span class="title">${title}</span><span class="summary">${summary}...</span></a></li>`;
+        }).join('');
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
     // Initialize on load

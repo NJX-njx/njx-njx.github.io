@@ -1,3 +1,76 @@
+/* ===== Search Box Styles ===== */
+#searchbox {
+    margin-bottom: 20px;
+}
+
+#searchbox input {
+    padding: 10px 14px;
+    width: 100%;
+    color: var(--primary);
+    font-weight: 500;
+    font-size: 1em;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--theme);
+}
+
+#searchbox input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+#searchResults {
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+#searchResults li {
+    list-style: none;
+    border-radius: var(--radius);
+    padding: 0;
+    margin: 8px 0;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    transition: transform 0.1s, border-color 0.2s;
+}
+
+#searchResults li:hover {
+    border-color: var(--primary);
+}
+
+#searchResults li:active {
+    transform: scale(0.98);
+}
+
+#searchResults li a {
+    display: block;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: var(--primary);
+}
+
+#searchResults li a .title {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+#searchResults li a .summary {
+    display: block;
+    font-size: 0.85em;
+    color: var(--secondary);
+    line-height: 1.4;
+}
+
+#searchResults .no-results {
+    padding: 15px;
+    color: var(--secondary);
+    text-align: center;
+    font-style: italic;
+}
+
+/* ===== AI Assistant Styles ===== */
 #ai-assistant {
     margin-top: 40px;
     padding-top: 30px;
