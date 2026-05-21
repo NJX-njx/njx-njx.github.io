@@ -3,6 +3,8 @@
 {{ $css := resources.Get "css/search-assistant.css" | minify | fingerprint }}
 {{ $fuse := resources.Get "js/fuse.basic.min.js" | fingerprint }}
 {{ $js := resources.Get "js/search-assistant.js" | minify | fingerprint }}
+{{ $assistant := site.Params.aiAssistant }}
+{{ $assistantEnabled := and $assistant.enabled $assistant.endpoint }}
 
 <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
 
@@ -27,7 +29,8 @@
     <ul id="searchResults" aria-label="search results"></ul>
 </div>
 
-<div id="ai-assistant" data-endpoint="{{ site.Params.aiAssistant.endpoint | default "" }}">
+{{- if $assistantEnabled }}
+<div id="ai-assistant" data-endpoint="{{ $assistant.endpoint }}">
     <header class="ask-header">
         <h2>Ask</h2>
         <div class="post-description">Ask a question grounded in matching blog posts.</div>
@@ -39,6 +42,7 @@
 
     <ul id="assistantResults" aria-label="assistant answers"></ul>
 </div>
+{{- end }}
 
 <script src="{{ $fuse.RelPermalink }}" integrity="{{ $fuse.Data.Integrity }}" defer></script>
 <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>

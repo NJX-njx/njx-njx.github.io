@@ -77,12 +77,32 @@
     color: var(--secondary);
     box-shadow: none;
     font-size: 0.92rem;
+    transition: color 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
 }
 
 .post-toc-sidebar .toc a:hover,
 .toc-drawer .toc a:hover {
     color: var(--primary);
     box-shadow: 0 1px 0;
+}
+
+.post-toc-sidebar .toc a.is-active,
+.toc-drawer .toc a.is-active {
+    color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 1px 0;
+}
+
+.post-toc-sidebar .toc a.is-active::before,
+.toc-drawer .toc a.is-active::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin-inline: -11px 6px;
+    border-radius: 999px;
+    background: currentColor;
+    vertical-align: middle;
 }
 
 .post-content h1,

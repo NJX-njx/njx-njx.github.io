@@ -85,7 +85,8 @@ The deployed endpoint will be:
 https://njx-log-ai-assistant.<your-workers-subdomain>.workers.dev/ask
 ```
 
-Use that URL as the frontend assistant endpoint.
+Use that URL as `params.aiAssistant.endpoint` in `hugo.yaml`, then set
+`params.aiAssistant.enabled` to `true`.
 
 ## Request Shape
 

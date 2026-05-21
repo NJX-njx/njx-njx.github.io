@@ -1,5 +1,5 @@
 baseURL: "https://njx-njx.github.io/"
-languageCode: "zh-cn"
+locale: "zh-cn"
 defaultContentLanguage: "zh-cn"
 hasCJKLanguage: true
 title: "Njx'Log"
@@ -41,10 +41,14 @@ params:
   tocopen: true
 
   aiAssistant:
-    endpoint: "http://127.0.0.1:8787/ask"
+    enabled: false
+    endpoint: ""
 
   assets:
     favicon: "/capybara-right.png"
+    favicon16x16: "/favicon-16x16.png"
+    favicon32x32: "/favicon-32x32.png"
+    apple_touch_icon: "/apple-touch-icon.png"
 
   label:
     text: "Njx'Log"
