@@ -38,32 +38,38 @@ params:
   hidemeta: false
   hideSummary: false
   showtoc: true
-  tocopen: false
+  tocopen: true
+
+  aiAssistant:
+    endpoint: "http://127.0.0.1:8787/ask"
 
   assets:
-    favicon: "/kpbl.png"
+    favicon: "/capybara-right.png"
 
   label:
     text: "Njx'Log"
-    icon: "/kpbl.png"
+    icon: "/capybara-right.png"
     iconHeight: 35
 
   # home-info mode
   homeInfoParams:
     Title: "👋 Welcome to Njx'Log"
     Content: >
-        Hi, this is Jiaxing Ni. I share my AI/ML learning notes, experiments, and engineering write-ups here.
+        Hi, this is Jiaxing Ni. I write about AI/ML, product thinking and building, evals, agentic RL, and the engineering work of turning ideas into systems.
         
-        Posts started in 2023 and are updated as I learn more.
+        Posts started in 2024 and are updated as I learn more.
 
   images:
-    - "/kpbl.png"
+    - "/capybara-right.png"
 
   socialIcons:
     - name: twitter
       url: "https://x.com/NJX_njx_ai"
     - name: github
       url: "https://github.com/NJX-njx"
+    - name: huggingface
+      title: Hugging Face
+      url: "https://huggingface.co/NJX-njx"
 
 menu:
   main:

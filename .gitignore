@@ -31,6 +31,7 @@ venv/
 # Node.js (if using any build tools)
 node_modules/
 package-lock.json
+!workers/openrouter-proxy/package-lock.json
 
 # Logs
 *.log

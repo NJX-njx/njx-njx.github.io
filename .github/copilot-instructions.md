@@ -58,7 +58,7 @@ hugo                    # Build site to ./public/
 | Page | File | Layout |
 |------|------|--------|
 | Archives | `content/archives.md` | `layout: "archives"` |
-| Search | `content/search.md` | `layout: "search"` |
+| Search | `content/search.md` | `layout: "search-assistant"` |
 
 ## Deployment
 

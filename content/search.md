@@ -1,8 +1,9 @@
 ---
 title: "Search"
-layout: "search"
+layout: "search-assistant"
 url: "/search/"
-summary: "Search articles or ask AI"
-description: "Search for articles or use AI assistant to explore blog content"
+summary: "Search articles"
+description: "Search articles across Njx'Log"
 ShowShareButtons: false
+searchHidden: true
 ---

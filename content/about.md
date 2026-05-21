@@ -1,7 +1,7 @@
 ---
 title: "About"
 url: "/about/"
-summary: "About me"
+summary: "About Jiaxing Ni"
 hidemeta: true
 ShowToc: true
 ShowReadingTime: false
@@ -11,106 +11,104 @@ ShowShareButtons: false
 ---
 ## 👋 Hi, I'm Jiaxing Ni (倪家兴)
 
-Welcome to **Njx'Log** — my personal blog where I document my learning journey in AI and technology.
+I study Computer Science at Beijing Institute of Technology, in the Xu Teli Elite Class.
 
-I'm a **LLM & Multimodal Engineer** passionate about turning research into reproducible training/inference pipelines. I have hands-on experience in LLM fine-tuning, RAG systems, multimodal fusion, and 0→1 product development.
+Most days, my attention returns to the same small constellation: **product thinking, evals, agentic RL, multimodal systems, and the engineering work that turns a fragile idea into a usable artifact**.
 
----
-
-## 🔧 What I Do
-
-I specialize in bridging the gap between AI research and production systems:
-
-- 🧠 **LLM Fine-tuning**: LoRA, QLoRA, SFT, full-finetune with domain-specific data
-- 🔍 **RAG Systems**: FAISS/Milvus vector indexing, retrieval-generation pipelines, rerank strategies
-- 🖼️ **Multimodal AI**: Vision-language models, OCR (PaddleOCR-VL), cross-modal representation learning
-- 📊 **Evaluation & Annotation**: Automated evaluation pipelines, A/B testing, IAA metrics, adversarial test sets
-- 🎯 **RLHF**: PPO, reward modeling, online/offline evaluation
+I like systems that are quiet on the surface and exact underneath. A good product feels almost transparent: the user sees a clean path; below it, there are datasets, prompts, metrics, retrieval traces, failure cases, and a few stubborn scripts keeping watch in the dark.
 
 ---
 
-## 🛠️ Tech Stack
+## 🧭 Coordinates
 
-- **Frameworks:** PyTorch, PaddlePaddle, DeepSpeed, Transformers
-- **Vector DBs:** FAISS, Milvus
-- **MLOps:** Kubernetes, Docker, Git
-- **Languages:** Python ，C++
-
----
-
-## 📚 Education
-
-🎓 **Beijing Institute of Technology (北京理工大学)**
-
-- Computer Science, Xu Teli Elite Class (徐特立英才班)
+- **Identity:** CS student, builder, product-minded engineer.
+- **Base:** Beijing / Shanghai, with a habit of carrying notebooks between code, papers, and product sketches.
+- **Current focus:** LLM/VLM applications, evaluation infrastructure, agent behavior, and retrieval-heavy products.
+- **Working style:** prototype first, measure honestly, ship only after the system has met enough real edges.
+- **Open loops:** better AI products, harder benchmarks, cleaner agent workflows, and notes that still make sense after the midnight excitement fades.
 
 ---
 
-## 💼 Experience & Projects
+## 🛠️ What I Build
 
-### 🤖 AI Note Assistant — Baidu Hackathon *2025.5 - Present*
+I work at the threshold where research becomes product.
 
-> 🏆 *"Model Power Award" (模力加成奖) & Incubation*
-
-Multimodal note-taking & knowledge retrieval assistant with document parsing → vector indexing → personalized summaries.
-
-- **Tech:** PaddleOCR-VL, sentence-transformers, FAISS, Notion API integration
-- **Performance:** End-to-end response <500ms (parallelization + caching)
-
----
-
-### ✈️ AI Travel Planner — Product & Tech Lead *2024.9 - 2025.6*
-
-Personalized travel itinerary generation combining LLM with retrieval and recommendation.
-
-- **Tech:** RAG pipeline (FAISS), domain fine-tuning (40B tokens), DeepSpeed distributed training (8×A100), rerank + constrained decoding
-- **Results:** 82% recommendation accuracy, 40% conversion rate improvement, 100K users in 3 months
+- **AI products from 0 to 1:** shaping user problems, designing loops, and turning demos into workflows people can actually return to.
+- **Evals and benchmarks:** OOD cases, task-specific metrics, A/B experiments, annotation rules, and agent-arena style tests.
+- **LLM/VLM systems:** fine-tuning, multimodal fusion, OCR/document parsing, retrieval-generation pipelines, and context engineering.
+- **Agentic RL thinking:** reward signals, behavior shaping, online/offline evaluation, and the patient question of whether an agent is becoming more useful or just more fluent.
+- **Engineering foundations:** reproducible experiments, Dockerized environments, distributed training/inference, and small tools that reduce human confusion.
 
 ---
 
-### 📋 ByteDance Xpert — Annotation & Evaluation System
+## 📌 Proof of Work
 
-Led expert-level annotation standards, quality control workflows, and evaluation systems.
+### AI Travel Planner — Product & Tech Lead
 
-- **Results:** IAA consistency improved >15%, evaluation rules reused in subsequent model iterations
+I helped build an AI travel planning product from zero to one: itinerary generation, recommendation, long-context reasoning, and product loops around real users.
+
+- Reached **100K users in three months**, with DAU share over **35%**.
+- Combined LLM scenario understanding with user profiles and collaborative filtering.
+- Improved recommendation accuracy to **82%**, user satisfaction to **91%**, and order conversion by **40%**.
+- Built a travel-agent benchmark with OOD scenes and long-context consistency checks.
+- Worked with roughly **40B tokens** of training data and added **5B domain tokens** for travel-specific robustness.
+
+### AI Note Assistant — Baidu Hackathon
+
+A multimodal note and knowledge retrieval assistant: document parsing, semantic search, personalized summaries, and Notion-style knowledge organization.
+
+- Led model selection, retrieval-generation pipeline design, prompt/context engineering, and end-to-end evaluation.
+- Used PaddleOCR-VL, semantic embeddings, retrieval, and Notion integration.
+- Won the Baidu Hackathon **Model Power Award** and entered incubation.
+
+### ByteDance Xpert — Expert Data & Evaluation
+
+I worked on expert-level annotation standards and benchmark design: not glamorous, but close to the heart of model quality.
+
+- Designed data quality control flows, labeling guidelines, and evaluation mechanisms.
+- Helped provide high-quality samples for alignment, analysis, and iteration.
+
+### PKU Wangxuan Institute — Research Intern
+
+I joined Prof. Peng Yuxin's group on fine-grained sports video understanding.
+
+- Worked on 3D pose reconstruction and action localization.
+- Participated in model training, data preprocessing, and metric design.
+
+### Other Engineering Fragments
+
+Some projects live like small metal parts in a drawer, but they still shape the hand.
+
+- Robot perception and control for quadruped systems.
+- Target detection modules for laser weeding robots.
+- Multimodal human-computer interaction work for commercial aerospace scenarios, including patent-related exploration.
 
 ---
 
-### 🔬 Research Intern — PKU Wangxuan Institute
+## 🧰 Toolkit
 
-3D pose reconstruction and fine-grained action analysis for sports videos under Prof. Peng Yuxin's lab.
+- **Languages:** Python, C++.
+- **ML stack:** PyTorch, PaddlePaddle, Transformers, DeepSpeed.
+- **Retrieval:** FAISS, Milvus, reranking, vector indexing.
+- **Infra:** Docker, Git, distributed training/inference, HPC-style multi-card workflows.
+- **Open source:** Paddle, PaddleOCR, PaddleDetection, and nearby ecosystems.
 
-- Participated in model training, data preprocessing, and evaluation metric design
-
----
-
-## 🏆 Awards & Honors
-
-- 🥇 **National AI Competition (Intelligent Agent)** — First Prize
-- 🥇 **Challenge Cup National Entrepreneurship Competition** — First Prize
-- 🥇 **National Mathematical Modeling Contest** — Beijing First Prize
-- 🥈 **Douyin Creator Program** — National 2nd Place (Innovation/Project)
-- 🏅 **China Software Cup (Robot Dog Track)** — Excellence Award
-- 🎓 **Baidu Wenxin Mentor** — External mentor for enterprise LLM applications
+I care about tools, but not as decoration. A tool earns its place when it makes the next experiment less vague.
 
 ---
 
 ## 🌐 Find Me Online
 
-- 🐙 [GitHub](https://github.com/NJX-njx)
+- [GitHub](https://github.com/NJX-njx)
+- [Hugging Face](https://huggingface.co/NJX-njx)
+- [Twitter / X](https://x.com/NJX_njx_ai)
 
 ---
 
 ## 📝 About This Blog
 
-This blog is:
+This blog is my field notebook.
 
-- Built with [Hugo](https://gohugo.io/) & [PaperMod](https://github.com/adityatelange/hugo-PaperMod)
-- Hosted on [GitHub Pages](https://pages.github.com/)
-- Open source on [GitHub](https://github.com/NJX-njx/njx-njx.github.io)
+Some entries are engineering write-ups, some are experiments, and some are the kind of notes one writes before the thought hardens into a method. I use it to keep a trail: what I built, what broke, what the metric did not explain, and what was still beautiful after the code ran.
 
-*"The faintest ink is better than the best memory."* — I write to learn, and I share to remember.
-
----
-
-*Thanks for stopping by! Feel free to explore the [posts](/posts/) or [reach out](/faq/) if you have any questions.*
+Built with [Hugo](https://gohugo.io/) and [PaperMod](https://github.com/adityatelange/hugo-PaperMod), hosted on [GitHub Pages](https://pages.github.com/), and open source on [GitHub](https://github.com/NJX-njx/njx-njx.github.io).

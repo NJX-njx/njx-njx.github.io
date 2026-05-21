@@ -1,0 +1,46 @@
+{{- define "main" }}
+
+{{ $css := resources.Get "css/search-assistant.css" | minify | fingerprint }}
+{{ $fuse := resources.Get "js/fuse.basic.min.js" | fingerprint }}
+{{ $js := resources.Get "js/search-assistant.js" | minify | fingerprint }}
+
+<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+
+<header class="page-header">
+    <h1>{{- (printf "%s&nbsp;" .Title ) | htmlUnescape -}}
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+    </h1>
+    {{- if .Description }}
+    <div class="post-description">
+        {{ .Description }}
+    </div>
+    {{- end }}
+</header>
+
+<div id="searchbox">
+    <input id="searchInput" autofocus placeholder="{{ .Params.placeholder | default (printf "%s ↵" .Title) }}"
+        aria-label="search" type="search" autocomplete="off" maxlength="64">
+    <ul id="searchResults" aria-label="search results"></ul>
+</div>
+
+<div id="ai-assistant" data-endpoint="{{ site.Params.aiAssistant.endpoint | default "" }}">
+    <header class="ask-header">
+        <h2>Ask</h2>
+        <div class="post-description">Ask a question grounded in matching blog posts.</div>
+    </header>
+
+    <div id="askbox">
+        <textarea id="chat-input" placeholder="Ask about articles ↵" rows="1"></textarea>
+    </div>
+
+    <ul id="assistantResults" aria-label="assistant answers"></ul>
+</div>
+
+<script src="{{ $fuse.RelPermalink }}" integrity="{{ $fuse.Data.Integrity }}" defer></script>
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>
+
+{{- end }}{{/* end main */}}

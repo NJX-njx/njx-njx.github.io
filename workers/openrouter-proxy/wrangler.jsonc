@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "njx-log-ai-assistant",
+  "main": "src/index.js",
+  "compatibility_date": "2026-05-21",
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
+    "OPENROUTER_MODEL": "openai/gpt-oss-20b:free",
+    "ALLOWED_ORIGINS": "https://njx-njx.github.io,http://localhost:1313,http://127.0.0.1:1313",
+    "SITE_URL": "https://njx-njx.github.io/",
+    "SITE_TITLE": "Njx'Log"
+  },
+  "secrets": {
+    "required": [
+      "OPENROUTER_API_KEY"
+    ]
+  }
+}
