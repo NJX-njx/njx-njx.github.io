@@ -101,12 +101,11 @@ layout name, because PaperMod automatically injects its own `fastsearch` script
 for pages whose layout is exactly `search`. Keeping this page on
 `search-assistant` prevents two scripts from binding to the same search input.
 
-The AI assistant is disabled by default in `hugo.yaml` so the production search
-page never points at a local `127.0.0.1` endpoint. After deploying the
-Cloudflare Worker in `workers/openrouter-proxy/`, set
-`params.aiAssistant.enabled` to `true` and set `params.aiAssistant.endpoint` to
-the deployed `/ask` URL. Keep `OPENROUTER_API_KEY` as a Cloudflare secret; never
-commit it or place it in Hugo/JavaScript frontend code.
+The AI assistant is enabled in `hugo.yaml` and points at the deployed
+Cloudflare Worker endpoint:
+`https://njx-log-ai-assistant.njx-log.workers.dev/ask`. Keep
+`OPENROUTER_API_KEY` as a Cloudflare secret; never commit it or place it in
+Hugo/JavaScript frontend code.
 
 See `workers/openrouter-proxy/README.md` for local development, secret setup,
 and deployment commands.

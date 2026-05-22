@@ -41,8 +41,8 @@ params:
   tocopen: true
 
   aiAssistant:
-    enabled: false
-    endpoint: ""
+    enabled: true
+    endpoint: "https://njx-log-ai-assistant.njx-log.workers.dev/ask"
 
   assets:
     favicon: "/capybara-right.png"
