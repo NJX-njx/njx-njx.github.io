@@ -25,9 +25,16 @@
 
             if (typeof Fuse !== 'undefined') {
                 fuse = new Fuse(searchIndex, {
-                    keys: ['title', 'content', 'summary'],
-                    threshold: 0.4,
+                    keys: [
+                        { name: 'title', weight: 0.4 },
+                        { name: 'section', weight: 0.28 },
+                        { name: 'summary', weight: 0.16 },
+                        { name: 'content', weight: 0.12 },
+                        { name: 'tags', weight: 0.04 }
+                    ],
+                    threshold: 0.35,
                     includeScore: true,
+                    includeMatches: true,
                     ignoreLocation: true
                 });
             }
@@ -75,19 +82,35 @@
         chatInput.style.height = `${Math.max(46, chatInput.scrollHeight)}px`;
     }
 
-    function searchRelevantPosts(query, limit = 3) {
+    function searchRelevantChunks(query, limit = 5) {
         if (!searchIndex || searchIndex.length === 0) return [];
 
         let results = [];
         if (fuse) {
-            results = fuse.search(query).map((result) => result.item);
+            results = fuse.search(query).map((result) => ({
+                ...result.item,
+                _matches: result.matches || [],
+                _score: result.score
+            }));
         } else {
             const keywords = query.toLowerCase().split(/\s+/);
-            results = searchIndex.map((post) => {
-                const text = `${post.title} ${post.content} ${post.summary}`.toLowerCase();
-                const score = keywords.reduce((acc, keyword) => acc + (text.includes(keyword) ? 1 : 0), 0);
-                return { ...post, score };
-            }).filter((post) => post.score > 0).sort((a, b) => b.score - a.score);
+            results = searchIndex.map((chunk) => {
+                const title = (chunk.title || '').toLowerCase();
+                const section = (chunk.section || '').toLowerCase();
+                const summary = (chunk.summary || '').toLowerCase();
+                const content = (chunk.content || '').toLowerCase();
+                const tags = Array.isArray(chunk.tags) ? chunk.tags.join(' ').toLowerCase() : '';
+                const score = keywords.reduce((acc, keyword) => {
+                    if (!keyword) return acc;
+                    return acc +
+                        (title.includes(keyword) ? 5 : 0) +
+                        (section.includes(keyword) ? 4 : 0) +
+                        (summary.includes(keyword) ? 3 : 0) +
+                        (tags.includes(keyword) ? 2 : 0) +
+                        (content.includes(keyword) ? 1 : 0);
+                }, 0);
+                return { ...chunk, _score: score, _matches: [] };
+            }).filter((chunk) => chunk._score > 0).sort((a, b) => b._score - a._score);
         }
 
         return results.slice(0, limit);
@@ -102,17 +125,13 @@
             return;
         }
 
-        const results = searchRelevantPosts(query, 10);
+        const results = searchRelevantChunks(query, 12);
         if (results.length === 0) {
             searchResults.innerHTML = '<li class="no-results">No results found</li>';
             return;
         }
 
-        searchResults.innerHTML = results.map((post) => {
-            const title = escapeHtml(post.title);
-            const summary = escapeHtml((post.summary || post.content || '').substring(0, 100));
-            return `<li><a href="${post.permalink}"><span class="title">${title}</span><span class="summary">${summary}...</span></a></li>`;
-        }).join('');
+        searchResults.innerHTML = results.map((chunk) => renderSearchResult(chunk, query)).join('');
     }
 
     async function handleAsk() {
@@ -127,7 +146,7 @@
         if (abortController) abortController.abort();
         abortController = new AbortController();
 
-        const sources = searchRelevantPosts(question, 3);
+        const sources = searchRelevantChunks(question, 5);
         renderAssistantLoading(question);
         if (sendButton) {
             sendButton.disabled = true;
@@ -141,10 +160,10 @@
                 },
                 body: JSON.stringify({
                     question,
-                    sources: sources.map((post) => ({
-                        title: post.title,
-                        url: post.permalink,
-                        excerpt: (post.content || post.summary || '').substring(0, 1200)
+                    sources: sources.map((chunk) => ({
+                        title: sourceTitle(chunk),
+                        url: chunkUrl(chunk),
+                        excerpt: sourceExcerpt(chunk)
                     })),
                     history: chatHistory.slice(-6)
                 }),
@@ -205,11 +224,134 @@
     function renderSources(sources) {
         if (!sources.length) return '';
 
-        const links = sources.map((post) => {
-            return `<a class="source-link" href="${post.permalink}" target="_blank" rel="noopener noreferrer">${escapeHtml(post.title)}</a>`;
+        const links = sources.map((chunk) => {
+            return `<a class="source-link" href="${escapeHtml(chunkUrl(chunk))}" target="_blank" rel="noopener noreferrer">${escapeHtml(sourceTitle(chunk))}</a>`;
         }).join('');
 
         return `<div class="sources"><div class="sources-title">Sources</div>${links}</div>`;
+    }
+
+    function renderSearchResult(chunk, query) {
+        const title = escapeHtml(chunk.title || 'Untitled');
+        const section = chunk.section && chunk.section !== chunk.title
+            ? `<span class="section">${escapeHtml(chunk.section)}</span>`
+            : '';
+        const metaParts = [];
+        if (chunk.date) metaParts.push(escapeHtml(chunk.date));
+        if (Array.isArray(chunk.tags) && chunk.tags.length) {
+            metaParts.push(escapeHtml(chunk.tags.slice(0, 4).join(' / ')));
+        }
+        const meta = metaParts.length ? `<span class="meta">${metaParts.join(' · ')}</span>` : '';
+        const snippet = buildSnippet(chunk, query);
+
+        return `
+            <li>
+                <a href="${escapeHtml(chunkUrl(chunk))}">
+                    <span class="title">${title}</span>
+                    ${section}
+                    <span class="summary">${snippet}</span>
+                    ${meta}
+                </a>
+            </li>
+        `;
+    }
+
+    function buildSnippet(chunk, query) {
+        const match = bestTextMatch(chunk._matches);
+        if (match) {
+            const text = matchText(chunk, match.key);
+            const range = bestRange(match.indices);
+            if (text && range) {
+                return highlightSnippet(text, range[0], range[1]);
+            }
+        }
+
+        const content = chunk.content || chunk.summary || '';
+        const queryRange = firstKeywordRange(content, query);
+        if (queryRange) {
+            return highlightSnippet(content, queryRange[0], queryRange[1]);
+        }
+
+        return escapeHtml(compactSnippet(content, 180));
+    }
+
+    function bestTextMatch(matches) {
+        if (!Array.isArray(matches)) return null;
+        const priority = ['content', 'summary', 'section', 'title', 'tags'];
+        for (const key of priority) {
+            const match = matches.find((item) => item.key === key && item.indices && item.indices.length);
+            if (match) return match;
+        }
+        return null;
+    }
+
+    function bestRange(indices) {
+        if (!Array.isArray(indices) || indices.length === 0) return null;
+        return indices.reduce((best, range) => {
+            if (!best) return range;
+            return (range[1] - range[0]) > (best[1] - best[0]) ? range : best;
+        }, null);
+    }
+
+    function matchText(chunk, key) {
+        const value = chunk[key];
+        if (Array.isArray(value)) return value.join(' ');
+        return value || '';
+    }
+
+    function highlightSnippet(text, start, end) {
+        const windowStart = Math.max(0, start - 70);
+        const windowEnd = Math.min(text.length, end + 90);
+        const before = text.slice(windowStart, start);
+        const hit = text.slice(start, end + 1);
+        const after = text.slice(end + 1, windowEnd);
+        const prefix = windowStart > 0 ? '...' : '';
+        const suffix = windowEnd < text.length ? '...' : '';
+
+        return [
+            escapeHtml(prefix + before),
+            `<mark>${escapeHtml(hit)}</mark>`,
+            escapeHtml(after + suffix)
+        ].join('');
+    }
+
+    function firstKeywordRange(text, query) {
+        if (!text || !query) return null;
+        const lowerText = text.toLowerCase();
+        const lowerQuery = query.trim().toLowerCase();
+        if (!lowerQuery) return null;
+        const directIndex = lowerText.indexOf(lowerQuery);
+        if (directIndex >= 0) return [directIndex, directIndex + lowerQuery.length - 1];
+
+        const keywords = lowerQuery.split(/\s+/).filter((keyword) => keyword.length > 1);
+        for (const keyword of keywords) {
+            const index = lowerText.indexOf(keyword);
+            if (index >= 0) return [index, index + keyword.length - 1];
+        }
+        return null;
+    }
+
+    function compactSnippet(text, length) {
+        const compact = String(text || '').replace(/\s+/g, ' ').trim();
+        return compact.length > length ? `${compact.slice(0, length)}...` : compact;
+    }
+
+    function chunkUrl(chunk) {
+        if (!chunk) return '#';
+        return chunk.anchor ? `${chunk.permalink}#${chunk.anchor}` : chunk.permalink;
+    }
+
+    function sourceTitle(chunk) {
+        if (!chunk) return 'Untitled';
+        if (chunk.section && chunk.section !== chunk.title) {
+            return `${chunk.title} — ${chunk.section}`;
+        }
+        return chunk.title || 'Untitled';
+    }
+
+    function sourceExcerpt(chunk) {
+        const heading = chunk.section ? `${chunk.section}\n\n` : '';
+        return `${heading}${chunk.content || chunk.summary || ''}`.substring(0, 1200);
     }
 
     function parseMarkdown(text) {

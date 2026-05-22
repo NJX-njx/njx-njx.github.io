@@ -94,7 +94,15 @@ summary: "Short description for lists and search results."
 
 The search page uses a custom layout, `search-assistant`, at `/search/`. It
 loads a custom browser script from `assets/js/search-assistant.js` and reads
-Hugo's generated `/index.json` search index.
+Hugo's generated `/index.json` search index. The project overrides PaperMod's
+default JSON index in `layouts/_default/index.json` so the index is chunk-based:
+each Markdown heading section becomes a searchable record with `title`,
+`section`, `content`, `permalink`, `anchor`, `summary`, `tags`, and `date`.
+Search results link directly to the matched section anchor.
+
+The Ask box uses the same chunk search layer. It sends the top matching chunks
+to the Cloudflare Worker as contextual excerpts before the Worker calls
+OpenRouter.
 
 This custom layout intentionally does not use PaperMod's built-in `search`
 layout name, because PaperMod automatically injects its own `fastsearch` script

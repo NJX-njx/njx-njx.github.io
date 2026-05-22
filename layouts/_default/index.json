@@ -1,0 +1,57 @@
+{{- $.Scratch.Set "index" slice -}}
+{{- range site.RegularPages -}}
+  {{- if and (not .Params.searchHidden) (ne .Layout `archives`) (ne .Layout `search`) (ne .Layout `search-assistant`) -}}
+    {{- $page := . -}}
+    {{- $tags := slice -}}
+    {{- with $page.Params.tags -}}
+      {{- range . -}}
+        {{- $tags = $tags | append (printf "%s" .) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $date := "" -}}
+    {{- if not $page.Date.IsZero -}}
+      {{- $date = $page.Date.Format "2006-01-02" -}}
+    {{- end -}}
+    {{- $summary := trim ($page.Summary | plainify | htmlUnescape) " \t\r\n" -}}
+    {{- $section := $page.Title -}}
+    {{- $anchor := "" -}}
+    {{- $content := "" -}}
+    {{- range split $page.RawContent "\n" -}}
+      {{- $line := . -}}
+      {{- if findRE `^#{1,6}\s+.+` $line -}}
+        {{- $plainContent := trim ($content | markdownify | plainify | htmlUnescape) " \t\r\n" -}}
+        {{- if $plainContent -}}
+          {{- $.Scratch.Add "index" (dict
+            "title" $page.Title
+            "section" $section
+            "content" $plainContent
+            "permalink" $page.Permalink
+            "anchor" $anchor
+            "summary" $summary
+            "tags" $tags
+            "date" $date
+          ) -}}
+        {{- end -}}
+        {{- $section = trim ($line | replaceRE `^#{1,6}\s+` "" | replaceRE `\s+\{#[-A-Za-z0-9_]+\}\s*$` "" | replaceRE "`" "" | replaceRE `\[(.*?)\]\(.*?\)` "$1" | replaceRE `[*_~]` "" | htmlUnescape) " \t\r\n" -}}
+        {{- $anchor = $section | anchorize -}}
+        {{- $content = "" -}}
+      {{- else -}}
+        {{- $content = printf "%s\n%s" $content $line -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $plainContent := trim ($content | markdownify | plainify | htmlUnescape) " \t\r\n" -}}
+    {{- if $plainContent -}}
+      {{- $.Scratch.Add "index" (dict
+        "title" $page.Title
+        "section" $section
+        "content" $plainContent
+        "permalink" $page.Permalink
+        "anchor" $anchor
+        "summary" $summary
+        "tags" $tags
+        "date" $date
+      ) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $.Scratch.Get "index" | jsonify -}}

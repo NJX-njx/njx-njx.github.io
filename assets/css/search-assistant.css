@@ -62,6 +62,12 @@
 
 #searchResults li a {
     display: block;
+    position: static;
+    top: auto;
+    left: auto;
+    width: auto;
+    height: auto;
+    box-sizing: border-box;
     padding: 12px 15px;
     text-decoration: none;
     color: var(--primary);
@@ -73,11 +79,35 @@
     margin-bottom: 4px;
 }
 
+#searchResults li a .section {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--primary);
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
 #searchResults li a .summary {
     display: block;
     font-size: 0.85em;
     color: var(--secondary);
     line-height: 1.4;
+}
+
+#searchResults li a .meta {
+    display: block;
+    margin-top: 8px;
+    color: var(--tertiary);
+    font-size: 0.75em;
+    line-height: 1.35;
+}
+
+#searchResults mark {
+    padding: 0 2px;
+    border-radius: 3px;
+    background: rgba(120, 120, 120, 0.18);
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+    color: var(--primary);
 }
 
 #searchResults .no-results,
