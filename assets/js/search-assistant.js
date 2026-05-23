@@ -87,27 +87,46 @@
 
         let results = [];
         if (fuse) {
-            results = fuse.search(query).map((result) => ({
-                ...result.item,
-                _matches: result.matches || [],
-                _score: result.score
-            }));
+            const merged = new Map();
+            const searches = [
+                { query, weight: 1.2 },
+                ...queryTokens(query).map((token) => ({ query: token, weight: Math.max(0.35, tokenImportance(token) * 0.45) }))
+            ];
+
+            searches.forEach((search) => {
+                fuse.search(search.query, { limit: limit * 4 }).forEach((result) => {
+                    const key = chunkKey(result.item);
+                    const existing = merged.get(key) || {
+                        ...result.item,
+                        _matches: [],
+                        _score: 0
+                    };
+                    existing._score += Math.max(0, 1 - result.score) * search.weight;
+                    existing._matches = mergeMatches(existing._matches, result.matches || []);
+                    merged.set(key, existing);
+                });
+            });
+
+            searchIndex.forEach((chunk) => {
+                const lexicalScore = lexicalChunkScore(chunk, query);
+                if (lexicalScore <= 0) return;
+                const key = chunkKey(chunk);
+                const existing = merged.get(key) || {
+                    ...chunk,
+                    _matches: [],
+                    _score: 0
+                };
+                existing._score += lexicalScore;
+                merged.set(key, existing);
+            });
+
+            results = Array.from(merged.values()).sort((a, b) => b._score - a._score);
         } else {
-            const keywords = query.toLowerCase().split(/\s+/);
+            const keywords = queryTokens(query);
             results = searchIndex.map((chunk) => {
-                const title = (chunk.title || '').toLowerCase();
-                const section = (chunk.section || '').toLowerCase();
-                const summary = (chunk.summary || '').toLowerCase();
-                const content = (chunk.content || '').toLowerCase();
-                const tags = Array.isArray(chunk.tags) ? chunk.tags.join(' ').toLowerCase() : '';
                 const score = keywords.reduce((acc, keyword) => {
                     if (!keyword) return acc;
-                    return acc +
-                        (title.includes(keyword) ? 5 : 0) +
-                        (section.includes(keyword) ? 4 : 0) +
-                        (summary.includes(keyword) ? 3 : 0) +
-                        (tags.includes(keyword) ? 2 : 0) +
-                        (content.includes(keyword) ? 1 : 0);
+                    return acc + lexicalChunkScore(chunk, keyword);
                 }, 0);
                 return { ...chunk, _score: score, _matches: [] };
             }).filter((chunk) => chunk._score > 0).sort((a, b) => b._score - a._score);
@@ -254,6 +273,125 @@
                 </a>
             </li>
         `;
+    }
+
+    function chunkKey(chunk) {
+        return `${chunk.permalink || ''}#${chunk.anchor || ''}`;
+    }
+
+    function mergeMatches(current, incoming) {
+        const merged = Array.isArray(current) ? current.slice() : [];
+        (Array.isArray(incoming) ? incoming : []).forEach((match) => {
+            const exists = merged.some((item) => item.key === match.key && item.value === match.value);
+            if (!exists) merged.push(match);
+        });
+        return merged;
+    }
+
+    function queryTokens(query) {
+        const stopWords = new Set([
+            'a', 'about', 'ai', 'an', 'and', 'are', 'as', 'at', 'be', 'beyond', 'by',
+            'can', 'for', 'from', 'how', 'in', 'into', 'is', 'of', 'on', 'or',
+            'should', 'the', 'to', 'what', 'when', 'where', 'which', 'who', 'why',
+            'with'
+        ]);
+        const base = String(query || '')
+            .toLowerCase()
+            .split(/[\s,.;:!?()[\]{}"'`/\\|]+/)
+            .map((token) => token.trim())
+            .filter((token) => token.length > 1 && !stopWords.has(token));
+        const expanded = base.slice();
+        const queryText = String(query || '').toLowerCase();
+        const synonyms = [
+            [/\bevals?\b|evaluat|benchmark|metric|measurement|measure/, ['eval', 'evaluation', 'benchmark', 'metric']],
+            [/product|project/, ['product', 'project', 'build', 'built']],
+            [/demo/, ['eval', 'product', 'measurement']],
+            [/agentic|agent|autonom/, ['agent', 'agentic']],
+            [/reward|policy|reinforcement|\brl\b/, ['agentic-rl', 'rl', 'reinforcement', 'reward', 'policy']],
+            [/tool|tools|function|api/, ['tool', 'tools', 'tool-use']],
+            [/memory|remember|context/, ['memory', 'context']],
+            [/retrieval|\brag\b|search|recall/, ['retrieval', 'rag', 'context']],
+            [/评测|评估|测评/, ['eval', 'evaluation', 'benchmark', 'metric']],
+            [/项目|产品/, ['project', 'product', 'build', 'built']],
+            [/智能体|代理/, ['agent', 'agentic']],
+            [/强化学习/, ['rl', 'reinforcement', 'reward', 'policy']],
+            [/检索|召回/, ['retrieval', 'rag', 'context']],
+            [/工具/, ['tool', 'tools']]
+        ];
+        synonyms.forEach(([pattern, terms]) => {
+            if (pattern.test(queryText)) expanded.push(...terms);
+        });
+        return Array.from(new Set(expanded));
+    }
+
+    function lexicalChunkScore(chunk, query) {
+        const tokens = queryTokens(query);
+        if (!tokens.length) return 0;
+
+        const fields = [
+            { value: chunk.title, weight: 5 },
+            { value: chunk.section, weight: 4 },
+            { value: chunk.summary, weight: 2.5 },
+            { value: Array.isArray(chunk.tags) ? chunk.tags.join(' ') : '', weight: 2 },
+            { value: chunk.content, weight: 1 }
+        ];
+        const haystack = normalizeSearchText(fields.map((field) => field.value || '').join(' '));
+        const phraseScore = queryPhrases(query).reduce((score, phrase) => {
+            return haystack.includes(phrase.value) ? score + phrase.weight : score;
+        }, 0);
+
+        return tokens.reduce((total, token) => {
+            const normalizedToken = normalizeSearchText(token);
+            const importance = tokenImportance(token);
+            return total + fields.reduce((score, field) => {
+                const value = String(field.value || '').toLowerCase();
+                const normalizedValue = normalizeSearchText(value);
+                if (!tokenMatches(value, normalizedValue, token, normalizedToken)) return score;
+                return score + (field.weight * importance);
+            }, 0);
+        }, phraseScore);
+    }
+
+    function normalizeSearchText(value) {
+        return String(value || '').toLowerCase().replace(/[-_]+/g, ' ');
+    }
+
+    function tokenImportance(token) {
+        const normalized = normalizeSearchText(token);
+        if (['rag', 'retrieval', 'travel', 'planner', 'hugo'].includes(normalized)) return 2.4;
+        if (['agentic rl', 'reinforcement', 'reward', 'policy'].includes(normalized)) return 1.8;
+        if (['eval', 'evaluation', 'benchmark', 'metric'].includes(normalized)) return 1.7;
+        if (['tool use', 'tool', 'tools', 'memory'].includes(normalized)) return 1.35;
+        if (['context', 'product', 'project', 'build', 'built', 'agent', 'agentic'].includes(normalized)) return 0.8;
+        return 1;
+    }
+
+    function tokenMatches(rawValue, normalizedValue, rawToken, normalizedToken) {
+        if (normalizedToken.length <= 3) {
+            const pattern = new RegExp(`(^|\\s)${escapeRegExp(normalizedToken)}($|\\s)`);
+            return pattern.test(normalizedValue);
+        }
+        return rawValue.includes(rawToken) || normalizedValue.includes(normalizedToken);
+    }
+
+    function escapeRegExp(value) {
+        return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function queryPhrases(query) {
+        const queryText = normalizeSearchText(query);
+        const phrases = [
+            ['travel planner', 9],
+            ['ai note', 8],
+            ['agent design', 8],
+            ['agentic rl', 8],
+            ['context engineering', 6],
+            ['long context', 5],
+            ['tool use', 5]
+        ];
+        return phrases
+            .filter(([phrase]) => queryText.includes(phrase))
+            .map(([phrase, weight]) => ({ value: phrase, weight }));
     }
 
     function buildSnippet(chunk, query) {

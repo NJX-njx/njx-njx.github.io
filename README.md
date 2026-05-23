@@ -136,6 +136,8 @@ You can also run the workflow manually from the GitHub Actions tab.
 
 ```powershell
 node --check assets/js/search-assistant.js
+node --check scripts/search_quality.js
 python -m py_compile scripts/llm_model.py
 hugo --gc --minify
+node scripts/search_quality.js public/index.json
 ```

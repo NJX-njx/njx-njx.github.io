@@ -1,33 +1,79 @@
 /* ===== Search Box Styles ===== */
+.page-header {
+    margin: 26px 0 30px;
+}
+
+.page-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    font-size: clamp(2.35rem, 5vw, 3.45rem);
+    line-height: 1.04;
+}
+
+.page-header h1 svg {
+    width: 0.62em;
+    height: 0.62em;
+    opacity: 0.78;
+    stroke-width: 1.8;
+}
+
+.page-header .post-description,
+.ask-header .post-description {
+    color: var(--secondary);
+    font-size: 1.02rem;
+    line-height: 1.45;
+}
+
 #searchbox,
 #askbox {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
+}
+
+#searchbox,
+#ai-assistant {
+    max-width: 860px;
 }
 
 #searchbox input,
 #askbox textarea {
-    padding: 10px 14px;
+    padding: 0 16px;
     width: 100%;
+    min-height: 52px;
     color: var(--primary);
     font-weight: 500;
-    font-size: 1em;
-    border: 2px solid var(--border);
+    font-size: 0.98rem;
+    line-height: 52px;
+    border: 1.5px solid var(--border);
     border-radius: var(--radius);
-    background: var(--theme);
+    background: color-mix(in srgb, var(--theme) 88%, var(--code-bg));
     font-family: inherit;
+    transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+
+#searchbox input::placeholder,
+#askbox textarea::placeholder {
+    color: var(--secondary);
+    opacity: 0.72;
 }
 
 #askbox textarea {
-    min-height: 46px;
+    display: block;
+    min-height: 52px;
     resize: none;
     overflow: hidden;
     line-height: 1.45;
+    padding-top: 14px;
+    padding-bottom: 12px;
 }
 
 #searchbox input:focus,
 #askbox textarea:focus {
     outline: none;
     border-color: var(--primary);
+    background: var(--theme);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
 #askbox {
@@ -120,18 +166,20 @@
 
 /* ===== Ask Styles ===== */
 #ai-assistant {
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 1px solid var(--border);
+    margin-top: 34px;
+    padding-top: 28px;
+    border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
 }
 
 .ask-header {
-    margin: 0 0 16px;
+    margin: 0 0 18px;
 }
 
 .ask-header h2 {
-    margin: 0 0 8px;
-    font-size: 1.5em;
+    margin: 0 0 10px;
+    font-size: clamp(1.8rem, 3vw, 2.25rem);
+    line-height: 1.1;
+    letter-spacing: 0;
 }
 
 .assistant-result {
@@ -205,7 +253,40 @@
 }
 
 @media (max-width: 600px) {
+    .page-header {
+        margin: 18px 0 24px;
+    }
+
+    .page-header h1 {
+        gap: 10px;
+        margin-bottom: 12px;
+        font-size: 2.25rem;
+    }
+
+    .page-header .post-description,
+    .ask-header .post-description {
+        font-size: 0.95rem;
+    }
+
+    #searchbox input,
     #askbox textarea {
-        min-height: 44px;
+        min-height: 48px;
+        font-size: 0.95rem;
+        line-height: 48px;
+    }
+
+    #askbox textarea {
+        line-height: 1.45;
+        padding-top: 13px;
+        padding-bottom: 11px;
+    }
+
+    #ai-assistant {
+        margin-top: 28px;
+        padding-top: 24px;
+    }
+
+    .ask-header h2 {
+        font-size: 1.75rem;
     }
 }
