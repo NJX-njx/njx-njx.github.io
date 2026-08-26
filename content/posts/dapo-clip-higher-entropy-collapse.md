@@ -2,6 +2,7 @@
 title: "熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么"
 date: 2026-08-26T14:30:00+08:00
 draft: false
+math: true
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
 categories: ["AI"]
 summary: "naive GRPO 复现 R1 时熵快速坍缩、组内样本趋同，DAPO 的 Clip-Higher 只把裁剪上界从 0.2 抬到 0.28。这一个数背后，是 PPO-Clip 在概率轴上的结构性不对称。本文拆解失效链条、机制、证据与边界。"
