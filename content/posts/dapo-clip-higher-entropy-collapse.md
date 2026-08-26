@@ -1,6 +1,6 @@
 ---
 title: "熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么"
-date: 2026-08-26T15:00:00+08:00
+date: 2026-08-26T14:30:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
 categories: ["AI"]
