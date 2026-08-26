@@ -597,6 +597,19 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
 }
 .metric-strip .m:hover::after { opacity: 1; }
 
+/* 封面布局防重叠（配合 cover.js 的测量式磁带左界）：
+   ≤1280 标题降一档，给右侧磁带留出分栏宽度；anchor 限宽 600 避免成为最宽行 */
+@media (max-width: 1280px) {
+  .cover-title { font-size: clamp(34px, 5.8vw, 64px); }
+  .cover-chips { max-width: 640px; }   /* chips 换两行，避免成为最宽行挤掉磁带分栏 */
+}
+.cover-anchor { max-width: 600px; }
+
+/* 窄屏堆叠模式：scroll-hint 让位给磁带区（cover.js <1024 时磁带在文字块下方） */
+@media (max-width: 1023px) {
+  .scroll-hint { display: none; }
+}
+
 @media (max-width: 760px) {
   .fig-controls input[type="range"] { width: 140px; }
   .formula-xl { line-height: 2.4; }
@@ -1092,6 +1105,10 @@ window.RPT_SOURCES = [
 //   GRPO 态：96 根 tick 围绕 w=1 大幅涨落，宽裁剪窗 [0.80, 1.27]，越界 tick 染红（梯度清零）；
 //   GSPO 态：磁带向均值塌缩，只剩一根指针 s_i——它偏离 1 的幅度在自然尺度下看不见，
 //            必须用放大镜（loupe）才能读出 ±3e-4 的裁剪带。
+// 布局（防标题重叠的关键）：磁带左界不取定值，而是按左侧文字块的实际墨水右缘动态测量
+//   （标题逐行 Range 矩形 + 各文字块/按钮的边界矩形，取最大 right）；
+//   宽屏（≥1024）左右分栏；窄屏（<1024）磁带堆叠到文字块下方：放大镜贴右侧、
+//   签栏移左下、scroll-hint 由 CSS 隐藏；纵向空间不足时整幅磁带退化为只留底纹。
 // 交互：点击画布在两态间切换；reduced-motion 直接出 GSPO 静态完成帧。
 (() => {
   const canvas = document.getElementById("cover-canvas");
@@ -1126,8 +1143,57 @@ window.RPT_SOURCES = [
   let k = REDUCE ? 1 : 0;          // 0=GRPO 态, 1=GSPO 态（动画值）
   let kTarget = REDUCE ? 1 : 0;
   let t0 = performance.now();
+  let textRight = 0, textBottom = 0;   // 文字块实际墨水范围（每次 refit 重测）
 
-  function refit() { const v = fit(); W = v.w; H = v.h; }
+  function measureText() {
+    let right = 0, bottom = 0;
+    // 标题/副标/lede 用 Range 逐行矩形量真实墨水（块级 rect 会撑满容器）
+    [".cover-title", ".cover-sub", ".cover-lede"].forEach(sel => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      for (const rc of r.getClientRects()) right = Math.max(right, rc.right);
+    });
+    // anchor 有 max-width 封顶，块级 rect 即可；它也是 DOM 流中最低的文本块
+    const anchor = document.querySelector(".cover-anchor");
+    if (anchor) {
+      const rc = anchor.getBoundingClientRect();
+      right = Math.max(right, rc.right);
+      bottom = Math.max(bottom, rc.bottom);
+    }
+    // chips 是 flex 容器会撑满整行，必须逐按钮量右缘
+    document.querySelectorAll(".cover-chips .chip").forEach(c => {
+      right = Math.max(right, c.getBoundingClientRect().right);
+    });
+    textRight = right; textBottom = bottom;
+  }
+
+  function refit() { const v = fit(); W = v.w; H = v.h; measureText(); }
+
+  // ── 布局：宽屏分栏 / 窄屏堆叠；返回 null 表示空间不足（只画底纹）──
+  function layout() {
+    const wide = W >= 1024;
+    if (wide) {
+      const L = Math.max(textRight + 44, 600);
+      const R = W - 70;
+      if (R - L < 200) return null;
+      const yT = H * 0.38, half = H * 0.16;
+      const lr = Math.min(118, (R - L) * 0.30, H * 0.16);
+      return { wide, L, R, yT, half, lr, loupeX: L + (R - L) / 2, loupeY: H * 0.70, loupeCap: "below", sigAlign: "right" };
+    }
+    // 窄屏堆叠：磁带放到文字块下方，half 按可用纵向空间自适应（不足则退化为只留底纹）
+    const L = 36, R = W - 36;
+    if (R - L < 200) return null;
+    const half = Math.min(Math.max(34, H * 0.055), (H - 158 - textBottom) / 2);
+    if (half < 30) return null;
+    const yT = textBottom + half + 56;
+    // 放大镜：直径受「右贴不碰签栏」约束；放不下就退化为无放大镜（指针标签仍在）
+    let lr = Math.min(96, (R - L) * 0.26, H * 0.10);
+    if (yT - lr - 26 < textBottom + 12 || yT + lr > H - 78) lr = 0;
+    const lx = W - lr - 40;
+    return { wide, L, R, yT, half, lr, loupeX: lx, loupeY: yT, loupeCap: "above", sigAlign: "left" };
+  }
 
   // ── 蓝图底纹：十字网格 + 四角对位标 ──
   function grid() {
@@ -1142,13 +1208,14 @@ window.RPT_SOURCES = [
     });
     ctx.restore();
   }
-  // 左侧白晕，保文字列可读
-  function wash() {
-    const g = ctx.createLinearGradient(0, 0, W * 0.66, 0);
+  // 左侧白晕（仅宽屏分栏需要；右界跟着磁带左界走，保证文字列干净）
+  function wash(lay) {
+    if (!lay || !lay.wide) return;
+    const g = ctx.createLinearGradient(0, 0, lay.L + 24, 0);
     g.addColorStop(0, "rgba(255,255,255,.96)");
     g.addColorStop(0.72, "rgba(255,255,255,.84)");
     g.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W * 0.66, H);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, lay.L + 24, H);
   }
   function halo(text, x, y, align = "left") {
     ctx.textAlign = align;
@@ -1164,21 +1231,18 @@ window.RPT_SOURCES = [
     ctx.clearRect(0, 0, W, H);
     grid();
 
-    const narrow = W < 900;
-    const L = narrow ? 36 : Math.max(W * 0.60, 600);
-    const R = W - (narrow ? 36 : 70);
-    if (R - L < 240) { wash(); return; }
-
-    const yT = H * (narrow ? 0.30 : 0.38);       // 磁带基线（w=1）
-    const half = H * (narrow ? 0.13 : 0.16);     // r∈[0.5,1.5] 的纵向半幅
+    const lay = layout();
+    if (!lay) return;                        // 空间不足：只留底纹
+    const { L, R, yT, half } = lay;
     const yOf = r => yT - (r - 1) / 0.5 * half;
     const span = R - L;
 
-    // ── 磁带区标题 ──
+    // ── 磁带区标题（窄分栏换短题，防越出画布右缘）──
     ctx.fillStyle = INK_L; ctx.font = `10px ${MONO}`;
-    halo(k < 0.5
-      ? "TOKEN TAPE · 一条 response 的逐 token 比率 w_t = π_θ/π_old（演示样本，96 token）"
-      : "TOKEN TAPE · 同一条 response · 逐 token 涨落被几何平均塌缩成一根指针 s_i", L, yT - half - 34);
+    const tapeTitle = k < 0.5
+      ? (span < 460 ? "TOKEN TAPE · 逐 token 比率 w_t（96 token 演示）" : "TOKEN TAPE · 一条 response 的逐 token 比率 w_t = π_θ/π_old（演示样本，96 token）")
+      : (span < 460 ? "TOKEN TAPE · 塌缩成一根指针 s_i" : "TOKEN TAPE · 同一条 response · 逐 token 涨落被几何平均塌缩成一根指针 s_i");
+    halo(tapeTitle, L, yT - half - 34);
 
     // ── GRPO 裁剪窗（随 k 淡出）──
     if (k < 0.98) {
@@ -1196,7 +1260,7 @@ window.RPT_SOURCES = [
       halo("1+ε_high = 1.27", L + 4, yOf(G_HI) - 6);
       halo("1−ε_low = 0.80", L + 4, yOf(G_LO) + 14);
       ctx.fillStyle = INK_L; ctx.font = `9.5px ${MONO}`;
-      halo("GRPO 裁剪窗 · ε = 0.2 / 0.27", R, yOf(G_LO) + 16, "right");
+      halo(span < 300 ? "0.2 / 0.27" : "ε = 0.2 / 0.27", R, yOf(G_HI) - 6, "right");
       ctx.restore();
     }
 
@@ -1232,7 +1296,8 @@ window.RPT_SOURCES = [
       ctx.strokeStyle = NEG; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(cx, cy, 7, 0, U.TAU); ctx.stroke();
       ctx.fillStyle = NEG; ctx.font = `bold 10.5px ${MONO}`;
-      halo(`红 = 越界 token · 本批 ${nClip}/${N} 被裁（梯度清零）`, L + 2, yT + half + 26);
+      if (lay.wide) halo(`红 = 越界 token · 本批 ${nClip}/${N} 被裁（梯度清零）`, L + 2, yT + half + 26);
+      else halo(`红 = 越界 · 本批 ${nClip}/${N} 被裁`, R, yT - half - 34, "right");
       ctx.restore();
     }
 
@@ -1247,19 +1312,28 @@ window.RPT_SOURCES = [
       ctx.beginPath(); ctx.arc(xS, yT - 30 - pulse, 4, 0, U.TAU);
       ctx.fillStyle = BLUE; ctx.fill();
       ctx.font = `bold 11px ${MONO}`; ctx.fillStyle = BLUE;
-      halo(`s_i = ${S_I.toFixed(4)}`, xS + 10, yT - 30 - pulse + 4);
-      ctx.font = `9.5px ${MONO}`; ctx.fillStyle = INK_L;
-      halo("偏离 1 仅 " + ((S_I - 1) * 100).toFixed(2) + "% · 自然尺度下看不见，需要放大镜 ↓", xS + 10, yT - 14 - pulse);
+      const sub = lay.lr > 0
+        ? "偏离 1 仅 " + ((S_I - 1) * 100).toFixed(2) + "% · 自然尺度下看不见，需要放大镜"
+        : "偏离 1 仅 " + ((S_I - 1) * 100).toFixed(2) + "% · 自然尺度下看不见（裁剪带 ±3e-4）";
+      ctx.font = `9.5px ${MONO}`;
+      if (lay.wide && xS + 330 <= W - 40) {
+        halo(`s_i = ${S_I.toFixed(4)}`, xS + 10, yT - 30 - pulse + 4);
+        ctx.fillStyle = INK_L;
+        halo(sub, xS + 10, yT - 14 - pulse);
+      } else {
+        // 窄屏或分栏太窄：标签放指针左边，右对齐
+        halo(`s_i = ${S_I.toFixed(4)}`, xS - 10, yT - 30 - pulse + 4, "right");
+        ctx.fillStyle = INK_L;
+        halo(sub, xS - 10, yT - 14 - pulse, "right");
+      }
       ctx.restore();
     }
 
     // ── GSPO 态：放大镜（loupe）读出 ±3e-4 窄带 ──
-    if (k > 0.02) {
+    if (k > 0.02 && lay.lr > 0) {
       const a = k;
       ctx.save(); ctx.globalAlpha = a;
-      const lx = narrow ? W / 2 : L + span / 2;
-      const ly = H * (narrow ? 0.66 : 0.70);
-      const lr = Math.min(118, span * 0.30, H * 0.16);
+      const lx = lay.loupeX, ly = lay.loupeY, lr = lay.lr;
       // 虚线引导：磁带 → 放大镜
       ctx.strokeStyle = BLUE_S; ctx.setLineDash([4, 5]); ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(lx - 40, yT + 24); ctx.lineTo(lx - lr * 0.55, ly - lr * 0.75); ctx.stroke();
@@ -1297,20 +1371,22 @@ window.RPT_SOURCES = [
       ctx.beginPath(); ctx.moveTo(lx + lr * 0.71, ly + lr * 0.71); ctx.lineTo(lx + lr * 1.18, ly + lr * 1.18);
       ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.lineCap = "round"; ctx.stroke(); ctx.lineCap = "butt";
       ctx.fillStyle = INK_M; ctx.font = `bold 10px ${MONO}`;
-      halo("LOUPE · 微缩轴 1±0.0012 · GSPO 裁剪带", lx, ly + lr * 1.48, "center");
+      if (lay.loupeCap === "below") halo("LOUPE · 微缩轴 1±0.0012 · GSPO 裁剪带", lx, ly + lr * 1.48, "center");
+      else halo("LOUPE · 微缩轴 1±0.0012", lx, ly - lr - 12, "center");
       ctx.restore();
     }
 
-    // ── 右下签栏（随状态切换，QA #21）──
-    const sx = W - 34, sy = H - 52;
+    // ── 签栏（随状态切换，QA #21；宽屏右下，窄屏左下）──
+    const sigR = lay.sigAlign === "right";
+    const sx = sigR ? W - 34 : 34, sy = H - 52;
     ctx.fillStyle = INK_L; ctx.font = `9.5px ${MONO}`;
-    halo("FIG. 1 · ONE RESPONSE, TWO UNITS OF CORRECTION · SCALE NTS", sx, sy, "right");
+    halo("FIG. 1 · ONE RESPONSE, TWO UNITS OF CORRECTION · SCALE NTS", sx, sy, sigR ? "right" : "left");
     ctx.fillStyle = BLUE; ctx.font = `bold 10px ${MONO}`;
     halo(kTarget > 0.5
       ? "STATE · GSPO 序列级 · 窄带 3e-4/4e-4 · CLICK FOR GRPO VIEW"
-      : "STATE · GRPO 逐 token · 宽带 0.2/0.27 · CLICK FOR GSPO VIEW", sx, sy + 16, "right");
+      : "STATE · GRPO 逐 token · 宽带 0.2/0.27 · CLICK FOR GSPO VIEW", sx, sy + 16, sigR ? "right" : "left");
 
-    wash(); // 最上层压左晕
+    wash(lay); // 最上层压左晕（仅宽屏）
   }
 
   function loop(now) {
@@ -1325,6 +1401,9 @@ window.RPT_SOURCES = [
     requestAnimationFrame(loop);
   }
   window.addEventListener("resize", () => { refit(); if (REDUCE) draw(performance.now()); });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { refit(); if (REDUCE) draw(performance.now()); });  // 字体加载后标题宽度会变，重测
+  }
   canvas.addEventListener("click", () => {
     kTarget = kTarget > 0.5 ? 0 : 1;
     if (REDUCE) { k = kTarget; draw(performance.now()); }
