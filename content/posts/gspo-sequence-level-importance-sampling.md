@@ -8,6 +8,8 @@ categories: ["AI"]
 summary: "GRPO 沿用 PPO 的 token 级重要性比率，Qwen 团队认定这是对重要性采样的根本误用，会在 MoE 长回答训练中导致不可逆崩溃。GSPO 把比率、裁剪、优化全部提到序列级，被裁掉的 token 多两个数量级，训练反而更高效。本文拆解这条论证链，以及论文没点破的前提与代价。"
 ---
 
+> 本文有配套的[交互报告](/reports/gspo-sequence-level-importance-sampling/)，含可下钻的公式拆解、裁剪带对比与稀释效应计算器。
+
 ## 一个补丁暴露的问题
 
 2025 年中之前，用 GRPO 训 MoE 模型需要一个专门的补丁。
