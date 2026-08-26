@@ -526,6 +526,26 @@ body { --railw: 0px; }
 }
 .formula b { font-style: normal; }
 .formula sub { font-size: 12px; }
+.formula sup { font-size: 12px; }
+
+/* 绝对锚 vs 相对锚：换挡对比组件（§4 前提二） */
+.anchor-cmp {
+  display: flex; align-items: stretch; gap: 16px; margin: 24px 0 10px;
+}
+.anchor-cmp .ac-card {
+  flex: 1; border: 1px solid var(--line); background: var(--paper);
+  padding: 16px 18px 14px;
+}
+.anchor-cmp .ac-card.on { border-color: var(--red); background: rgba(34,81,255,.04); }
+.anchor-cmp .ac-k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-lo); margin: 0 0 6px;
+}
+.anchor-cmp .ac-t { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--ink); margin: 0 0 8px; }
+.anchor-cmp .ac-card.on .ac-t { color: var(--red); }
+.anchor-cmp .ac-d { font-size: 13.5px; color: var(--ink-md); line-height: 1.75; margin: 0; }
+.anchor-cmp .ac-mid { align-self: center; font-family: var(--mono); font-size: 10px; color: var(--ink-lo); }
+.anchor-cmp .ac-mid span { border: 1px dashed var(--line); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
 
 /* 章节入场（IO 触发一次；reduced-motion 直接显示） */
 .band .prose, .band .wide, .band .wide.xl { opacity: 1; }
@@ -556,6 +576,8 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
 
 @media (max-width: 760px) {
   .fig-controls input[type="range"] { width: 140px; }
+  .anchor-cmp { flex-direction: column; }
+  .anchor-cmp .ac-mid { align-self: flex-start; }
 }
 
 </style>
@@ -575,6 +597,7 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
       <button class="chip" data-goto="#sec-mech">机制拆解</button>
       <button class="chip" data-goto="#sec-loop">坍缩闭环</button>
       <button class="chip" data-goto="#sec-clip">消融证据</button>
+      <button class="chip" data-goto="#sec-layers">分层补遗</button>
       <button class="chip" data-goto="#sec-open">未决问题</button>
     </div>
     <p class="cover-anchor">本报告为博客正文的配套交互版 · 正文：<a href="/posts/dapo-clip-higher-entropy-collapse/">/posts/dapo-clip-higher-entropy-collapse/</a>（线上 <a href="https://njx-njx.github.io/posts/dapo-clip-higher-entropy-collapse/">njx-njx.github.io</a>）<br>证据分级：论文一手 &gt; 书/代码一手 &gt; 二手讲解（回对过原文）&gt; 推算/定性示意 [已标注] · 图内数字可点击下钻</p>
@@ -595,6 +618,19 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
     <p>下面这张图是全篇的形状预告：naive GRPO 的熵一路塌向地板，应用 Clip-Higher 后熵曲线回升、AIME 准确率同步上升<button class="src" data-k="K5">◆</button>。</p>
   </div>
   <div class="wide"><div id="entropy-chart" class="chart-frame"></div></div>
+  <div class="prose">
+    <h3 class="sub-h">先把「熵」说清楚</h3>
+    <p>整篇报告都绕着一个"熵"字转，先把它定义死。这里的熵就是信息论里那个熵，作用对象是<b>模型每生成一个 token 时输出的、覆盖整个词表的概率分布</b>：</p>
+    <p class="formula">H = −Σ<sub>x∈词表</sub>&nbsp; p(x)·log&nbsp;p(x)</p>
+    <p>分布越平（很多 token 概率差不多），熵越高，模型"拿不定主意"；分布越尖（一个 token 占 0.99，其余瓜分 0.01），熵越低，模型"很确定"。DAPO 论文监控的"actor 模型的熵"，就是 rollout 生成过程中这些逐步分布熵的平均值。下面用 3 个 token 的玩具词表把账算一遍——<b>熵就是"采样多样性"的数学度量</b>。</p>
+  </div>
+  <div class="wide"><div id="entropy-demo-chart" class="chart-frame"></div></div>
+  <div class="prose">
+    <p>为什么熵是 RL 训练的命门：<b>GRPO 的全部训练信号来自组内奖励方差，而方差来自采样多样性。</b>熵高，同一道题采 16 条回答各不相同，有对有错，advantage 非零；熵坍缩，16 条趋同，奖励全同，advantage 全零。</p>
+    <div class="note-box">
+      <p><b>两个边界，别理解过头。</b>一，<b>熵不是越高越好</b>——熵过高对应 gibberish、重复词等失控模式，论文只说熵要维持在"合适区间"，没给区间怎么定（§7 未决问题 ①）。二，<b>别把熵和采样温度混为一谈</b>：熵是分布的内在形状，温度是你怎么从分布里取；rollout 时用 temperature 1.0 这类参数才把熵兑现成多样性。Clip-Higher 影响的是前者——防止训练本身把分布越压越尖。</p>
+    </div>
+  </div>
 </section>
 
 <!-- ═══ §1 机制：先把 PPO-Clip 的账算清楚 ═══ -->
@@ -630,10 +666,27 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
       </article>
     </div>
   </div>
+  <div class="prose">
+    <h3 class="sub-h">advantage 从哪来：PPO 与 GRPO 是两条路</h3>
+    <p><b>PPO</b>：靠一个学出来的价值函数（critic），用 GAE 逐 token 估计<button class="src" data-k="K16">◆</button>：</p>
+    <p class="formula">Â<sub>t</sub> = Σ<sub>l</sub>&nbsp;(γλ)<sup>l</sup>&nbsp;δ<sub>t+l</sub>，&nbsp; δ<sub>t</sub> = r<sub>t</sub> + γV(s<sub>t+1</sub>) − V(s<sub>t</sub>)</p>
+    <p>critic 准，advantage 方差就低；critic 歪，整个训练跟着歪。<b>GRPO</b>：不要 critic，对同一道题采 G 条回答，拿组内奖励做归一化——本质是用组内均值当 baseline，这是 REINFORCE 的方差缩减技巧，只不过基线不用学，直接拿同组样本算<button class="src" data-k="K16">◆</button>。</p>
+    <p>GRPO 这条路有三个直接后果，后面都会用到：</p>
+    <ul class="laws">
+      <li><b>① 整组同奖则全零。</b>G 条全对或全错时，mean 等于每条自己的奖励，advantage 全是 0，这道题不贡献任何梯度。</li>
+      <li><b>② 除 std 有隐含加权。</b>std 小的组（比如 16 条只对 1 条）会被归一化放大权重，Dr.GRPO 批评的难度偏置就来自这一项。</li>
+      <li><b>③ advantage 按整条回答算，同一条里每个 token 共用。</b>答错的回答里前 80% 推理步骤可能是对的，但它们和最后算错那一步吃同一个负 advantage——GRPO 本身没有 token 级信用分配。</li>
+    </ul>
+  </div>
   <div class="prose" style="margin-top:34px">
     <p><b>Â &gt; 0（好 token，要强化）</b>：当 r &gt; 1+ε，clipped 支被选中，目标函数变成常数，<b>梯度为零</b>——每步最多把一个 token 的概率抬到采样时的 1+ε 倍。<b>Â &lt; 0（坏 token，要压制）</b>：对称地，每步最多压到采样时的 1−ε 倍。下面这张图把两段平台画了出来，拖动滑杆可以看到 Clip-Higher 抬上界时平台怎么移动。</p>
   </div>
   <div class="wide xl"><div id="clip-chart" class="chart-frame"></div></div>
+  <div class="prose">
+    <div class="note-box">
+      <p><b>机制图读法：值是结果，梯度才是动作。</b>clip 对每种符号的 advantage 都是<b>单边</b>的。看 Â&gt;0 且 r&lt;1−ε 的情形：min 选中的仍然是 r·Â（因为它更小），目标函数的值虽然小，但<b>梯度是活的</b>——dJ/dπ&gt;0，优化器照样以全额斜率 Â 把这个好 token 的概率往回拉。值小不等于抑制。min 的作用是<b>撤掉激励</b>，从来不是<b>施加反向激励</b>。所以完整结构是：好 token 只封顶上涨激励（右侧平台），坏 token 只封顶压制激励（左侧平台），<b>反方向的纠偏永远满梯度放行</b>。</p>
+    </div>
+  </div>
   <div class="prose">
     <div class="note-box">
       <p><b>clip 不是一直在工作。</b>RLHF Book 第 6 章特别提醒：只有当比率真的出界、且 min 恰好选中 clipped 支时，梯度才被掐断。裁剪分数（clip fraction）就是监控这件事的指标<button class="src" data-k="K8">◆</button>。记住这一点，§4 的两个前提会用上。</p>
@@ -651,6 +704,12 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
     <p>而 RL 里的"探索"恰恰由低概率 token 承载——那些当前策略不太倾向选、但可能通向新解法的 token。DAPO 的实测印证了这一点：训练中真正被上界裁住的 token，平均概率小于 <b>0.2</b>（论文图 3a）<button class="src" data-k="K4">◆</button>。换句话说，<b>被裁剪机制反复按住头的，正是探索 token</b>；exploitation token 几乎从不被约束。</p>
   </div>
   <div class="wide"><div id="probaxis-chart" class="chart-frame"></div></div>
+  <div class="prose">
+    <h3 class="sub-h">先把「一轮」说准确：预算每轮刷新</h3>
+    <p>"一轮"指一个"采样→更新"循环：采完样 π<sub>old</sub> 冻结成快照，之后在这批数据上跑多次梯度更新（DAPO 是 <b>16 次</b>，论文 §4.1），这期间 π<sub>θ</sub> 逐渐偏离快照，r 从 1 开始漂移；一旦 r 越过 1+ε，这个 token 的梯度就断了，本轮剩下的更新不再推它。所以上面"上界 0.012"的准确含义是<b>激励消失点</b>，不是硬钳制——步长迈大了概率可能一步冲过去，只是冲过去之后激励归零，没人继续推，也没人拉回来。</p>
+    <p>而预算是<b>每轮刷新</b>的：下一轮重新采样，π<sub>old</sub> 更新，r 重置为 1，又拿到一份 ×1.2 预算。所以低概率 token 的成长路线是乘法的：0.01 → 0.012 → 0.0144 → ⋯，比率上是指数增长，前半段绝对值却爬得非常慢；高概率 token 一两轮就顶到 1.0 饱和。压制方向对称但更狠：Â&lt;0 时每轮最多砍到 ×0.8，<b>五轮后只剩起点的 0.33</b>——下行的乘法衰减比上行的乘法增长快得多<button class="src" data-k="K17">◆</button>。</p>
+  </div>
+  <div class="wide"><div id="budget-chart" class="chart-frame"></div></div>
   <div class="prose">
     <blockquote class="quote-card">
       <p class="q-text">裁剪以"比率"为刻度，但学习效果发生在"概率"轴上。</p>
@@ -689,7 +748,24 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
   <div class="prose">
     <h3 class="sub-h">两个少有人摊开讲的前提</h3>
     <p><b>前提一：clip 只在 off-policy 时才激活。</b>RLHF Book 第 6 章指出，语言模型的 RL 实践里很多算法每个 batch 只跑一步梯度更新——此时比率恒等于 1，clip 永远不触发，真正起正则作用的是 KL 惩罚<button class="src" data-k="K8">◆</button>。而 DAPO 每个 rollout 跑 <b>16 个梯度步</b>（mini-batch 512，论文 §4.1），策略在 batch 内多次更新，比率才会偏离 1，clip 才真的开始工作。所以 Clip-Higher 这个旋钮的价值，和训练的 off-policy 程度是耦合的：严格单步 on-policy 训练里这个旋钮根本不存在；反过来，异步 RL（rollout 和训练重叠、样本天然 off-policy）才是它发挥作用的土壤。</p>
-    <p><b>前提二：DAPO 同时去掉了 KL 项。</b>理由是长 CoT 训练中模型分布本来就要大幅偏离初始模型，KL 约束不再必要（论文 §2.3）。注意去 KL 和抬上界方向一致——都在给探索松绑。论文没有明说两者是协同设计，这是作者的推断；但从"防坍缩"的目标看，它们确实是同一战壕的<button class="src" data-k="K15">◆</button>。</p>
+    <p><b>前提二：DAPO 同时去掉了 KL 项。</b>先把 KL 惩罚本身说清楚。KL 散度衡量当前策略 π<sub>θ</sub> 和参考策略 π<sub>ref</sub>（通常是冻结的 SFT/base 模型）差多远：</p>
+    <p class="formula">D<sub>KL</sub>(π<sub>θ</sub> ‖ π<sub>ref</sub>) = E<sub>x∼π_θ</sub>&nbsp;<b>[</b>&nbsp;log π<sub>θ</sub>(x) − log π<sub>ref</sub>(x)&nbsp;<b>]</b></p>
+    <p>经典 RLHF 把它作为惩罚项放进目标函数（−β·D<sub>KL</sub>），动机有二<button class="src" data-k="K8">◆</button>：一是<b>防 reward hacking</b>——奖励模型是有漏洞的代理，策略跑得够偏就能找到 RM 没见过、瞎打高分的输出，KL 把搜索拴在 RM 见过的分布范围内；二是<b>保住初始模型的语言能力</b>，防止格式崩坏。工程代价是显存里要常驻一个冻结参考模型，每个 token 算两边的前向。</p>
+    <p>DAPO 把它整个去掉了（β=0，参考模型不用加载），论文 §2.3 的理由<button class="src" data-k="K3">◆</button>：KL 惩罚的初衷是"对齐但不要偏离初始模型太远"，而长 CoT 训练的目的<b>恰恰是大幅偏离初始模型</b>——base 模型本来不会写长思维链、不会自我反思，这些行为全靠 RL 重塑分布，拴着锚等于不让船开。还有一个没明说的配套条件：RLVR 的奖励是规则判定，<b>没有 RM 可以 hack</b>，KL 防 hacking 的那一半动机直接消失。注意去 KL 和抬上界方向一致——都在给探索松绑：KL 惩罚是逐 token 把分布往参考模型拉，去掉它，策略才敢往新区域走。论文没有明说两者是协同设计，这是作者的推断；但从"防坍缩"的目标看，它们确实是同一战壕的<button class="src" data-k="K15">◆</button>。</p>
+    <p>把两个前提合起来看，能看出 DAPO 的一次<b>隐含换挡</b>：经典配置里防漂移靠 KL，DAPO 去掉 KL 后只剩 clip——信任区域的角色从一个锚换到了另一个锚。锚拆了不是没有代价：训练失控时没有任何东西把模型拉回来，所以 DAPO 才那么依赖监控仪表盘（熵、长度、平均概率），也才需要 clip、动态采样这些替代性稳定器。</p>
+    <div class="anchor-cmp">
+      <div class="ac-card">
+        <p class="ac-k">经典配置 · KL 惩罚</p>
+        <p class="ac-t">绝对锚</p>
+        <p class="ac-d">不许离初始模型太远。逐 token 把分布往冻结的参考模型拉；代价是参考模型常驻显存、每个 token 算两边前向。</p>
+      </div>
+      <div class="ac-mid"><span>换挡</span></div>
+      <div class="ac-card on">
+        <p class="ac-k">DAPO · 只剩 clip</p>
+        <p class="ac-t">相对锚</p>
+        <p class="ac-d">每步不许离上一步太远，但允许持续走远。失控时没有东西把模型拉回来——靠监控仪表盘（熵、长度、平均概率）和替代稳定器（clip、动态采样）兜住。</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -725,10 +801,38 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
   </div>
 </section>
 
-<!-- ═══ §6 判断与未决问题 ═══ -->
+<!-- ═══ §6 补遗：RLVR 与 GRPO 分层 ═══ -->
+<section id="sec-layers" class="band">
+  <div class="prose">
+    <p class="sec-no">§6 · 补遗</p>
+    <h2>RLVR 和 GRPO 不是同一层的东西</h2>
+    <p class="dek">读这篇很容易把 RLVR 和 GRPO 连着念，其实它们是两根正交的轴：一个回答"奖励从哪来"，一个回答"拿到奖励后怎么更新模型"。</p>
+    <table class="dt">
+      <thead><tr><th></th><th>回答的问题</th><th>属于哪一层</th><th>同层的其他选项</th></tr></thead>
+      <tbody>
+        <tr class="hl">
+          <td><b>RLVR</b></td>
+          <td>奖励从哪来？</td>
+          <td>奖励来源 / 训练范式</td>
+          <td>人类偏好（RLHF 原点）、学出来的奖励模型、可验证规则奖励</td>
+        </tr>
+        <tr>
+          <td><b>GRPO</b></td>
+          <td>拿到奖励后怎么更新模型？</td>
+          <td>策略优化算法</td>
+          <td class="num">REINFORCE、PPO、DAPO、GSPO</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>两者可以<b>自由组合</b>：RLVR + PPO 完全可以（VAPO 就是 value 路线跑可验证奖励<button class="src" data-k="K11">◆</button>）；RM + GRPO 也成立（GRPO 出自 DeepSeekMath 时并不绑定规则奖励，组内归一化对任何标量奖励都适用）。RLVR + GRPO 之所以成为主流配方，是<b>互相成就</b>：RLVR 的规则奖励便宜、客观、不怕 reward hacking，但它是稀疏的 0/1 信号；GRPO 的组内归一化恰好适合 0/1——同一道题采一组，对错比例天然形成 baseline，不需要再训一个 critic 去估计"这条推理值多少分"。反过来，PPO 的 critic 在稀疏 0/1 奖励加几千 token 长序列上很难训准<button class="src" data-k="K16">◆</button>。</p>
+    <p>放回失效链里，两者的分工也清楚：<b>RLVR 决定信号源有多脆</b>（0/1 奖励只有全对、全错、有对有错三种形态，前两种直接零梯度），<b>GRPO 决定信号依赖什么</b>（组内奖励方差，也就是采样多样性）。DAPO 的四个技巧全是在 GRPO 这个算法层打补丁，没动 RLVR 的奖励来源；另一个方向的改进——给 RLVR 造更多可验证任务、把奖励做细到过程级（PRM）——那是在奖励范式层动刀子，和算法层的补丁是正交的两条路。</p>
+  </div>
+</section>
+
+<!-- ═══ §7 判断与未决问题 ═══ -->
 <section id="sec-open" class="band">
   <div class="prose">
-    <p class="sec-no">§6 · 判断与未决问题</p>
+    <p class="sec-no">§7 · 判断与未决问题</p>
     <h2>一个数背后的诊断框架</h2>
     <div class="note-box">
       <p><b>判断。</b>Clip-Higher 的本质，是把"探索节奏"从一个历史遗留的隐式默认值（ε=0.2，来自 2017 年连续控制场景）变成面向长 CoT 推理的显式旋钮。0.28 没有理论推导，是经验值，但它背后的诊断框架——比率裁剪在概率轴上的不对称——是有普适解释力的。以后看到任何"训练好好的突然熵崩了"，先查被 clip 按住的 token 的概率分布，应该成为标准动作。</p>
@@ -756,13 +860,13 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
   </div>
   <div class="wide xl">
     <div style="margin-top:26px">
-      <p class="chart-title">锚点登记表 · K1–K15</p>
+      <p class="chart-title">锚点登记表 · K1–K17</p>
       <p class="chart-sub">本报告依赖的每一个关键数字及其出处 · 点击任意行下钻</p>
     </div>
     <div id="source-list"></div>
   </div>
   <div class="prose">
-    <p class="colophon">交互研报版 · 编译于 2026-08-26 · 配套博客正文：<a href="/posts/dapo-clip-higher-entropy-collapse/">/posts/dapo-clip-higher-entropy-collapse/</a><br>线上地址：<a href="https://njx-njx.github.io/posts/dapo-clip-higher-entropy-collapse/">https://njx-njx.github.io/posts/dapo-clip-higher-entropy-collapse/</a><br>单文件自包含 · CSS / JS / 字体全内联 · 无外部依赖</p>
+    <p class="colophon">交互研报版 · 编译于 2026-08-26 · 配套博客正文：<a href="/posts/dapo-clip-higher-entropy-collapse/">/posts/dapo-clip-higher-entropy-collapse/</a><br>线上地址：<a href="https://njx-njx.github.io/posts/dapo-clip-higher-entropy-collapse/">https://njx-njx.github.io/posts/dapo-clip-higher-entropy-collapse/</a><br>单文件自包含 · CSS / JS / 字体全内联 · 无外部依赖<br>更新记录：2026-08-26 初版；同日根据读者问答补充——「熵」的定义与边界、advantage 的两种来源及其后果、min 的单边裁剪读法（值 vs 梯度）、「单轮预算」的准确含义与乘法积累、KL 惩罚详解与绝对锚/相对锚的换挡、RLVR 与 GRPO 的分层。</p>
   </div>
 </footer>
 
@@ -809,6 +913,15 @@ window.RPT = {
   ],
   // 被裁剪 token 的实测（DAPO 论文图 3a）
   clippedTokenAvgProb: 0.2, // 真正被上界裁住的 token，平均概率 < 0.2
+  // 熵的数值例子（博客正文「先把熵说清楚」）：3-token 玩具词表，H 单位 nat
+  entropyExample: [
+    { name: "尖分布", ps: [0.9, 0.05, 0.05], H: 0.39,
+      note: "模型「很确定」：采样 10 次约 9 次拿到同一个 token" },
+    { name: "均匀分布", ps: [1 / 3, 1 / 3, 1 / 3], H: 1.10,
+      note: "模型「拿不定主意」：采样结果均匀散开；ln 3 ≈ 1.10 是 3 个 token 的最大熵" },
+  ],
+  // 单轮预算的乘法轨迹（博客正文「对称裁剪，不对称的效果」）：起点 p0=0.01
+  budget: { p0: 0.01, up: 1.2, down: 0.8, rounds: 5 }, // 5 轮后：×1.2⁵≈2.49，×0.8⁵≈0.33
 };
 
 </script>
@@ -994,7 +1107,7 @@ window.RPT_SOURCES = [
     fact: "ε=0.2 的默认值来自 2017 年 PPO 原论文的 Atari 与机器人控制实验",
     cite: "PPO 原论文 arXiv:1707.06347（2017-07），转引自博客正文" },
   { id: "K8", cat: "book",
-    fact: "clip 只在 off-policy 时激活：语言模型 RL 很多实现每 batch 只跑一步梯度，比率恒为 1，clip 不触发；clip fraction 是监控指标",
+    fact: "clip 只在 off-policy 时激活：语言模型 RL 很多实现每 batch 只跑一步梯度，比率恒为 1，clip 不触发；clip fraction 是监控指标。KL 惩罚的两动机：防 reward hacking（RM 是有漏洞的代理，KL 把搜索拴在 RM 见过的分布内）、保住初始模型语言能力；工程代价是冻结参考模型常驻显存、逐 token 两边前向",
     cite: "RLHF Book 第 6 章（natolambert/rlhf-book，2026 年读本）" },
   { id: "K9", cat: "impl",
     fact: "verl 生产实现：clip_ratio_low / clip_ratio_high 为独立配置，未设置时回落对称 clip_ratio；另有 dual-clip clip_ratio_c=3.0",
@@ -1017,6 +1130,12 @@ window.RPT_SOURCES = [
   { id: "K15", cat: "derived",
     fact: "“去 KL 与抬上界是协同设计”为作者推断，论文未明说；两者方向一致，都在给探索松绑",
     cite: "博客正文作者判断，DAPO 论文未声明（2026-08-26）" },
+  { id: "K16", cat: "book",
+    fact: "advantage 的两条来源：PPO 用学出来的 critic + GAE 逐 token 估计（δ_t = r_t + γV(s_{t+1}) − V(s_t)）；GRPO 用组内归一化当 baseline（REINFORCE 方差缩减，基线不用学）。GRPO 三后果：整组同奖则全零、除 std 隐含加权（Dr.GRPO 难度偏置来源）、整条回答共用一个 advantage（无 token 级信用分配）",
+    cite: "RLHF Book 第 6 章；GAE 原始论文 arXiv:1506.02438（2016）；PPO 原论文 arXiv:1707.06347（2017）" },
+  { id: "K17", cat: "derived",
+    fact: "「单轮预算」的乘法账：一轮 = 采样冻结快照 → 批内 16 次梯度更新（DAPO §4.1）→ r 漂移；「上界 0.012」是激励消失点而非硬钳制；预算每轮刷新（r 重置为 1）；低概率 token 乘法成长 0.01→0.012→0.0144…（×1.2⁵≈2.49），下行乘法衰减更快（×0.8 五轮剩 0.33）",
+    cite: "由 clip 公式直接推算（博客正文数值例子）；16 梯度步/rollout 见 DAPO arXiv:2503.14476 §4.1" },
 ];
 
 </script>
@@ -1750,6 +1869,158 @@ function growLine(path, dur = 900) {
     gSteps.querySelectorAll("rect").forEach(r => { r.style.transform = "scaleY(1)"; });
   });
   if (REDUCE) gSteps.querySelectorAll("rect").forEach(r => { r.style.transform = "none"; });
+})();
+
+/* ═══ 图 0b · 熵的数值例子：3-token 玩具词表（§0「先把熵说清楚」） ═══ */
+(() => {
+  const host = document.getElementById("entropy-demo-chart");
+  if (!host) return;
+  const body = U.frame(host, {
+    title: "3 个 token 的词表：熵到底在量什么",
+    sub: "H = −Σ p·log p（单位 nat）· 两个分布各算一遍 · 柱与大数字可点击下钻",
+    src: "推算 — 由信息熵定义直接计算（博客正文数值例子）[derived]",
+  });
+  const data = window.RPT.entropyExample;
+  const W = 760, H = 330, top = 70, bot = 246;
+  const svg = svgRoot(body, W, H);
+  const Y = v => bot - v * (bot - top);
+  const panels = [
+    { x0: 70, x1: 350, d: data[0], hot: 0 },
+    { x0: 450, x1: 730, d: data[1], hot: -1 },
+  ];
+  panels.forEach(p => {
+    const bw = 58, gap = (p.x1 - p.x0 - 3 * bw) / 2;
+    const cx = (p.x0 + p.x1) / 2;
+    txt(svg, cx, 34, p.d.name, { size: 12.5, fill: INK, bold: true, anchor: "middle", serif: true });
+    txt(svg, cx, 52, `[ ${p.d.ps.map(v => v.toFixed(2)).join(", ")} ]`, { size: 9.5, fill: INK_L, anchor: "middle" });
+    // p=1 参考线 + 基线
+    el("line", { x1: p.x0 - 14, y1: Y(1), x2: p.x1 + 14, y2: Y(1), stroke: LINE, "stroke-width": 1, "stroke-dasharray": "3 4" }, svg);
+    txt(svg, p.x0 - 18, Y(1) + 3, "1.0", { size: 8.5, fill: INK_L, anchor: "end" });
+    el("line", { x1: p.x0 - 14, y1: bot, x2: p.x1 + 14, y2: bot, stroke: INK, "stroke-width": 1.2 }, svg);
+    p.d.ps.forEach((v, i) => {
+      const x = p.x0 + i * (bw + gap), on = i === p.hot;
+      const rect = el("rect", {
+        x, y: Y(v), width: bw, height: bot - Y(v),
+        fill: on ? "rgba(34,81,255,.16)" : "rgba(5,28,44,.12)",
+        stroke: on ? BLUE : INK_M, "stroke-width": on ? 1.6 : 1,
+      }, svg);
+      const lab = txt(svg, x + bw / 2, Y(v) - 8, v.toFixed(2), { size: 10, fill: on ? BLUE : INK_M, anchor: "middle", bold: true });
+      txt(svg, x + bw / 2, bot + 16, `token ${"ABC"[i]}`, { size: 9, fill: INK_L, anchor: "middle" });
+      const dd = {
+        title: `${p.d.name} · token ${"ABC"[i]}`, value: `p = ${v.toFixed(2)}`,
+        sub: `${p.d.note}。这一项对熵的贡献 −p·log p = ${(-v * Math.log(v)).toFixed(3)} nat。`,
+        source: "由 H = −Σ p·log p 直接计算（博客正文数值例子）",
+      };
+      drillOn(rect, dd); drillOn(lab, dd);
+      if (!REDUCE) {
+        rect.style.transformOrigin = `${x + bw / 2}px ${bot}px`;
+        rect.style.transform = "scaleY(0)";
+        rect.style.transition = `transform .55s ease ${i * 110}ms`;
+      }
+    });
+    // 熵大读数
+    const hLab = txt(svg, cx, bot + 46, `H ≈ ${p.d.H.toFixed(2)} nat`, { size: 16, fill: p.hot === 0 ? INK_M : INK, anchor: "middle", bold: true });
+    drillOn(hLab, {
+      title: `${p.d.name}的信息熵`, value: `H ≈ ${p.d.H.toFixed(2)} nat`,
+      sub: p.hot === 0
+        ? "−(0.9·ln0.9 + 2×0.05·ln0.05) ≈ 0.39 nat。分布越尖熵越低：采样 10 次约 9 次拿到同一个 token——熵坍缩就是分布被训练越压越尖。"
+        : "−(3 × 1/3·ln(1/3)) = ln 3 ≈ 1.10 nat，这是 3 个 token 能达到的最大熵。分布越平熵越高：采样结果均匀散开，多样性最大。",
+      source: "由信息熵定义直接计算（博客正文数值例子）",
+    });
+  });
+  // 中间对照注记
+  txt(svg, 400, 138, "vs", { size: 12, fill: INK_L, anchor: "middle", italic: true, serif: true });
+  const mid = txt(svg, 400, 160, "熵 = 采样多样性", { size: 10.5, fill: BLUE, anchor: "middle", bold: true });
+  txt(svg, 400, 175, "的数学度量", { size: 10.5, fill: BLUE, anchor: "middle", bold: true });
+  drillOn(mid, {
+    title: "熵在量什么", value: "采样多样性",
+    sub: "从尖分布采样 10 次约 9 次拿到 token A，从均匀分布采样结果均匀散开。DAPO 监控的「actor 模型的熵」就是 rollout 生成过程中逐步分布熵的平均值。",
+    source: "博客正文 · §先把「熵」说清楚（2026-08-26）",
+  });
+  txt(svg, W / 2, H - 10, "从尖分布采样 10 次约 9 次拿到 token A；均匀分布的采样结果均匀散开", { size: 9.5, fill: INK_L, anchor: "middle" });
+  onVisible(host, () => {
+    if (REDUCE) return;
+    svg.querySelectorAll("rect").forEach(r => { r.style.transform = "scaleY(1)"; });
+  });
+})();
+
+/* ═══ 图 2b · 单轮预算的乘法轨迹：×1.2 上行 vs ×0.8 下行（§2） ═══ */
+(() => {
+  const host = document.getElementById("budget-chart");
+  if (!host) return;
+  const body = U.frame(host, {
+    title: "乘法成长 vs 乘法衰减：五轮预算轨迹",
+    sub: "起点 p₀ = 0.01 · 上行每轮 ×(1+ε)=×1.2，下行每轮 ×(1−ε)=×0.8 · 每轮重新采样后 r 重置为 1、预算刷新 · 节点可点击",
+    src: "推算 — 由 clip 公式直接计算（K17）；16 梯度步/rollout 见 DAPO §4.1",
+  });
+  const B = window.RPT.budget;
+  const W = 760, H = 380, mL = 64, mR = 122, top = 44, bot = 296;
+  const svg = svgRoot(body, W, H);
+  const yMax = 0.027;
+  const X = n => mL + n / B.rounds * (W - mL - mR);
+  const Y = v => bot - v / yMax * (bot - top);
+  const fmt = v => { let s = v.toFixed(4); s = s.replace(/0+$/, ""); if (s.endsWith(".")) s += "0"; return s; };
+
+  // 轴与网格
+  el("line", { x1: mL, y1: bot, x2: W - mR + 10, y2: bot, stroke: INK, "stroke-width": 1.2 }, svg);
+  el("line", { x1: mL, y1: top - 6, x2: mL, y2: bot, stroke: INK, "stroke-width": 1.2 }, svg);
+  [0.01, 0.02].forEach(v => {
+    el("line", { x1: mL, y1: Y(v), x2: W - mR, y2: Y(v), stroke: LINE_LO, "stroke-width": 1 }, svg);
+    txt(svg, mL - 8, Y(v) + 3, v.toFixed(2), { size: 9, fill: INK_L, anchor: "end" });
+  });
+  txt(svg, mL - 8, bot + 3, "0", { size: 9, fill: INK_L, anchor: "end" });
+  for (let n = 0; n <= B.rounds; n++) {
+    el("line", { x1: X(n), y1: bot - 4, x2: X(n), y2: bot + 4, stroke: INK, "stroke-width": 1 }, svg);
+    txt(svg, X(n), bot + 18, `第 ${n} 轮`, { size: 9, fill: INK_L, anchor: "middle" });
+  }
+  txt(svg, (mL + W - mR) / 2, H - 12, "「采样→更新」循环轮次（每轮 ×1.2 / ×0.8 预算刷新）", { size: 9.5, fill: INK_L, anchor: "middle" });
+  // 起点参考线
+  el("line", { x1: mL, y1: Y(B.p0), x2: W - mR, y2: Y(B.p0), stroke: INK_L, "stroke-width": 1, "stroke-dasharray": "3 4" }, svg);
+  txt(svg, mL + 4, Y(B.p0) - 6, "起点 p₀ = 0.01（每轮的 r=1 重置点）", { size: 9, fill: INK_M });
+
+  const series = [
+    { k: B.up, color: BLUE, name: "上行 ×1.2/轮", gist: "Â>0 · 乘法成长", yOff: -12, ratio: "2.49",
+      note: "比率上是指数增长（×1.2⁵≈2.49），但绝对值爬得慢：0.01 走五轮才 0.025。低概率探索 token 的前半段成长几乎原地踏步——这是熵坍缩的微观起点。" },
+    { k: B.down, color: NEG, name: "下行 ×0.8/轮", gist: "Â<0 · 乘法衰减", yOff: 15, ratio: "0.33",
+      note: "下行乘法衰减更快：×0.8⁵≈0.33，0.01 被压五轮只剩 0.0033。所以 ε_low 不能放宽——再松，低概率 token 很快被压到接近 0，等于从采样空间里删掉。" },
+  ];
+  series.forEach(s => {
+    let d = "";
+    const pts = [];
+    for (let n = 0; n <= B.rounds; n++) {
+      const v = B.p0 * Math.pow(s.k, n);
+      pts.push([X(n), Y(v), v]);
+      d += (n ? "L" : "M") + X(n).toFixed(1) + " " + Y(v).toFixed(1);
+    }
+    const path = el("path", { d, fill: "none", stroke: s.color, "stroke-width": 2.4 }, svg);
+    pts.forEach(([x, y, v], n) => {
+      const dot = el("circle", { cx: x, cy: y, r: 4.2, fill: s.color, stroke: PAPER, "stroke-width": 1.2 }, svg);
+      const dd = {
+        title: `${s.name}（${s.gist}）· 第 ${n} 轮`, value: `p = ${v.toFixed(5)}`,
+        sub: `0.01 × ${s.k}^${n} = ${v.toFixed(5)}（相对起点 ×${(v / B.p0).toFixed(2)}）。预算是每轮刷新的：重新采样后 r 重置为 1，又拿到一份 ×${s.k} 预算；「上界」是激励消失点而非硬钳制——冲过去后激励归零，没人继续推，也没人拉回来。`,
+        source: "K17 · 由 clip 公式推算；DAPO arXiv:2503.14476 §4.1",
+      };
+      drillOn(dot, dd);
+      // 仅标中间轮次：起点值由 p₀ 参考线标签给出，终点值由右端两行标签给出
+      if (n > 0 && n < B.rounds) {
+        const lab = txt(svg, x, y + s.yOff, fmt(v), { size: 8.5, fill: s.color, anchor: "middle" });
+        drillOn(lab, dd);
+      }
+    });
+    // 右端两行标签（系列名 + 终值）
+    const [ex, ey, ev] = pts[B.rounds];
+    const gEnd = el("g", {}, svg);
+    txt(gEnd, ex + 10, ey - 2, s.name, { size: 9.5, fill: s.color, bold: true });
+    txt(gEnd, ex + 10, ey + 11, `${fmt(ev)} · ×${s.ratio}`, { size: 9.5, fill: s.color });
+    drillOn(gEnd, {
+      title: `${s.name}（${s.gist}）`, value: `5 轮后 ×${s.ratio}`,
+      sub: s.note,
+      source: "K17 · 由 clip 公式推算（博客正文）",
+    });
+    onVisible(host, () => growLine(path, 1100));
+  });
+  // 中部注记
+  txt(svg, X(2.5), Y(0.0245), "下行衰减（5 轮 ×0.33）远快于上行成长的绝对值（5 轮 ×2.49 也才 0.025）", { size: 9.5, fill: INK_M, anchor: "middle", italic: true, serif: true });
 })();
 })();
 
