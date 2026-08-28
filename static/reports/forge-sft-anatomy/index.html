@@ -62,7 +62,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
-  --railw: 460px;
+
   background: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
@@ -459,28 +459,8 @@ table.dt tr.hl td { background: rgba(34,81,255,.05); }
   .step { min-height: 0; }
 }
 
-/* ── Narrative column yields to right rail ── */
-main, footer#sec-sources { margin-right: var(--railw); }
-#cover { margin-right: 0; }
+/* ── Single-column layout (dashboard rail removed) ── */
 .cover-inner { max-width: 1180px; margin: 0 auto; }
-#era-rail { right: var(--railw); }
-
-/* ── Persistent dashboard rail · borderless, part of the page surface ── */
-#dash-rail {
-  position: fixed; top: 0; right: 0; bottom: 0; width: var(--railw);
-  border: 0;
-  background: transparent;
-  z-index: 60;
-  /* fully hidden on the cover; slides in after the reader enters the chapters */
-  opacity: 0; visibility: hidden; transform: translateX(24px);
-  transition: opacity .55s ease, transform .55s ease, visibility 0s linear .55s;
-}
-#dash-rail.on { opacity: 1; visibility: visible; transform: none; transition: opacity .55s ease, transform .55s ease; }
-#dash-rail canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
-#dash-rail #dash-canvas {
-  max-height: none; border: 0; border-radius: 0; box-shadow: none;
-  background: transparent;
-}
 
 /* ── dek · italic serif deck, no border chrome ── */
 .dek {
@@ -495,10 +475,6 @@ main, footer#sec-sources { margin-right: var(--railw); }
 .chron-text { max-width: 760px; margin: 0 auto; padding: 40px 24px; }
 .step { min-height: 78vh; }
 
-@media (max-width: 1180px) {
-  body { --railw: 0px; }
-  #dash-rail { display: none; }
-}
 
 /* section hairline */
 hr.sep { border: 0; height: 1px; background: var(--line); margin: 0 auto; max-width: 860px; }
@@ -561,7 +537,7 @@ html{ scroll-behavior:smooth; }
         <tr><th>指标</th><th>数值</th><th>说明</th><th>来源</th></tr>
       </thead>
       <tbody>
-        <tr><td>仓库总行数</td><td class="num">511 行</td><td>src/forge 5 模块 + scripts 3 入口 + tests + 配置</td><td class="num">K9</td></tr>
+        <tr><td>仓库总行数</td><td class="num">511 行</td><td>5 个核心模块 + 3 个入口脚本 + 测试与配置</td><td class="num">K9</td></tr>
         <tr><td>决策点</td><td class="num">7 个</td><td>模板 / masking / collate·loss / 精度 / 调度 / 数据 / 验证</td><td class="num">K1</td></tr>
         <tr><td>对照信息源</td><td class="num">6 路</td><td>2 套教材 · 4 个生产框架 · arXiv · 知乎 · 飞书 · Notion</td><td class="num">K1</td></tr>
         <tr><td>训练数据</td><td class="num">10,000 条</td><td>smoltalk everyday-conversations（全集 1.1M 的 0.9%）</td><td class="num">K8</td></tr>
@@ -584,19 +560,19 @@ html{ scroll-behavior:smooth; }
         <tr><th>路线</th><th>代表实现</th><th>循环与 loss</th><th>数据与工程</th></tr>
       </thead>
       <tbody>
-        <tr><td>框架黑箱</td><td>hands-on-modern-rl <span class="chain">sft_pipeline.py</span></td><td>TRL <span class="chain">SFTTrainer</span> 一行调用，循环 / loss / padding 全在库内</td><td>15 条手写 mock 数据；代码不 mask，与自家文档矛盾</td></tr>
-        <tr><td>教材手写</td><td>rlhf-book <span class="chain">instruction_tuning</span></td><td>手写循环；collate·loss 与 forge 逐行同构</td><td>No Robots 9.5K；只训末轮 assistant；全模块不存模型</td></tr>
+        <tr><td>框架黑箱</td><td>hands-on-modern-rl 课程实现</td><td>TRL <span class="chain">SFTTrainer</span> 一行调用，循环 / loss / padding 全在库内</td><td>15 条手写 mock 数据；代码不 mask，与自家文档矛盾</td></tr>
+        <tr><td>教材手写</td><td>rlhf-book 教材实现</td><td>手写循环；collate·loss 与 forge 逐行同构</td><td>No Robots 9.5K；只训末轮 assistant；全模块不存模型</td></tr>
         <tr><td>生产封装</td><td>alignment-handbook · open-instruct · OpenRLHF</td><td>Trainer 封装之上叠 packing、flash-attention</td><td>tulu3 940K 配比混合 + 去污染工具链</td></tr>
-        <tr class="hl"><td>forge（本仓库）</td><td><span class="chain">src/forge</span> 手写循环</td><td>511 行全显式，每个决策能讲清为什么</td><td>smoltalk 10K 单源；3 项单元测试全过</td></tr>
+        <tr class="hl"><td>forge（本仓库）</td><td>forge 手写循环</td><td>511 行全显式，每个决策能讲清为什么</td><td>smoltalk 10K 单源；3 项单元测试全过</td></tr>
       </tbody>
     </table>
-    <p class="chart-src">Source · K2 教材代码 · K3 课程代码 · K4 生产框架快照 · K9 forge 工作区（行号以 2026-08-28 为准）</p>
+    <p class="chart-src">Source · K2 教材代码 · K3 课程代码 · K4 生产框架快照 · K9 forge 工作区（快照 2026-08-28）</p>
   </div>
   <div class="prose">
     <h3 class="sub-h">模板：字符串拼接里的三个坑</h3>
     <p>原始数据是结构化的 messages（role + content），模型只认纯文本，第一步是渲染。forge 手写 ChatML——每条消息包成 <span class="chain">&lt;|im_start|&gt;{role}\n{content}&lt;|im_end|&gt;\n</span>——与 Qwen 官方 tokenizer 自带 <span class="chain">chat_template</span> 的渲染结果<b>逐字符一致</b>（已验证）。看似没有决策含量，三个信息源各自给了一个坑。</p>
     <div class="note-box">
-      <p><b>坑一 · base 模型没有模板。</b> OLMo-2-1B 是 base 模型，tokenizer 里没住 chat template；rlhf-book 的做法是从姊妹模型 <span class="chain">allenai/OLMo-2-0425-1B-SFT</span> 的 tokenizer 整段拷贝 <span class="chain">chat_template</span> 属性（<span class="chain">utils.py:82-88</span>）。真实世界里模板不一定现成。</p>
+      <p><b>坑一 · base 模型没有模板。</b> OLMo-2-1B 是 base 模型，tokenizer 里没住 chat template；rlhf-book 的做法是从姊妹模型 <span class="chain">allenai/OLMo-2-0425-1B-SFT</span> 的 tokenizer 整段拷贝 <span class="chain">chat_template</span> 属性。真实世界里模板不一定现成。</p>
       <p><b>坑二 · <span class="chain">apply_chat_template</span> 有隐藏行为。</b> Qwen 的模板在 messages 无 system 段时会注入默认 system prompt（"You are Qwen, created by Alibaba Cloud..."）。hands-on 课程的数据没有 system 段，训练文本里实际带着这句没审过的默认文本。forge 只渲染样本里已有的段，不注入任何东西。</p>
       <p><b>坑三 · 模板错是 SFT 的头号隐形问题。</b> HuggingFace 官方博客《Chat Templates: An End to the Silent Performance Killer》（2024-01）被材料库标为"SFT 最高频的坑"；中文社区 Trainer 排错清单第一条就是"loss 不降 → chat template 错 / labels mask 错"。</p>
     </div>
@@ -662,7 +638,7 @@ html{ scroll-behavior:smooth; }
   <div class="prose">
     <blockquote class="quote-card">
       <p class="q-text">"…the model may never learn to stop."</p>
-      <p class="q-who">— <b>TRL SFTTrainer</b>，assistant_only_loss 警告<span class="q-src">Source · K4（trl sft_trainer.py / sft_config.py，2026-08-28 快照）</span></p>
+      <p class="q-who">— <b>TRL SFTTrainer</b>，assistant_only_loss 警告<span class="q-src">Source · K4（trl 源码快照，2026-08-28）</span></p>
       <div class="q-why"><span class="q-lab">Context</span> 触发条件：assistant 轮的结束 token 不在 loss mask 内。<span class="q-lab why">Why it matters</span> 这佐证了 forge 把 &lt;|im_end|&gt; 训进 loss 的必要性——模型必须学会停止；也给矩阵里"截断策略"一行 OpenRLHF 强制 EOS 收尾的格子提供了分量。</div>
     </blockquote>
   </div>
@@ -674,7 +650,7 @@ html{ scroll-behavior:smooth; }
     <p class="dek">规则一句话：每个位置的 logits 预测下一个 token，预测目标是 assistant token 就计分，否则置 -100。</p>
     <p>forge 的选择是<b>所有 assistant 段都计</b>（含 &lt;|im_start|&gt;、&lt;|im_end|&gt; 包裹标记），user / system 段全 mask。loss 写成公式：</p>
     <p style="font-family:var(--mono); font-size:13.5px; color:var(--ink-md); margin:2px 0 22px;">L = −(1/|A|) · Σ<sub>t: x<sub>t+1</sub> ∈ A</sub> log p<sub>θ</sub>(x<sub>t+1</sub> | x<sub>≤t</sub>)<span style="color:var(--ink-lo);">&nbsp;&nbsp;A = assistant 段 token 集合，|A| = 有效 token 数</span></p>
-    <p>信息源里的分布并不整齐：rlhf-book 只训最后一轮 assistant——多轮对话中间的 assistant 回复也 mask，连 &lt;|assistant|&gt; 生成头本身都 mask（<span class="chain">utils.py:138,142-148</span>）；hands-on 课程的代码用 "text" 列喂 SFTTrainer、对整个序列计 loss，而自家文档（<span class="chain">imitation-learning-pipeline.md:236-238</span>）把 user / system 计入 loss 称为"最常见的坑……这不是洁癖，这是在保护你训练出来的模型不去背诵提示词"——同一仓库，代码与文档互相矛盾，是"教学实现 ≠ 最佳实践"的最直接样本。trl 现在的方案是 <span class="chain">assistant_only_loss</span> + 模板里的 <span class="chain">{% generation %}</span> 标记，但通常只把 assistant content 包进标记，即生成头不计 loss；forge 把头也算进去，一两 token 之差，属可以争论的细节。</p>
+    <p>信息源里的分布并不整齐：rlhf-book 只训最后一轮 assistant——多轮对话中间的 assistant 回复也 mask，连 &lt;|assistant|&gt; 生成头本身都 mask；hands-on 课程的代码用 "text" 列喂 SFTTrainer、对整个序列计 loss，而自家文档把 user / system 计入 loss 称为"最常见的坑……这不是洁癖，这是在保护你训练出来的模型不去背诵提示词"——同一仓库，代码与文档互相矛盾，是"教学实现 ≠ 最佳实践"的最直接样本。trl 现在的方案是 <span class="chain">assistant_only_loss</span> + 模板里的 <span class="chain">{% generation %}</span> 标记，但通常只把 assistant content 包进标记，即生成头不计 loss；forge 把头也算进去，一两 token 之差，属可以争论的细节。</p>
   </div>
   <div class="wide xl">
     <div id="masking-chart" class="chart-frame"></div>
@@ -689,7 +665,7 @@ html{ scroll-behavior:smooth; }
     <p class="sec-no">§4 · 调度与精度 Schedule &amp; precision</p>
     <h2>cosine vs linear 是配方之争，不是对错</h2>
     <p class="dek">lr、schedule、warmup 三个旋钮，7 个来源给出 5 种配方；不显式指定 scheduler，本身就是一个决策。</p>
-    <p>forge 用 <span class="chain">get_cosine_schedule_with_warmup</span>，warmup 3%。生产侧的答案并不统一：Tulu 3 的 8B SFT 配方是 lr 5e-6 + linear decay + warmup 0.03（open-instruct <span class="chain">finetune_8b.sh</span>，可复现配置比论文转述更硬）；Zephyr 是 2e-5 + cosine + warmup 0.1；OpenRLHF 默认 cosine_with_min_lr；rlhf-book 干脆手写线性衰减——教学书自己也不用 cosine。forge 的 lr 1e-5 落在 5e-6~2e-5 生产区间（模型越小 lr 越大），warmup 0.03、weight decay 0.0、grad clip 1.0、epochs 2 与 tulu3 / OpenRLHF 逐项吻合。有效 batch 32（8×4）对 0.5B 是教学缩放——rlhf-book 巧合地也是 32（4×8），生产是 128–256。</p>
+    <p>forge 用 cosine 调度加 3% warmup。生产侧的答案并不统一：Tulu 3 的 8B SFT 配方是 lr 5e-6 + linear decay + warmup 0.03（open-instruct 官方可复现配置，比论文转述更硬）；Zephyr 是 2e-5 + cosine + warmup 0.1；OpenRLHF 默认 cosine_with_min_lr；rlhf-book 干脆手写线性衰减——教学书自己也不用 cosine。forge 的 lr 1e-5 落在 5e-6~2e-5 生产区间（模型越小 lr 越大），warmup 0.03、weight decay 0.0、grad clip 1.0、epochs 2 与 tulu3 / OpenRLHF 逐项吻合。有效 batch 32（8×4）对 0.5B 是教学缩放——rlhf-book 巧合地也是 32（4×8），生产是 128–256。</p>
   </div>
   <div class="wide">
     <table class="dt">
@@ -697,20 +673,20 @@ html{ scroll-behavior:smooth; }
         <tr><th>来源</th><th>LR</th><th>schedule</th><th>warmup</th><th>备注</th></tr>
       </thead>
       <tbody>
-        <tr class="hl"><td>forge（本仓库）</td><td class="num">1e-5</td><td>cosine</td><td class="num">3%</td><td>configs/sft.yaml；wd 0 · clip 1.0 · epochs 2</td></tr>
+        <tr class="hl"><td>forge（本仓库）</td><td class="num">1e-5</td><td>cosine</td><td class="num">3%</td><td>wd 0 · clip 1.0 · epochs 2</td></tr>
         <tr><td>rlhf-book</td><td class="num">5e-6</td><td>手写线性衰减</td><td class="num">—</td><td>教材自己也不用 cosine</td></tr>
         <tr><td>hands-on 课程</td><td class="num">2e-5</td><td>linear</td><td class="num">0</td><td>默认配置；不显式指定 = 隐藏决策</td></tr>
         <tr><td>trl SFTTrainer</td><td class="num">2e-5（默认）</td><td>cosine（默认）</td><td class="num">—</td><td>默认 lr 与默认 schedule 都不显式</td></tr>
-        <tr><td>Zephyr-7b-beta</td><td class="num">2e-5</td><td>cosine</td><td class="num">10%</td><td>alignment-handbook config_full.yaml</td></tr>
-        <tr><td>tulu3 8B</td><td class="num">5e-6</td><td>linear</td><td class="num">3%</td><td>open-instruct finetune_8b.sh</td></tr>
-        <tr><td>OpenRLHF</td><td class="num">5e-6（默认）</td><td>cosine_with_min_lr</td><td class="num">—</td><td>train_sft.py 默认配方</td></tr>
+        <tr><td>Zephyr-7b-beta</td><td class="num">2e-5</td><td>cosine</td><td class="num">10%</td><td>alignment-handbook 官方配方</td></tr>
+        <tr><td>tulu3 8B</td><td class="num">5e-6</td><td>linear</td><td class="num">3%</td><td>open-instruct 官方 8B 配方</td></tr>
+        <tr><td>OpenRLHF</td><td class="num">5e-6（默认）</td><td>cosine_with_min_lr</td><td class="num">—</td><td>官方默认配方</td></tr>
       </tbody>
     </table>
-    <p class="chart-src">Source · K2 · K3 · K4（生产框架源码快照，2026-08-28）· K9</p>
+    <p class="chart-src">Source · K2 教材代码 · K3 课程代码 · K4 生产框架快照（2026-08-28）· K9 forge 工作区</p>
   </div>
   <div class="prose">
     <div class="note-box">
-      <p><b>精度：纯 bf16，和一层多余的 autocast。</b> 两本教材都是纯 bf16 加载权重：不用 autocast、没有 fp32 master weights、没有 GradScaler；教学场景图省事，0.5B 也确实犯不上。forge 的自我修正点：权重已 bf16 加载（<span class="chain">model.py</span>），forward 外又包了一层 <span class="chain">torch.autocast(bf16)</span>（<span class="chain">train.py:92</span>）——权重已是 bf16 时这层基本是冗余的，Stage 2 顺手去掉。真正的混合精度（fp32 master + loss scaling）在 Megatron / DeepSpeed 那一层。生产侧背书：Tulu 3 的 <span class="chain">--mixed_precision bf16</span>，与课程文档"BF16 比 FP32 快 2 倍"的社区经验。</p>
+      <p><b>精度：纯 bf16，和一层多余的 autocast。</b> 两本教材都是纯 bf16 加载权重：不用 autocast、没有 fp32 master weights、没有 GradScaler；教学场景图省事，0.5B 也确实犯不上。forge 的自我修正点：权重已按 bf16 加载，forward 外又包了一层 autocast——权重已是 bf16 时这层基本是冗余的，Stage 2 顺手去掉。真正的混合精度（fp32 master + loss scaling）在 Megatron / DeepSpeed 那一层。生产侧背书：Tulu 3 官方配方同样是 bf16 混合精度，与课程文档"BF16 比 FP32 快 2 倍"的社区经验一致。</p>
     </div>
     <p>两个值得记住的观察。其一，<b>默认 scheduler 是个陷阱</b>：不显式指定时，HF / TRL 默认 linear + warmup 0——你以为没做决策，其实已经做了。其二，<b>lr 与 packing 强耦合</b>：教材引用的 OLMo 3 实践是 sequence packing 显著增大有效 token batch，lr 要跟着上调——离开吞吐配置谈 lr 没有意义。epochs=2 有研究侧的支持：SFT 的 scaling 研究显示重复数据的收益约在前 4 个 epoch 内（arXiv 2402.17193），《SFT Memorizes, RL Generalizes》（arXiv 2501.17161）进一步指出多训 epoch 主要强化记忆而非泛化——2 个 epoch 在安全区，也预示了纯 SFT 切片的天花板（§7）。</p>
   </div>
@@ -738,7 +714,7 @@ html{ scroll-behavior:smooth; }
     <p class="sec-no">§6 · Stage 2 闸门 Priority gates</p>
     <h2>没做的清单，就是 Stage 2 的路线图</h2>
     <p class="dek">对照完六个信息源，刻意没做的与应该尽快补的，按优先级排成 7 道闸门；其中两道明确不跟进。</p>
-    <p><b>P0 只有一道</b>：packing + padding-free + flash-attention 2——四个生产框架全有，是 forge 与生产的第一工程差距，Netflix 的 4.7 倍吞吐说明这不是细节。<b>P1 三道</b>：mask 边界对齐生产口径（assistant 头不计 loss、结束 token 必计）；截断样本强制 EOS 收尾（OpenRLHF <span class="chain">sft_dataset.py</span> 把 <span class="chain">input_ids[-1]</span> 设为 eos，一行可修，防切断 &lt;|im_end|&gt; 教坏停止）；grad accumulation 尾部按实际组数归一，顺手去掉那层冗余 autocast。<b>P2 两道</b>：chunked loss、梯度检查点——大模型阶段再说；去污染属于数据准备层，不进训练器。<b>不跟进两道</b>：NEFTune（arXiv 2310.05914，框架支持、主流 recipe 未启用）；cosine 换 linear（两派并存的配方之争，forge 站多数派）。</p>
+    <p><b>P0 只有一道</b>：packing + padding-free + flash-attention 2——四个生产框架全有，是 forge 与生产的第一工程差距，Netflix 的 4.7 倍吞吐说明这不是细节。<b>P1 三道</b>：mask 边界对齐生产口径（assistant 头不计 loss、结束 token 必计）；截断样本强制 EOS 收尾（OpenRLHF 在数据集出口把序列末位强制设为 EOS，一行可修，防切断 &lt;|im_end|&gt; 教坏停止）；grad accumulation 尾部按实际组数归一，顺手去掉那层冗余 autocast。<b>P2 两道</b>：chunked loss、梯度检查点——大模型阶段再说；去污染属于数据准备层，不进训练器。<b>不跟进两道</b>：NEFTune（arXiv 2310.05914，框架支持、主流 recipe 未启用）；cosine 换 linear（两派并存的配方之争，forge 站多数派）。</p>
     <p>这些都不进 Stage 1——极简的意义就是让你看清没有它们时系统在干什么。</p>
   </div>
   <div class="wide">
@@ -762,9 +738,9 @@ html{ scroll-behavior:smooth; }
     <p class="sec-no">Sources &amp; method</p>
     <h2>方法与出处</h2>
     <div class="note-box">
-      <p><b>事实分级。</b> 凡标"已验证"者，均直接读到源码/数据集卡片原文（行号见 blog 正文）；论文结论经 arXiv API 核实标题与日期；社区经验凡给不出实验出处的，正文标注"存疑"。</p>
+      <p><b>事实分级。</b> 凡标"已验证"者，均直接读到源码/数据集卡片原文（具体行号登记于配套 blog）；论文结论经 arXiv API 核实标题与日期；社区经验凡给不出实验出处的，正文标注"存疑"。</p>
       <p><b>来源分类。</b> <span class="src-cat kimi">个人研究整理</span> <span class="src-cat company">官方仓库/数据集卡片</span> <span class="src-cat industry">社区与业界</span></p>
-      <p><b>测量纪律。</b> 表中没有的实体不画；被挑战的数字在渲染层标注验证状态；forge 行号以 2026-08-28 工作区为准。</p>
+      <p><b>测量纪律。</b> 表中没有的实体不画；被挑战的数字在渲染层标注验证状态；forge 侧事实以 2026-08-28 工作区快照为准。</p>
     </div>
   </div>
   <div class="wide xl">
@@ -781,7 +757,6 @@ html{ scroll-behavior:smooth; }
 
 </main>
 
-<aside id="dash-rail" aria-label="决策仪表盘"><canvas id="dash-canvas"></canvas></aside>
 <div id="drill-card" hidden></div>
 
 <script>
@@ -799,7 +774,7 @@ window.RPT = {
   evidence: {
     object: "forge 工件（Stage 1 产出的第一件成品）",
     items: [
-      { part: "铭牌", label: "仓库总行数", value: "511 行", sub: "src/forge 5 模块 + scripts 3 入口 + tests + 配置", src: "K9" },
+      { part: "铭牌", label: "仓库总行数", value: "511 行", sub: "5 个核心模块 + 3 个入口脚本 + 测试与配置", src: "K9" },
       { part: "刃口", label: "决策点", value: "7 个", sub: "模板 / masking / collate·loss / 精度 / 调度 / 数据 / 验证", src: "K1" },
       { part: "锤痕", label: "对照信息源", value: "6 路", sub: "2 套教材 · 4 个生产框架 · arXiv · 知乎 · 飞书 · Notion", src: "K1" },
       { part: "原料签", label: "训练数据", value: "10,000 条", sub: "smoltalk everyday-conversations（全集 1.1M 的 0.9%）", src: "K8" },
@@ -2877,12 +2852,12 @@ window.U = (() => {
   // 列 → K 锚点出处（见 js/sources.js；trl/Zephyr/tulu3/OpenRLHF 同属 K4 生产框架源码快照）
   const COLSRC = [
     "K9 · forge 仓库本地工作区（2026-08-28）",
-    "K2 · rlhf-book code/instruction_tuning",
+    "K2 · rlhf-book 教材代码",
     "K3 · hands-on-modern-rl ch08 + ch15",
-    "K4 · trl sft_trainer.py / sft_config.py",
+    "K4 · trl 源码快照",
     "K4 · alignment-handbook zephyr-7b-beta 配方",
-    "K4 · open-instruct tulu3 finetune_8b.sh",
-    "K4 · OpenRLHF sft_dataset.py / train_sft.py",
+    "K4 · open-instruct tulu3 官方配方",
+    "K4 · OpenRLHF 源码快照",
   ];
 
   // ── 模块私有样式（全部限定在 #matrix-chart 内）──
@@ -3767,7 +3742,7 @@ window.U = (() => {
   const SRC = {
     1: "K4 · 生产框架源码快照(2026-08-28) — 四框架全有 packing；K10 · Netflix 工程博客(2026-02) — 吞吐 4.7×",
     2: "K1 · blog 正文(2026-08-28) — masking 之争；K4 · 生产框架源码快照 — mask 口径对照",
-    3: "K4 · OpenRLHF sft_dataset.py / train_sft.py(2026-08-28) — 截断强制 EOS 收尾",
+    3: "K4 · OpenRLHF 源码快照(2026-08-28) — 截断强制 EOS 收尾",
     4: "K2 · rlhf-book(2026-05-13)；K3 · hands-on-modern-rl ch08+ch15(2026-08) — 两本教材的 accum 瑕疵",
     5: "K1 · blog 正文(2026-08-28) — 显存优化留到大模型阶段",
     6: "K5 · arXiv 清单(2026-08-28) — NEFTune 2310.05914",
@@ -4211,271 +4186,7 @@ window.U = (() => {
 
 </script>
 <script>
-// 右栏常驻仪表盘（CHARTS.md P14 context rail）
-// 结构：窗口徽章+标题 · 七段相位条（当前段电蓝+脉冲）· 读数牌（超大衬线）· 四块统计 2×2 · 底部锚点提示
-// 数据全部来自 window.RPT.rail；随 main.js 广播的 rpt:section 切换相位。一切数字可下钻（带 K 锚点出处）。
-(() => {
-  const host = document.getElementById("dash-rail");
-  if (!host) return;
-  const canvas = document.getElementById("dash-canvas");
-  if (!canvas) return;
-  const rail = window.RPT && window.RPT.rail;
-  if (!rail) return;
-
-  const { PAL, clamp, lerp, ease, bindCanvas } = U;
-  const { fit, ctx } = bindCanvas(canvas);
-  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  // canvas 字体族与 css/fonts.css 的 --serif / --mono 一致
-  const SERIF = (wt, s) => `${wt} ${s}px "et-book","Iowan Old Style",Palatino,"Palatino Linotype","Book Antiqua",Georgia,serif`;
-  const MONO = (wt, s) => `${wt} ${s}px Menlo,Consolas,"SF Mono","Liberation Mono","DejaVu Sans Mono",ui-monospace,monospace`;
-
-  // K 锚点 → "Kx · 日期"（日期取自 js/sources.js，不手写）
-  const SRC = id => {
-    const s = (window.SOURCES || []).find(x => x.id === id);
-    return s ? `${s.id} · ${s.date}` : id;
-  };
-
-  // 章节 id → { 窗口标题, 相位 }（映射由报告结构给定）
-  const WINDOWS = {
-    "sec-exec":    { t: "核心发现",      ph: 0 },
-    "sec-form":    { t: "公式·逐行解剖", ph: 0 },
-    "sec-matrix":  { t: "决策矩阵",      ph: 1 },
-    "sec-masking": { t: "MASKING 裁决",  ph: 1 },
-    "sec-sched":   { t: "LR 调度",       ph: 4 },
-    "sec-data":    { t: "数据光谱",      ph: 5 },
-    "sec-gates":   { t: "STAGE 2 闸门",  ph: 6 },
-    "sec-odds":    { t: "未决问题",      ph: 6 },
-  };
-
-  // 七个相位各自的事实依据（均出自 data.js / sources.js 已登记事实）
-  const PHASE_FACTS = [
-    { sub: "手写 ChatML 纯函数；与 Qwen 官方模板逐字符一致（已验证）", src: "K1" },
-    { sub: "全部 assistant 段计 loss；全篇最大分歧点，trl 警告 end token 必计", src: "K1" },
-    { sub: "chunked loss + accum 尾部按实际组数归一（Stage 2 闸门 P1）", src: "K1" },
-    { sub: "决策点 4/7；生产互证配方项含 grad clip 1.0", src: "K4" },
-    { sub: "cosine + 3% warmup；cosine vs linear 是配方之争不是对错", src: "K4" },
-    { sub: "smoltalk everyday-conversations 10,000 条，全集 1.1M 的 0.9%", src: "K8" },
-    { sub: "val loss + 8 prompt 生成；小模型优先分领域验证 loss", src: "K1" },
-  ];
-
-  // 四块统计的下钻口径（与 evidence 实物图同一事实源）
-  const STAT_DRILL = [
-    { sub: "src/forge 5 模块 + scripts 3 入口 + tests + 配置", src: "K9" },
-    { sub: "模板 / masking / collate·loss / 精度 / 调度 / 数据 / 验证", src: "K1" },
-    { sub: "2 套教材 · 4 个生产框架 · arXiv · 知乎 · 飞书 · Notion", src: "K1" },
-    { sub: "lr 1e-5 · warmup 0.03 · wd 0 · clip 1.0 · epochs 2，与 tulu3/OpenRLHF 逐项吻合", src: "K4" },
-  ];
-
-  const phases = rail.phases || [];
-  const stats = rail.stats || [];
-  const readout = rail.readout || { label: "对照来源", value: "—", sub: "" };
-
-  const state = {
-    win: "STAGE 1 · SFT",
-    title: (window.RPT.meta && window.RPT.meta.title) || "SFT 训练器",
-    phase: clamp(rail.current ?? 0, 0, phases.length - 1 || 0),
-    phaseT: 0,   // 动画用的浮点相位
-    t: 0,
-  };
-  state.phaseT = state.phase;
-
-  const hits = [];   // 每帧重建的可点击区域 {x,y,w,h,drill}
-  let size = fit();
-
-  // ── 纸底 halo 文字（canvas 文字一律先纸底描边再填色；描边宽度随字号，避免吃掉小字衬线）──
-  function text(str, x, y, font, color, align = "left", spacing = 0) {
-    ctx.font = font;
-    ctx.textAlign = align;
-    ctx.textBaseline = "alphabetic";
-    try { ctx.letterSpacing = spacing ? spacing + "px" : "0px"; } catch (e) { /* 旧内核忽略 */ }
-    const px = parseFloat(font.match(/(\d+(?:\.\d+)?)px/) || [0, 12])[1];
-    ctx.save();
-    ctx.strokeStyle = PAL.paper;
-    ctx.lineWidth = clamp(px * 0.1, 1.5, 4);
-    ctx.lineJoin = "round";
-    ctx.strokeText(str, x, y);
-    ctx.restore();
-    ctx.fillStyle = color;
-    ctx.fillText(str, x, y);
-    try { ctx.letterSpacing = "0px"; } catch (e) { /* noop */ }
-  }
-
-  const PAD = 30;
-
-  function render(s) {
-    const w = s.w, h = s.h;
-    ctx.clearRect(0, 0, w, h);
-    hits.length = 0;
-    const W = w - PAD * 2;
-    const pulse = RM ? 0.55 : 0.5 + 0.5 * Math.sin(state.t * 2.4);
-
-    // ── 顶部：窗口徽章 + 标题 ──
-    const badgeY = 46;
-    ctx.fillStyle = PAL.red;
-    ctx.fillRect(PAD, badgeY - 9, 9, 9);
-    const phNo = String(Math.round(state.phase) + 1).padStart(2, "0");
-    text(`${state.win} · PHASE ${phNo}/0${phases.length || 7}`, PAD + 17, badgeY, MONO(700, 10), PAL.inkMd, "left", 1.2);
-    text(state.title, PAD, badgeY + 33, SERIF(700, 22), PAL.ink);
-
-    // ── 七段相位条 ──
-    const n = phases.length || 1;
-    const gap = 6;
-    const segW = (W - gap * (n - 1)) / n;
-    const barY = badgeY + 66;
-    const segH = 5;
-    const segX = i => PAD + i * (segW + gap);
-
-    for (let i = 0; i < n; i++) {
-      ctx.fillStyle = PAL.lineLo;
-      ctx.fillRect(segX(i), barY, segW, segH);
-    }
-
-    const ph = clamp(state.phaseT, 0, n - 1);
-    const a = Math.floor(ph), b = Math.min(a + 1, n - 1), f = ph - a;
-    const ax = lerp(segX(a), segX(b), f);
-    // 脉冲光晕（reduced-motion 下为静态常亮）
-    ctx.save();
-    ctx.globalAlpha = 0.10 + 0.16 * pulse;
-    ctx.fillStyle = PAL.red;
-    ctx.fillRect(ax - 3, barY - 3, segW + 6, segH + 6);
-    ctx.restore();
-    ctx.fillStyle = PAL.red;
-    ctx.fillRect(ax, barY, segW, segH);
-    // 顶部游标小块
-    ctx.fillRect(ax + segW / 2 - 3.5, barY - 13, 7, 7);
-
-    for (let i = 0; i < n; i++) {
-      const cx = segX(i) + segW / 2;
-      const on = i === Math.round(ph);
-      text(String(phases[i]).toUpperCase(), cx, barY + 21, MONO(on ? 700 : 400, 8.5), on ? PAL.ink : PAL.inkLo, "center", 0.8);
-      const fact = PHASE_FACTS[i];
-      if (fact) {
-        hits.push({
-          x: segX(i) - 2, y: barY - 16, w: segW + 4, h: 44,
-          drill: {
-            title: `相位 · ${phases[i]}`,
-            value: `0${i + 1} / 0${n}`,
-            sub: fact.sub,
-            source: SRC(fact.src),
-          },
-        });
-      }
-    }
-
-    // ── 中部：读数牌（超大衬线数字 + 标签）──
-    const hintY = h - 40;
-    const gridH = 2 * 62 + 14;
-    const gridTop = hintY - 22 - gridH;
-    let vSize = 88;
-    let vy = barY + 66 + vSize + 14;
-    const vyMax = gridTop - 42;
-    if (vy < vyMax - 60) vy = (vy + vyMax) / 2; // 空间充足时读数牌在相位条与统计栅格之间居中
-    vy = Math.min(vy, vyMax);                    // 矮视口压缩
-    const ly = vy - vSize - 12;
-    const cxm = w / 2;
-
-    text(`READOUT · ${readout.label}`.toUpperCase(), cxm, ly, MONO(700, 10), PAL.inkLo, "center", 2);
-    text(String(readout.value), cxm, vy, SERIF(700, vSize), PAL.ink, "center");
-    ctx.fillStyle = PAL.red;
-    ctx.fillRect(cxm - 18, vy + 10, 36, 2);
-    if (readout.sub) text(readout.sub, cxm, vy + 32, SERIF(400, 13), PAL.inkMd, "center");
-    hits.push({
-      x: PAD, y: ly - 16, w: W, h: vy + 56 - ly,
-      drill: {
-        title: `READOUT · ${readout.label}`,
-        value: String(readout.value),
-        sub: `${readout.sub || ""}；全部出处见文末锚点登记`.replace(/^；/, ""),
-        source: SRC("K5"),
-      },
-    });
-
-    // ── 四块统计 2×2 ──
-    ctx.fillStyle = PAL.line;
-    ctx.fillRect(PAD, gridTop, W, 1);
-    const colW = W / 2;
-    stats.slice(0, 4).forEach((st, i) => {
-      const gx = PAD + (i % 2) * colW;
-      const gy = gridTop + 12 + Math.floor(i / 2) * (62 + 14);
-      text(String(st.k).toUpperCase(), gx, gy + 12, MONO(700, 9.5), PAL.inkLo, "left", 1.2);
-      text(String(st.v), gx, gy + 44, MONO(700, 25), PAL.ink, "left");
-      const d = STAT_DRILL[i];
-      if (d) {
-        hits.push({
-          x: gx - 4, y: gy - 6, w: colW - 10, h: 58,
-          drill: { title: `统计 · ${st.k}`, value: String(st.v), sub: d.sub, source: SRC(d.src) },
-        });
-      }
-    });
-
-    // ── 底部：锚点提示 ──
-    text("锚点 K1–K10 已登记 · 点击任意数字下钻", cxm, hintY, MONO(400, 9.5), PAL.inkLo, "center", 0.8);
-    hits.push({
-      x: PAD, y: hintY - 16, w: W, h: 26,
-      drill: {
-        title: "锚点登记",
-        value: "K1–K10",
-        sub: "每个数字的出处全部带日期；登记全表见文末 Sources & method",
-        source: SRC("K1"),
-      },
-    });
-  }
-
-  // ── 交互：点击下钻 + 悬浮指针 ──
-  canvas.addEventListener("click", e => {
-    const r = canvas.getBoundingClientRect();
-    const x = e.clientX - r.left, y = e.clientY - r.top;
-    const hit = hits.find(hh => x >= hh.x && x <= hh.x + hh.w && y >= hh.y && y <= hh.y + hh.h);
-    if (hit) U.showDrill({ ...hit.drill, x: e.clientX, y: e.clientY });
-  });
-  canvas.addEventListener("mousemove", e => {
-    const r = canvas.getBoundingClientRect();
-    const x = e.clientX - r.left, y = e.clientY - r.top;
-    const over = hits.some(hh => x >= hh.x && x <= hh.x + hh.w && y >= hh.y && y <= hh.y + hh.h);
-    canvas.style.cursor = over ? "pointer" : "crosshair";
-  });
-
-  // ── rpt:section 广播：切窗口 + 切相位（首次进入章节时 rail 滑入）──
-  window.addEventListener("rpt:section", e => {
-    const d = e.detail || {};
-    host.classList.add("on");
-    state.win = String(d.win || d.id || "STAGE 1").toUpperCase();
-    const wmap = WINDOWS[d.id];
-    if (wmap) {
-      state.title = wmap.t;
-      state.phase = clamp(wmap.ph, 0, phases.length - 1 || 0);
-    }
-    if (RM) { state.phaseT = state.phase; render(size); }
-  });
-
-  // ── resize + 字体就绪重绘 ──
-  window.addEventListener("resize", () => {
-    size = fit();
-    if (RM) render(size);
-  });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render(size));
-
-  // ── 渲染循环：reduced-motion 直接静态完成帧，无脉冲 ──
-  if (RM) {
-    render(size);
-  } else {
-    let last = performance.now();
-    const tick = now => {
-      const dt = Math.min((now - last) / 1000, 0.05);
-      last = now;
-      state.t += dt;
-      state.phaseT = ease(state.phaseT, state.phase, dt, 0.45);
-      if (Math.abs(state.phaseT - state.phase) < 0.001) state.phaseT = state.phase;
-      render(size);
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }
-})();
-
-</script>
-<script>
-// 全站引擎：chips 跳转 · 章节入场 · data-win 广播（右栏仪表盘监听）
+// 全站引擎：chips 跳转 · 章节入场
 (() => {
   // chips 平滑跳转
   document.querySelectorAll(".chip[data-goto]").forEach(b => {
@@ -4492,17 +4203,6 @@ window.U = (() => {
   document.querySelectorAll(".band, footer .prose, footer .wide").forEach(el => {
     el.classList.add("rpt-reveal"); io.observe(el);
   });
-
-  // data-win 广播：右栏随章节切换
-  const sections = [...document.querySelectorAll("[data-win]")];
-  if (sections.length) {
-    const winIO = new IntersectionObserver(es => es.forEach(e => {
-      if (e.isIntersecting) {
-        window.dispatchEvent(new CustomEvent("rpt:section", { detail: { win: e.target.dataset.win, id: e.target.id } }));
-      }
-    }), { rootMargin: "-40% 0px -55% 0px", threshold: 0 });
-    sections.forEach(s => winIO.observe(s));
-  }
 })();
 
 </script>
