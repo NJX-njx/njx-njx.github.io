@@ -12,7 +12,7 @@ summary: "TRL 的 SFTTrainer 一行就能训，为什么还有人手写 SFT 循�
 
 ## 为什么手写一个只有 511 行的训练器
 
-我在搭一个随学习路径逐阶段生长的后训练仓库 [forge](https://github.com/NJX-njx)（Stage 1：SFT），原则只有一条：成熟的工程件直接拿来用，训练-数据核心链路每一行都自己写、能讲清为什么。
+我在搭一个随学习路径逐阶段生长的后训练仓库 forge（Stage 1：SFT，本地，尚未开源推送），原则只有一条：成熟的工程件直接拿来用，训练-数据核心链路每一行都自己写、能讲清为什么。
 
 写 SFT 有三条路线。 hands-on-modern-rl 课程的 [`sft_pipeline.py`](https://github.com/walkinglabs/hands-on-modern-rl) 是 TRL `SFTTrainer` 一行调用，训练循环、loss、padding 全在库内；Nathan Lambert《RLHF Book》的 [`instruction_tuning`](https://github.com/natolambert/rlhf-book) 是手写循环；生产框架（alignment-handbook、open-instruct、OpenRLHF）则在 Trainer 之上叠 packing、flash-attention、去污染一整套。
 
