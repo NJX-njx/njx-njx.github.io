@@ -635,6 +635,7 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
       <button class="chip" data-goto="#sec-mech">序列级机制</button>
       <button class="chip" data-goto="#sec-grad">梯度视角</button>
       <button class="chip" data-goto="#sec-evidence">实验证据</button>
+      <button class="chip" data-goto="#sec-eps">ε 的选取</button>
       <button class="chip" data-goto="#sec-caveat">三个保留意见</button>
       <button class="chip" data-goto="#sec-clip">与 Clip-Higher 的关系</button>
     </div>
@@ -736,7 +737,7 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
         <h3 class="t-abbr">ε</h3>
         <p class="t-full">裁剪带 · 3e-4 / 4e-4</p>
         <p class="t-gist">比 token 级窄三个数量级，且左右不对称。</p>
-        <div class="t-more"><p>GRPO 用 0.2/0.27（精心调过的 token 级边界），GSPO 用 3e-4/4e-4。几何平均把涨落压小，s_i 天然贴 1，裁剪带必须窄才有意义。换算：3e-4 对应平均每 token 约 0.03% 的对数漂移<button class="src" data-k="K8">◆</button>。右界比左界宽 33%——这个不对称是 §6 的主角。</p></div>
+        <div class="t-more"><p>GRPO 用 0.2/0.27（精心调过的 token 级边界），GSPO 用 3e-4/4e-4。几何平均把涨落压小，s_i 天然贴 1，裁剪带必须窄才有意义。换算：3e-4 对应平均每 token 约 0.03% 的对数漂移<button class="src" data-k="K8">◆</button>。右界比左界宽 33%——这个不对称是 §7 的主角；ε 本身的选取逻辑是 §5 的主角（K19）。</p></div>
         <p class="t-hint">Hover 看完整定义</p>
       </article>
     </div>
@@ -769,8 +770,8 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
     <p class="dek">实验设置本身就值得注意：冷启动模型，每个 rollout batch 切成 4 个 mini-batch 做梯度更新——标准的 off-policy 场景，正是「clip 真正开始工作」的场景。</p>
     <p>设置细节：Qwen3-30B-A3B-Base 经 SFT 冷启动；每个 rollout batch 切 <b>4 个</b> mini-batch，策略在批内多次更新，比率才会偏离 1<button class="src" data-k="K7">◆</button>。GRPO 基线的裁剪范围 0.2/0.27 是精心调过的，GSPO 用 3e-4/4e-4。</p>
     <ul class="laws">
-      <li><b>事实一 · ε 差三个数量级，不是笔误。</b>token 级比率单个就能冲到 1.2，序列级几何平均把逐 token 涨落平均掉，s_i 天然贴着 1 小幅波动，裁剪带必须窄才有意义。3e-4 的容忍带对应平均每 token 约 <b>0.03%</b> 的对数漂移；反过来读——逐 token 各自漂移 20% 是家常便饭，几何平均后只剩万分之三，方差缩减的数量级就是这么来的<button class="src" data-k="K8">◆</button>。</li>
-      <li><b>事实二 · 被裁的 token 多一百倍，效率反而更高。</b>GSPO 被裁剪的 token 比例比 GRPO 高约<b>两个数量级</b>（调 ε 改变不了这个量级差），用于训练的 token 更少，训练效率和 benchmark 却更好——AIME'24 / LiveCodeBench / CodeForces 三条曲线都赢<button class="src" data-k="K9">◆</button>。论文的解读：GRPO 的 token 级梯度估计本来就噪声大，被随机保留下来的那部分并不比被裁掉的部分更有用；GSPO 的序列级筛选提供了更可靠的学习信号。</li>
+      <li><b>事实一 · ε 差三个数量级，不是笔误，是平均的必然。</b>token 级比率单个就能冲到 1.2；序列级比率是逐 token 对数比率的平均再取 exp，平均会把正负涨落抵消掉，s_i 天然贴着 1 小幅波动。这笔账可以算细（<b>以下为推算，论文没有报告这些统计量</b><button class="src" data-k="K17">◆</button>）：设一次 mini-batch 更新后，平均每个 token 的对数比率漂移标准差为 σ（比如 5%），回答长 L，各 token 漂移近似独立，则平均后的漂移标准差缩到 <b>σ/√L</b>——L=2000 时约为 <b>1/45</b>。给这样一个几乎不动的比率配 ±0.2 的带，它永远也碰不到边，裁剪等于不存在，所以 GSPO 必须收到万分之几：<b>0.2 / 3e-4 ≈ 667</b>，三个数量级的收窄就是这么来的。换个说法：3e-4 的容忍带对应平均每 token 只允许约 0.03% 的对数漂移<button class="src" data-k="K8">◆</button>。假设的成色也要交代：实际训练中各 token 的漂移并不独立（一次更新会成片地抬高或压低相似上下文的概率），真实缩小倍数到不了 √L——但这只会让事实二的结论更强。</li>
+      <li><b>事实二 · 被裁的 token 多一百倍，效率反而更高。</b>带窄了一千倍，被裁的反而多一百倍——听起来矛盾，两笔账乘起来就不矛盾（推算同上<button class="src" data-k="K18">◆</button>）。第一笔：<b>相对各自的波动幅度，带反而更窄了</b>。波动只缩约 45 倍，带缩了 667 倍，拿各自的波动当尺子量，GSPO 的带比 GRPO 窄约 <b>15 倍</b>（√L/667），s_i 出界比 w_t 出界容易得多。代入具体数（σ=5%、漂移近似高斯）：GRPO 的 0.2 相当于 4σ，单个 token 出界概率为万分之几；GSPO 的 3e-4 只相当于约 <b>0.27σ</b>（0.0003/(0.05/45)），每条 response 有过半概率整条出局。第二笔：<b>出界按整条算账</b>。GRPO 一个 token 出界只废它自己；GSPO 出界一次，整段几千 token 全部被剔除。两个因素相乘，被裁 token 总数就是 GRPO 的约一百倍——论文图 2 实测的裁剪比例差正好是约两个数量级，量级对得上<button class="src" data-k="K9">◆</button>。真正反直觉的是后半句：用于训练的 token 更少，训练效率和 benchmark 却更好（AIME'24 / LiveCodeBench / CodeForces 三条曲线都赢）。论文的解读：GRPO 的 token 级梯度估计本来就噪声大，被随机保留下来的那部分并不比被裁掉的部分更有用；GSPO 的序列级筛选提供了更可靠的学习信号。</li>
       <li><b>事实三 · MoE 不再需要 Routing Replay。</b>序列似然 π_θ(y_i|x) 对路由抖动不敏感——10% 的专家换了，单个 token 的概率可能明显变化，但整条序列的似然不会剧变。GSPO 只关心后者，直接正常算比率就能收敛，补丁的显存、通信开销全省了，模型也不再被旧路由束缚<button class="src" data-k="K10">◆</button>。</li>
     </ul>
   </div>
@@ -787,10 +788,24 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
   </div>
 </section>
 
-<!-- ═══ §5 三个保留意见 ═══ -->
+<!-- ═══ §5 附：裁剪范围是怎么定的（2026-08-29 新增） ═══ -->
+<section id="sec-eps" class="band">
+  <div class="prose">
+    <p class="sec-no">§5 · 附：裁剪范围 3e-4/4e-4 是怎么定的</p>
+    <h2>论文没说，外界只能推断——而且不能照搬</h2>
+    <p class="dek">论文层面：没说。GSPO 论文只给了结果（左界 3e-4、右界 4e-4），没有选取过程，没有针对裁剪范围的消融。为什么是这个数而不是 1e-4 或 1e-3，外界无从得知；合理的猜测是作者在自家配置（Qwen3-30B-A3B 冷启动、每 batch 分 4 个 mini-batch）上试出来的，但这只是猜测。</p>
+    <p>原则层面（<b>以下为推断，不是论文内容</b><button class="src" data-k="K19">◆</button>）：裁剪范围的工作是放过正常波动、拦住异常波动，所以它应当定在 s_i 日常波动幅度的一个小倍数上：</p>
+    <p class="formula">ε ≈ k · σ / √L</p>
+    <p>其中 σ 是一次更新后逐 token 对数比率的漂移幅度，L 是回答长度，k 是想放过的波动倍数。把 §4 的演示数（σ=5%、L=2000）代入，σ/√L ≈ 0.0011，论文的 3e-4 相当于 <b>k ≈ 0.27</b>——只放过约四分之一的日常波动，是很严的筛选，与实测「裁掉百分之几十 token」互相印证。</p>
+    <p>这个框架同时说明 3e-4 <b>不能照搬</b>，它和三件事耦合：<b>off-policy 程度</b>（数据越陈旧 σ 越大，ε 要相应放宽，否则样本全被裁光）；<b>回答长度</b>（L 越长平均后波动越小，同样的 ε 越严，32k 与 2k 的合适取值差约 4 倍）；<b>想要的裁剪力度</b>（最优裁剪比例没有公开数据，复现只能自己扫参）。换一套配置，这个数就要重新定。</p>
+  </div>
+  <div class="wide xl"><div id="eps-chart" class="chart-frame"></div></div>
+</section>
+
+<!-- ═══ §6 三个保留意见 ═══ -->
 <section id="sec-caveat" class="band">
   <div class="prose">
-    <p class="sec-no">§5 · 三个保留意见</p>
+    <p class="sec-no">§6 · 三个保留意见</p>
     <h2>论文没点破的前提与代价</h2>
     <p class="dek">GSPO 的改进不宜理解为「恢复了重要性采样的理论正确性」——它没有。它真正做的是三件工程论证的合流，扎实，但不是定理。</p>
     <ul class="laws">
@@ -803,10 +818,10 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
   <div class="wide xl"><div id="dilution-chart" class="chart-frame"></div></div>
 </section>
 
-<!-- ═══ §6 与 Clip-Higher 的关系 ═══ -->
+<!-- ═══ §7 与 Clip-Higher 的关系 ═══ -->
 <section id="sec-clip" class="band">
   <div class="prose">
-    <p class="sec-no">§6 · 与 Clip-Higher 的关系</p>
+    <p class="sec-no">§7 · 与 Clip-Higher 的关系</p>
     <h2>同一病灶，同方向的药——还有一个没人点破的细节</h2>
     <p class="dek">病灶同为 off-policy 下 token 级 clip 的结构性缺陷：DAPO 的解法是调边界，GSPO 的解法是换单位。两者不互斥。</p>
     <p>上一篇写 DAPO 的 Clip-Higher（<a href="/reports/dapo-clip-higher-entropy-collapse/">交互研报</a> / <a href="/posts/dapo-clip-higher-entropy-collapse/">博客正文</a>）：上界 0.2 抬到 0.28，放探索 token 一马。GSPO 则是整个 response 共用一个比率。两者不互斥——Qwen 的实践就是 GSPO 叠加 Dr.GRPO 式的去归一化偏差修正。</p>
@@ -815,13 +830,13 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
   <div class="wide"><div id="asym-chart" class="chart-frame"></div></div>
 </section>
 
-<!-- ═══ §7 未决问题 ═══ -->
+<!-- ═══ §8 未决问题 ═══ -->
 <section id="sec-open" class="band">
   <div class="prose">
-    <p class="sec-no">§7 · 未决问题</p>
+    <p class="sec-no">§8 · 未决问题</p>
     <h2>三个还没有答案的问题</h2>
     <ul class="laws">
-      <li><b>① 极窄 ε 与不对称边界叠加的最优范围。</b>GSPO 的 3e-4 量级 ε 与 clip-higher 式不对称边界叠加时，最优范围在哪，目前没有公开消融。</li>
+      <li><b>① ε 的选取方法本身没有公开。</b>3e-4/4e-4 只有结果没有消融，ε ≈ k·σ/√L 只是本文的推断框架（§5）；k 的最优区间、与 clip-higher 式不对称边界叠加的效果，都需要公开复现<button class="src" data-k="K19">◆</button>。</li>
       <li><b>② 稀释效应在超长 CoT 上是否系统性失明。</b>几何平均的稀释效应在 32k token 以上的超长 CoT 上是否会系统性放过「局部剧变」，需要构造性实验验证。</li>
       <li><b>③ GSPO-token 在多轮 agentic RL 里的实际效果。</b>与 turn 级奖励配合的表现如何，目前只有 Qwen 内部数据。</li>
     </ul>
@@ -837,17 +852,18 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
       <p><b>证据分级。</b>论文一手（GSPO arXiv:2507.18071v2）&gt; 书/教材一手（RLHF Book 第 6 章）&gt; 二手/本地教材（hands-on-modern-rl，已回对论文原文）&gt; 推算与作者判断 [derived，图内单独标注]。</p>
       <p><b>来源分类，每条带出处。</b><span class="src-cat company">论文一手</span><span class="src-cat industry">书/教材一手</span><span class="src-cat broker">二手/本地教材</span><span class="src-cat kimi">推算/作者判断</span></p>
       <p><b>口径纪律。</b>ε、专家漂移、clip 比例、benchmark 等数字均出自 GSPO 论文 v2 版；蒙特卡洛与几何平均演示图由可复现的伪随机数实时计算，图内标注「演示实验」；benchmark 曲线方向为定性示意，非原始数据。prose 忠实转写博客正文，对冲措辞（「这是批评角度不是公理」「作者判断」）原样保留。</p>
+      <p><b>更新记录（2026-08-29）。</b>据博客问答回流同步：§4 事实一/事实二补入裁剪带算术的完整推导（σ/√L 方差缩减、667 倍收窄、相对带窄约 15 倍、出界概率演算）；新增 §5「附：裁剪范围 3e-4/4e-4 是怎么定的」（论文未披露选取方法，推断框架 ε ≈ k·σ/√L 与三个耦合）；§8 未决问题第一条随之改写；新增 K17–K19 三个推算锚点。所有推演均标注推算口径，与论文事实分列。</p>
     </div>
   </div>
   <div class="wide xl">
     <div style="margin-top:26px">
-      <p class="chart-title">锚点登记表 · K1–K16</p>
-      <p class="chart-sub">本报告依赖的每一个关键数字及其出处 · 点击任意行下钻</p>
+      <p class="chart-title">锚点登记表 · K1–K19</p>
+      <p class="chart-sub">本报告依赖的每一个关键数字及其出处 · 点击任意行下钻 · K17–K19 为 2026-08-29 新增推算</p>
     </div>
     <div id="source-list"></div>
   </div>
   <div class="prose">
-    <p class="colophon">交互研报版 · 编译于 2026-08-26 · 配套博客正文：<a href="/posts/gspo-sequence-level-importance-sampling/">/posts/gspo-sequence-level-importance-sampling/</a><br>线上地址：<a href="https://njx-njx.github.io/posts/gspo-sequence-level-importance-sampling/">https://njx-njx.github.io/posts/gspo-sequence-level-importance-sampling/</a><br>论文引用：Group Sequence Policy Optimization · <a href="https://arxiv.org/abs/2507.18071">arXiv:2507.18071v2</a>（2025-07）<br>单文件自包含 · CSS / JS / 字体全内联 · 无外部依赖 · 同系列：<a href="/reports/dapo-clip-higher-entropy-collapse/">DAPO Clip-Higher 交互研报</a></p>
+    <p class="colophon">交互研报版 · 编译于 2026-08-26 · 更新于 2026-08-29（证据区推导扩写 + 新增 §5 ε 选取）· 配套博客正文：<a href="/posts/gspo-sequence-level-importance-sampling/">/posts/gspo-sequence-level-importance-sampling/</a><br>线上地址：<a href="https://njx-njx.github.io/posts/gspo-sequence-level-importance-sampling/">https://njx-njx.github.io/posts/gspo-sequence-level-importance-sampling/</a><br>论文引用：Group Sequence Policy Optimization · <a href="https://arxiv.org/abs/2507.18071">arXiv:2507.18071v2</a>（2025-07）<br>单文件自包含 · CSS / JS / 字体全内联 · 无外部依赖 · 同系列：<a href="/reports/dapo-clip-higher-entropy-collapse/">DAPO Clip-Higher 交互研报</a></p>
   </div>
 </footer>
 
@@ -876,6 +892,30 @@ window.RPT = {
   dilution: { drift: 1.5, seqlen: 10000, result: 1.00004 },
   // 基建红利（论文 §5.4）：序列级似然容忍训推精度差，省训练引擎重算
   infra: { trainEngine: "Megatron", inferEngines: "SGLang / vLLM" },
+  // ε 推算链条（2026-08-29 新增 §附 的主模块；derived=true 的节点全程标注推算口径）
+  epsChain: {
+    sigma: 0.05, len: 2000, sd: 0.05 / Math.sqrt(2000),   // ≈1.1e-3 ≈ 1/45
+    nodes: [
+      { v: "σ/√L ≈ 1.1e-3", cap: "平均后漂移标准差", kid: "K17",
+        sub: "σ=5%、L=2000、各 token 漂移近似独立：平均后标准差缩到 σ/√L ≈ 1/45。i.i.d. 假设有水分——漂移成片相关，真实缩小到不了 √L，但下游结论只会更强。" },
+      { v: "×667", cap: "0.2 / 3e-4 收窄倍数", kid: "K17",
+        sub: "给几乎不动的 s_i 配 ±0.2 的带，裁剪等于不存在；所以收到万分之几：0.2 / 3e-4 ≈ 667，三个数量级就是这么来的。" },
+      { v: "≈15×", cap: "√L/667：相对波动反而更窄", kid: "K18",
+        sub: "第一笔账：波动只缩约 45 倍，带缩 667 倍；拿各自波动当尺子，GSPO 的带比 GRPO 窄约 15 倍（45/667），s_i 出界容易得多。" },
+      { v: "0.27σ", cap: "3e-4 折算成波动倍数", kid: "K18",
+        sub: "0.0003 / (0.05/45) ≈ 0.27σ：σ=5% 高斯假设下 GRPO 的 0.2 是 4σ（单 token 出界万分之几），GSPO 的 3e-4 是 0.27σ（每条 response 过半概率整条出局）。" },
+      { v: "≈100×", cap: "× 整条算账 = 总裁剪量", kid: "K18",
+        sub: "第二笔账：GRPO 一个 token 出界只废自己，GSPO 出界一次废整条几千 token。两笔账相乘 ≈ 一百倍——与论文图 2 实测约两个数量级对上（实测见 K9）。" },
+    ],
+    frame: [
+      { v: "ε ≈ k·σ/√L", cap: "推断框架：带 = 日常波动的小倍数", kid: "K19",
+        sub: "裁剪范围的工作是放过正常波动、拦住异常波动，所以定在 s_i 日常波动幅度的一个小倍数上。论文未披露选取过程，本框架为推断。" },
+      { v: "k ≈ 0.27", cap: "3e-4 相当于只放过 1/4 日常波动", kid: "K19",
+        sub: "σ/√L ≈ 0.0011，论文的 3e-4 / 0.0011 ≈ 0.27——很严的筛选，与实测「裁掉百分之几十 token」互相印证。" },
+      { v: "3 个耦合", cap: "off-policy 程度 / 长度 L / 裁剪力度", kid: "K19",
+        sub: "3e-4 不能照搬：数据越陈旧 σ 越大带要放宽；L 越长波动越小同样的 ε 越严（32k vs 2k 差约 4 倍）；最优裁剪力度没有公开数据只能自己扫参。" },
+    ],
+  },
   // 关键数字仪表盘（§0 metric strip；v 显示值，k 口径，drill 下钻）
   metrics: [
     { v: "3e-4 / 4e-4", k: "GSPO 序列级裁剪界 ε_low / ε_high", kid: "K7" },
@@ -1096,6 +1136,15 @@ window.RPT_SOURCES = [
   { id: "K16", cat: "derived",
     fact: "「单样本批评同样适用于 GSPO 自己」：s_i 也从单条样本算出、同样没有 N≫1 的平均；GSPO 的真正贡献是三件事的合流——单位对齐、方差归一（1/|y|）、等权梯度——是扎实的工程论证，不是定理",
     cite: "博客正文 §保留意见一（作者判断，2026-08-26）" },
+  { id: "K17", cat: "derived",
+    fact: "方差缩减算术（2026-08-29 扩写）：设一次 mini-batch 更新后平均每 token 对数比率漂移标准差 σ（如 5%），回答长 L，各 token 漂移近似独立，则平均后漂移标准差缩到 σ/√L——L=2000 时约 1/45（≈1.1e-3）；0.2/3e-4 ≈ 667 倍收窄由此而来。假设成色：实际漂移成片相关，真实缩小倍数到不了 √L——但这只会让 K18 的结论更强",
+    cite: "博客正文 §证据·事实一推算补写（2026-08-29）；论文未报告这些统计量" },
+  { id: "K18", cat: "derived",
+    fact: "出界概率演算（2026-08-29 扩写）：波动缩约 45 倍、带缩 667 倍 → 相对各自波动，GSPO 的带窄约 15 倍（√L/667）；σ=5% 高斯假设下 GRPO 的 0.2 ≈ 4σ（单 token 出界概率万分之几），GSPO 的 3e-4 ≈ 0.27σ（每条 response 过半概率整条出局）；× 出界按整条算账 ≈ 总裁剪量一百倍，与论文图 2 实测约两个数量级对上",
+    cite: "博客正文 §证据·事实二推算补写（2026-08-29）；约两个数量级差本身为论文实测（K9）" },
+  { id: "K19", cat: "derived",
+    fact: "ε 选取框架（新增一节）：论文只给 3e-4/4e-4 的结果，没有选取过程、没有消融。推断框架 ε ≈ k·σ/√L：代入 σ=5%、L=2000 得 σ/√L≈0.0011，3e-4 相当于 k≈0.27——只放过约四分之一的日常波动，与实测「裁掉百分之几十 token」互证。三个耦合：off-policy 程度（σ 越大带要越宽）、回答长度（32k 与 2k 的合适取值差约 4 倍）、想要的裁剪力度——换配置就要重新定",
+    cite: "博客正文 §附：裁剪范围是怎么定的（2026-08-29）；框架为推断，非论文内容" },
 ];
 
 </script>
@@ -1534,8 +1583,8 @@ function factOf(kid) {
   const gapLab = txt(arrow, (xOf(1.2e-3) + xOf(0.09)) / 2, 52, "≈ 三个数量级（0.2 / 3e-4 ≈ ×667）", { size: 10.5, fill: INK, bold: true, anchor: "middle" });
   drillOn(gapLab, {
     title: "ε 的三个数量级差", value: "×667",
-    sub: "GRPO token 级 0.2/0.27 对 GSPO 序列级 3e-4/4e-4。几何平均把逐 token 涨落平均掉，s_i 天然贴 1 小幅波动，裁剪带必须窄才有意义；3e-4 对应平均每 token 约 0.03% 对数漂移。",
-    source: srcOf("K8"),
+    sub: "GRPO token 级 0.2/0.27 对 GSPO 序列级 3e-4/4e-4。完整推导（推算）：平均后漂移标准差缩到 σ/√L（L=2000 约 1/45），给几乎不动的比率配 ±0.2 裁剪等于不存在，所以收到万分之几——0.2/3e-4 ≈ 667。i.i.d. 假设成色与后续出界概率演算见 §4 事实一/事实二（K17/K18）。",
+    source: srcOf("K17"),
   });
 
   // 车道标签
@@ -2005,7 +2054,7 @@ function factOf(kid) {
   onVisible(host, () => fadeIn(gBars));
 })();
 
-/* ═══ §5 · 稀释计算器：一处剧变，平均后还剩多少 ═══ */
+/* ═══ §6 · 稀释计算器：一处剧变，平均后还剩多少 ═══ */
 (() => {
   const host = document.getElementById("dilution-chart");
   if (!host) return;
@@ -2076,7 +2125,7 @@ function factOf(kid) {
   render();
 })();
 
-/* ═══ §6 · 不对称窗：3e-4/4e-4 = 序列级 Clip-Higher ═══ */
+/* ═══ §7 · 不对称窗：3e-4/4e-4 = 序列级 Clip-Higher ═══ */
 (() => {
   const host = document.getElementById("asym-chart");
   if (!host) return;
@@ -2119,6 +2168,66 @@ function factOf(kid) {
   const dObj = { title: "不对称边界观察", value: "3e-4 / 4e-4", sub: factOf("K14"), source: srcOf("K14") };
   [dL, dR, cmp, rd].forEach(n => drillOn(n, dObj));
   onVisible(host, () => fadeIn(svg));
+})();
+
+/* ═══ §5 · ε 推算链条：σ/√L → ×667 → 15× → 0.27σ → ≈100×，再接 ε ≈ k·σ/√L 框架 ═══ */
+(() => {
+  const host = document.getElementById("eps-chart");
+  if (!host) return;
+  const body = U.frame(host, {
+    title: "ε 选取逻辑推算链：每一步都能算，每一步都是推算",
+    sub: "上排：方差缩减→收窄→相对带窄→出界概率→总裁剪量（K17/K18） · 下排：ε ≈ k·σ/√L 推断框架与三个耦合（K19） · 虚线牌=推算，蓝实线牌=论文实测锚点（K9） · 点击牌面下钻",
+    src: "推算 — 博客 2026-08-29 扩写（K17–K19）；实测锚点 GSPO arXiv:2507.18071v2 图 2（K9）",
+  });
+  const W = 880, H = 306;
+  const svg = svgRoot(body, W, H);
+  const CH = (window.RPT.epsChain || { nodes: [], frame: [] });
+  const gAll = el("g", {}, svg);
+
+  // 口径水印（与悖论图同款纪律）
+  el("rect", { x: W - 232, y: 8, width: 224, height: 18, fill: "none", stroke: NEG, "stroke-dasharray": "4 3", "stroke-width": 1 }, gAll);
+  txt(gAll, W - 226, 21, "全链条为推算 · 非论文原文（K17–K19）", { size: 8.5, fill: NEG, bold: true });
+
+  function plate(x, y, w, h, n, fact) {
+    const g = el("g", {}, gAll);
+    const r = el("rect", {
+      x, y, width: w, height: h, rx: 6, fill: PAPER,
+      stroke: fact ? BLUE : INK_M, "stroke-width": fact ? 1.6 : 1.2,
+      "stroke-dasharray": fact ? "none" : "5 3",
+    }, g);
+    txt(g, x + 10, y + 14, fact ? "实测锚点" : "推算", { size: 7.5, fill: fact ? BLUE : INK_L, bold: true });
+    txt(g, x + w / 2, y + 32, n.v, { size: 13.5, fill: fact ? BLUE : INK, bold: true, anchor: "middle" });
+    txt(g, x + w / 2, y + 47, n.cap, { size: 8, fill: INK_L, anchor: "middle" });
+    drillOn(r, { title: `推算链 · ${n.cap}`, value: n.v, sub: n.sub, source: srcOf(n.kid) });
+    drillOn(g, { title: `推算链 · ${n.cap}`, value: n.v, sub: n.sub, source: srcOf(n.kid) });
+    return g;
+  }
+  function arrow(x0, x1, y) {
+    el("line", { x1: x0, y1: y, x2: x1 - 5, y2: y, stroke: INK_L, "stroke-width": 1 }, gAll);
+    el("path", { d: `M ${x1 - 5} ${y} l -6 -3.5 l 0 7 Z`, fill: INK_L }, gAll);
+  }
+
+  // 上排：五步推导链（σ/√L → ×667 → 15× → 0.27σ → ≈100×）
+  txt(gAll, 30, 46, "推导链 · 事实一/事实二的完整算术（2026-08-29 扩写）", { size: 10, fill: INK, bold: true });
+  const pW = 142, pH = 58, gap = 30, yA = 58;
+  CH.nodes.forEach((n, i) => {
+    const x = 30 + i * (pW + gap);
+    plate(x, yA, pW, pH, n, i === CH.nodes.length - 1);
+    if (i < CH.nodes.length - 1) arrow(x + pW + 3, x + pW + gap - 3, yA + pH / 2);
+  });
+  txt(gAll, 30, yA + pH + 18, "末牌 ≈100× 与论文图 2 实测的约两个数量级对上——推算链在此落回实测锚点。", { size: 8.5, fill: INK_L, italic: true, serif: true });
+
+  // 下排：ε ≈ k·σ/√L 推断框架 → k≈0.27 → 三个耦合
+  const yB = 168;
+  txt(gAll, 30, yB - 12, "推断框架 · 3e-4 不能照搬（本节附录）", { size: 10, fill: INK, bold: true });
+  const fW = 216, fGap = 64;
+  CH.frame.forEach((n, i) => {
+    const x = 30 + i * (fW + fGap);
+    plate(x, yB, fW, 58, n, false);
+    if (i < CH.frame.length - 1) arrow(x + fW + 6, x + fW + fGap - 6, yB + 29);
+  });
+  txt(gAll, 30, yB + 58 + 22, "三个耦合：off-policy 程度（σ 越大带要越宽）· 回答长度（32k vs 2k 差约 4 倍）· 想要的裁剪力度（无公开数据，自行扫参）。", { size: 8.5, fill: INK_L, italic: true, serif: true });
+  onVisible(host, () => fadeIn(gAll));
 })();
 
 })();
@@ -2179,7 +2288,7 @@ function factOf(kid) {
     },
     lik: {
       t: "π_θ(y_i|x) / π_θold(y_i|x) · 整条序列的似然比",
-      d: "分子是整条 response 在当前策略下的似然，分母是采样时旧策略的似然。注意：它也是从单条样本算出的，没有 N≫1 的平均——§5 保留意见一「单样本批评同样适用于 GSPO 自己」就是从这里来的。（K5/K16）",
+      d: "分子是整条 response 在当前策略下的似然，分母是采样时旧策略的似然。注意：它也是从单条样本算出的，没有 N≫1 的平均——§6 保留意见一「单样本批评同样适用于 GSPO 自己」就是从这里来的。（K5/K16）",
     },
     pow: {
       t: "指数 1/|y_i| · 长度归一化（不能省）",
@@ -2187,7 +2296,7 @@ function factOf(kid) {
     },
     exp: {
       t: "exp · 从对数域还原成比率",
-      d: "对数域平均完再取 exp，数学上等价于几何平均：(∏ r_t)^{1/|y|}。几何平均天然对单点大漂移不敏感——对训推精度噪声这是特性（基建红利），对关键 token 检测这是漏洞（§5 稀释算例）。（K12）",
+      d: "对数域平均完再取 exp，数学上等价于几何平均：(∏ r_t)^{1/|y|}。几何平均天然对单点大漂移不敏感——对训推精度噪声这是特性（基建红利），对关键 token 检测这是漏洞（§6 稀释算例）。（K12）",
     },
     mean: {
       t: "(1/|y_i|)·Σ_t · 对数域的算术平均",
