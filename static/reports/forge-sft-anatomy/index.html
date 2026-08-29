@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>解剖一个极简 SFT 训练器 · Interactive Research Edition</title>
-<meta name="description" content="forge Stage 1 的每个工程决策，对照两套教材、四个生产框架与六路信息源。">
+<meta name="description" content="一个极简 SFT 训练器的 7 个工程决策，对照两套教材、四个生产框架与六路信息源。">
 <style>
 /* ET Book (tufte-css, ai-2040 reference stack) — base64-inlined, CSP-safe */
 @font-face {
@@ -494,10 +494,10 @@ html{ scroll-behavior:smooth; }
   <canvas id="cover-canvas-x" style="display:none"></canvas>
   <canvas id="cover-canvas-w" style="display:none"></canvas>
   <div class="cover-inner">
-    <p class="cover-kicker">FORGE STAGE 1 · SFT · DATA AS OF 2026-08-28</p>
+    <p class="cover-kicker">SFT ANATOMY · POST-TRAINING · DATA AS OF 2026-08-28</p>
     <h1 class="cover-title">解剖一个极简<br><span class="cover-num">SFT 训练器</span></h1>
-    <p class="cover-sub">511 行代码，7 个工程决策，对照 2 套教材、4 个生产框架、6 路信息源</p>
-    <p class="cover-lede">TRL 的 SFTTrainer 一行就能训，为什么要手写？因为那一行里藏着十几个默认决策——其中三个恰好是社区排错清单的前几名。本报告把 forge 的每个旋钮摆到台面上：哪些有共识，哪些是配方之争，哪些两本教材各自糊弄过去了。</p>
+    <p class="cover-sub">7 个工程决策，对照 2 套教材、4 个生产框架、6 路信息源</p>
+    <p class="cover-lede">TRL 的 SFTTrainer 一行就能训，为什么要手写？因为那一行里藏着十几个默认决策——其中三个恰好是社区排错清单的前几名。本报告把每个旋钮摆到台面上：哪些有共识，哪些是配方之争，哪些两本教材各自糊弄过去了。</p>
     <div class="cover-chips">
       <button class="chip" data-goto="#sec-exec">核心发现</button>
       <button class="chip" data-goto="#sec-matrix">决策矩阵</button>
@@ -522,26 +522,25 @@ html{ scroll-behavior:smooth; }
 <section id="sec-exec" class="band" data-win="0">
   <div class="prose">
     <p class="sec-no">§0 · 核心发现 Executive summary</p>
-    <h2>511 行买到的不是性能，是一张决策清单</h2>
+    <h2>买到的不是性能，是一张决策清单</h2>
     <p class="dek">TRL 的 SFTTrainer 一行就能训——那一行里藏着十几个默认决策，其中三个恰好是社区排错清单的前几名。</p>
-    <p>本报告解剖 forge 仓库 Stage 1（SFT）的 7 个工程决策：chat template、prompt masking、collate 与 loss、精度、LR schedule、数据、验证。每个决策对照 2 套教材（rlhf-book、hands-on-modern-rl）、4 个生产框架（alignment-handbook、trl、open-instruct、OpenRLHF）与 6 路信息源，结论分三档：<b>有强共识</b>（collate 与 loss 的实现、学习率区间、checkpoint 保存）、<b>真实的配方之争</b>（cosine vs linear schedule、packing 开关）、以及<b>两本教材各自糊弄过去的坑</b>（grad accumulation 尾部、micro-batch 平均口径、静默截断）。</p>
-    <p>三个被默认掩盖的决策——全序列 loss、linear schedule 零 warmup、静默截断——正是中文社区 Trainer 排错清单的前几名。forge 的应对：masking 只计 assistant 段（含 &lt;|im_end|&gt;）、cosine + 3% warmup、截断样本在 assistant 段全丢时才弃。生产配方互证 5 项：lr 1e-5、warmup 0.03、weight decay 0、grad clip 1.0、epochs 2，与 tulu3 / OpenRLHF 逐项吻合。</p>
+    <p>本报告解剖一个手写极简 SFT 训练器的 7 个工程决策：chat template、prompt masking、collate 与 loss、精度、LR schedule、数据、验证。每个决策对照 2 套教材（rlhf-book、hands-on-modern-rl）、4 个生产框架（alignment-handbook、trl、open-instruct、OpenRLHF）与 6 路信息源，结论分三档：<b>有强共识</b>（collate 与 loss 的实现、学习率区间、checkpoint 保存）、<b>真实的配方之争</b>（cosine vs linear schedule、packing 开关）、以及<b>两本教材各自糊弄过去的坑</b>（grad accumulation 尾部、micro-batch 平均口径、静默截断）。</p>
+    <p>三个被默认掩盖的决策——全序列 loss、linear schedule 零 warmup、静默截断——正是中文社区 Trainer 排错清单的前几名。极简实现的应对：masking 只计 assistant 段（含 &lt;|im_end|&gt;）、cosine + 3% warmup、截断样本在 assistant 段全丢时才弃。生产配方互证 5 项：lr 1e-5、warmup 0.03、weight decay 0、grad clip 1.0、epochs 2，与 tulu3 / OpenRLHF 逐项吻合。</p>
   </div>
   <div class="wide xl">
     <div id="exec-chart" class="chart-frame"></div>
   </div>
   <div class="prose">
-    <h3 class="sub-h">关键数字</h3>
+    <h3 class="sub-h">关键发现</h3>
     <table class="dt">
       <thead>
-        <tr><th>指标</th><th>数值</th><th>说明</th><th>来源</th></tr>
+        <tr><th>发现</th><th>数值</th><th>说明</th><th>来源</th></tr>
       </thead>
       <tbody>
-        <tr><td>仓库总行数</td><td class="num">511 行</td><td>5 个核心模块 + 3 个入口脚本 + 测试与配置</td><td class="num">K9</td></tr>
-        <tr><td>决策点</td><td class="num">7 个</td><td>模板 / masking / collate·loss / 精度 / 调度 / 数据 / 验证</td><td class="num">K1</td></tr>
+        <tr><td>工程决策点</td><td class="num">7 个</td><td>模板 / masking / collate·loss / 精度 / 调度 / 数据 / 验证</td><td class="num">K1</td></tr>
         <tr><td>对照信息源</td><td class="num">6 路</td><td>2 套教材 · 4 个生产框架 · arXiv · 知乎 · 飞书 · Notion</td><td class="num">K1</td></tr>
+        <tr><td>masking 做法</td><td class="num">3 种并存</td><td>只训末轮（rlhf-book）· 不 mask（课程代码）· generation 标记（trl）</td><td class="num">K2/K3/K4</td></tr>
         <tr><td>训练数据</td><td class="num">10,000 条</td><td>smoltalk everyday-conversations（全集 1.1M 的 0.9%）</td><td class="num">K8</td></tr>
-        <tr><td>单元测试</td><td class="num">3 项</td><td>模板渲染 / 多轮 masking / collate padding，全过</td><td class="num">K9</td></tr>
         <tr class="hl"><td>生产配方互证项</td><td class="num">5 项</td><td>lr 1e-5 · warmup 0.03 · wd 0 · clip 1.0 · epochs 2，与 tulu3 / OpenRLHF 逐项吻合</td><td class="num">K4</td></tr>
       </tbody>
     </table>
@@ -550,9 +549,9 @@ html{ scroll-behavior:smooth; }
 <section id="sec-form" class="band" data-win="0">
   <div class="prose">
     <p class="sec-no">§1 · 训练器形态与模板 Form &amp; template</p>
-    <h2>写 SFT 有三条路线，forge 选了全显式的那条</h2>
+    <h2>写 SFT 有三条路线，全显式手写是第四条</h2>
     <p class="dek">动机不是性能——0.5B 模型怎么训都快——而是每个决策必须显式可见：后面 RM、DPO、GRPO、agentic RL 都要复用这个循环，黑箱迟早要拆开。</p>
-    <p>三条路线的差别不在能不能跑，而在<b>决策藏在哪</b>。框架黑箱把训练循环、loss、padding 全收进库内；教材手写循环每一步可见但各自有省略；生产框架在 Trainer 之上叠 packing、flash-attention、去污染一整套工程件。forge 的手写循环与 rlhf-book 的 collate·loss 逐行同构——两处独立写出的代码长得一样，是最强的"这就是标准做法"证据。</p>
+    <p>三条路线的差别不在能不能跑，而在<b>决策藏在哪</b>。框架黑箱把训练循环、loss、padding 全收进库内；教材手写循环每一步可见但各自有省略；生产框架在 Trainer 之上叠 packing、flash-attention、去污染一整套工程件。手写极简实现与 rlhf-book 的 collate·loss 逐行同构——两处独立写出的代码长得一样，是最强的"这就是标准做法"证据。</p>
   </div>
   <div class="wide">
     <table class="dt">
@@ -561,19 +560,19 @@ html{ scroll-behavior:smooth; }
       </thead>
       <tbody>
         <tr><td>框架黑箱</td><td>hands-on-modern-rl 课程实现</td><td>TRL <span class="chain">SFTTrainer</span> 一行调用，循环 / loss / padding 全在库内</td><td>15 条手写 mock 数据；代码不 mask，与自家文档矛盾</td></tr>
-        <tr><td>教材手写</td><td>rlhf-book 教材实现</td><td>手写循环；collate·loss 与 forge 逐行同构</td><td>No Robots 9.5K；只训末轮 assistant；全模块不存模型</td></tr>
+        <tr><td>教材手写</td><td>rlhf-book 教材实现</td><td>手写循环；collate·loss 与手写极简逐行同构</td><td>No Robots 9.5K；只训末轮 assistant；全模块不存模型</td></tr>
         <tr><td>生产封装</td><td>alignment-handbook · open-instruct · OpenRLHF</td><td>Trainer 封装之上叠 packing、flash-attention</td><td>tulu3 940K 配比混合 + 去污染工具链</td></tr>
-        <tr class="hl"><td>forge（本仓库）</td><td>forge 手写循环</td><td>511 行全显式，每个决策能讲清为什么</td><td>smoltalk 10K 单源；3 项单元测试全过</td></tr>
+        <tr class="hl"><td>手写极简（本报告基准）</td><td>从零写的训练循环</td><td>全显式，每个决策能讲清为什么</td><td>smoltalk 10K 单源</td></tr>
       </tbody>
     </table>
-    <p class="chart-src">Source · K2 教材代码 · K3 课程代码 · K4 生产框架快照 · K9 forge 工作区（快照 2026-08-28）</p>
+    <p class="chart-src">Source · K2 教材代码 · K3 课程代码 · K4 生产框架快照 · K9 基准实现工作区（快照 2026-08-28）</p>
   </div>
   <div class="prose">
     <h3 class="sub-h">模板：字符串拼接里的三个坑</h3>
-    <p>原始数据是结构化的 messages（role + content），模型只认纯文本，第一步是渲染。forge 手写 ChatML——每条消息包成 <span class="chain">&lt;|im_start|&gt;{role}\n{content}&lt;|im_end|&gt;\n</span>——与 Qwen 官方 tokenizer 自带 <span class="chain">chat_template</span> 的渲染结果<b>逐字符一致</b>（已验证）。看似没有决策含量，三个信息源各自给了一个坑。</p>
+    <p>原始数据是结构化的 messages（role + content），模型只认纯文本，第一步是渲染。手写实现选 ChatML——每条消息包成 <span class="chain">&lt;|im_start|&gt;{role}\n{content}&lt;|im_end|&gt;\n</span>——与 Qwen 官方 tokenizer 自带 <span class="chain">chat_template</span> 的渲染结果<b>逐字符一致</b>（已验证）。看似没有决策含量，三个信息源各自给了一个坑。</p>
     <div class="note-box">
       <p><b>坑一 · base 模型没有模板。</b> OLMo-2-1B 是 base 模型，tokenizer 里没住 chat template；rlhf-book 的做法是从姊妹模型 <span class="chain">allenai/OLMo-2-0425-1B-SFT</span> 的 tokenizer 整段拷贝 <span class="chain">chat_template</span> 属性。真实世界里模板不一定现成。</p>
-      <p><b>坑二 · <span class="chain">apply_chat_template</span> 有隐藏行为。</b> Qwen 的模板在 messages 无 system 段时会注入默认 system prompt（"You are Qwen, created by Alibaba Cloud..."）。hands-on 课程的数据没有 system 段，训练文本里实际带着这句没审过的默认文本。forge 只渲染样本里已有的段，不注入任何东西。</p>
+      <p><b>坑二 · <span class="chain">apply_chat_template</span> 有隐藏行为。</b> Qwen 的模板在 messages 无 system 段时会注入默认 system prompt（"You are Qwen, created by Alibaba Cloud..."）。hands-on 课程的数据没有 system 段，训练文本里实际带着这句没审过的默认文本。手写实现只渲染样本里已有的段，不注入任何东西。</p>
       <p><b>坑三 · 模板错是 SFT 的头号隐形问题。</b> HuggingFace 官方博客《Chat Templates: An End to the Silent Performance Killer》（2024-01）被材料库标为"SFT 最高频的坑"；中文社区 Trainer 排错清单第一条就是"loss 不降 → chat template 错 / labels mask 错"。</p>
     </div>
     <p>取舍：先手写模板把结构看懂——模板就是字符串拼接——之后对接官方模板时才知道自己在对接什么。</p>
@@ -584,7 +583,7 @@ html{ scroll-behavior:smooth; }
         <h3 class="t-abbr">SFT</h3>
         <p class="t-full">Supervised Fine-Tuning</p>
         <p class="t-gist">用标注好的指令—回答数据继续训练预训练模型，是对齐的第一步。</p>
-        <div class="t-more"><p>forge Stage 1 的唯一目标：让 base 模型学会按 ChatML 格式对话、答完就停。要验证的不是指标而是行为——base 答非所问，SFT 后答完就停。</p></div>
+        <div class="t-more"><p>极简 SFT 的唯一目标：让 base 模型学会按 ChatML 格式对话、答完就停。要验证的不是指标而是行为——base 答非所问，SFT 后答完就停。</p></div>
         <p class="t-hint">Hover for the full story</p>
       </article>
       <article class="term" tabindex="0">
@@ -605,14 +604,14 @@ html{ scroll-behavior:smooth; }
         <h3 class="t-abbr">Grad Accum</h3>
         <p class="t-full">Gradient Accumulation</p>
         <p class="t-gist">攒若干个 micro-batch 的梯度再 step 一次，模拟更大的有效 batch。</p>
-        <div class="t-more"><p>一个 epoch 的 micro-batch 数不一定整除 accum 步数：rlhf-book 把尾部残余组直接丢弃，forge 让残余组也 step 但 loss 仍除以标称 accum 数——两本教材各糊弄一半。见 §6 闸门。</p></div>
+        <div class="t-more"><p>一个 epoch 的 micro-batch 数不一定整除 accum 步数：rlhf-book 把尾部残余组直接丢弃，极简实现让残余组也 step 但 loss 仍除以标称 accum 数——两本教材各糊弄一半。见 §6 闸门。</p></div>
         <p class="t-hint">Hover for the full story</p>
       </article>
       <article class="term" tabindex="0">
         <h3 class="t-abbr">bf16</h3>
         <p class="t-full">Brain Float 16</p>
         <p class="t-gist">纯 bf16 加载权重：不用 autocast、没有 fp32 master weights、没有 GradScaler。</p>
-        <div class="t-more"><p>教学场景图省事，0.5B 也犯不上。真正的混合精度（fp32 master + loss scaling）在 Megatron / DeepSpeed 那一层；forge 在已 bf16 的权重外又包了一层 autocast，属冗余，Stage 2 顺手去掉。</p></div>
+        <div class="t-more"><p>教学场景图省事，0.5B 也犯不上。真正的混合精度（fp32 master + loss scaling）在 Megatron / DeepSpeed 那一层；在已 bf16 的权重外再包一层 autocast 是常见冗余，很容易顺手写多。</p></div>
         <p class="t-hint">Hover for the full story</p>
       </article>
       <article class="term" tabindex="0">
@@ -629,7 +628,7 @@ html{ scroll-behavior:smooth; }
   <div class="prose">
     <p class="sec-no">§2 · 决策对照矩阵 Decision matrix</p>
     <h2>10 个决策 × 7 个来源实现</h2>
-    <p class="dek">行是决策，列是来源：forge、两套教材、四个生产框架。共识填一格，分歧现形。</p>
+    <p class="dek">行是决策，列是来源：手写极简、两套教材、四个生产框架。共识填一格，分歧现形。</p>
     <p>矩阵的读法：<b>同色即共识</b>。collate·loss 的实现、学习率落在 5e-6~2e-5 生产区间、checkpoint 保存，是全列一致的强共识区；prompt masking 是全篇最大分歧点——"只训最后一轮""不 mask""completion-only"三种做法并存；LR schedule 的 cosine vs linear 是配方之争而非对错。矩阵里还躺着两个"你以为没做决策、其实已经做了"的格子：不显式指定 scheduler = linear + 零 warmup（hands-on 课程代码就是这样跑出来的）、trl 默认 2e-5。</p>
   </div>
   <div class="wide xl">
@@ -639,7 +638,7 @@ html{ scroll-behavior:smooth; }
     <blockquote class="quote-card">
       <p class="q-text">"…the model may never learn to stop."</p>
       <p class="q-who">— <b>TRL SFTTrainer</b>，assistant_only_loss 警告<span class="q-src">Source · K4（trl 源码快照，2026-08-28）</span></p>
-      <div class="q-why"><span class="q-lab">Context</span> 触发条件：assistant 轮的结束 token 不在 loss mask 内。<span class="q-lab why">Why it matters</span> 这佐证了 forge 把 &lt;|im_end|&gt; 训进 loss 的必要性——模型必须学会停止；也给矩阵里"截断策略"一行 OpenRLHF 强制 EOS 收尾的格子提供了分量。</div>
+      <div class="q-why"><span class="q-lab">Context</span> 触发条件：assistant 轮的结束 token 不在 loss mask 内。<span class="q-lab why">Why it matters</span> 这佐证了把 &lt;|im_end|&gt; 训进 loss 的必要性——模型必须学会停止；也给矩阵里"截断策略"一行 OpenRLHF 强制 EOS 收尾的格子提供了分量。</div>
     </blockquote>
   </div>
 </section>
@@ -648,16 +647,16 @@ html{ scroll-behavior:smooth; }
     <p class="sec-no">§3 · masking 裁决 The masking verdict</p>
     <h2>每个位置都要裁决：算不算 loss</h2>
     <p class="dek">规则一句话：每个位置的 logits 预测下一个 token，预测目标是 assistant token 就计分，否则置 -100。</p>
-    <p>forge 的选择是<b>所有 assistant 段都计</b>（含 &lt;|im_start|&gt;、&lt;|im_end|&gt; 包裹标记），user / system 段全 mask。loss 写成公式：</p>
+    <p>手写极简的选择是<b>所有 assistant 段都计</b>（含 &lt;|im_start|&gt;、&lt;|im_end|&gt; 包裹标记），user / system 段全 mask。loss 写成公式：</p>
     <p style="font-family:var(--mono); font-size:13.5px; color:var(--ink-md); margin:2px 0 22px;">L = −(1/|A|) · Σ<sub>t: x<sub>t+1</sub> ∈ A</sub> log p<sub>θ</sub>(x<sub>t+1</sub> | x<sub>≤t</sub>)<span style="color:var(--ink-lo);">&nbsp;&nbsp;A = assistant 段 token 集合，|A| = 有效 token 数</span></p>
-    <p>信息源里的分布并不整齐：rlhf-book 只训最后一轮 assistant——多轮对话中间的 assistant 回复也 mask，连 &lt;|assistant|&gt; 生成头本身都 mask；hands-on 课程的代码用 "text" 列喂 SFTTrainer、对整个序列计 loss，而自家文档把 user / system 计入 loss 称为"最常见的坑……这不是洁癖，这是在保护你训练出来的模型不去背诵提示词"——同一仓库，代码与文档互相矛盾，是"教学实现 ≠ 最佳实践"的最直接样本。trl 现在的方案是 <span class="chain">assistant_only_loss</span> + 模板里的 <span class="chain">{% generation %}</span> 标记，但通常只把 assistant content 包进标记，即生成头不计 loss；forge 把头也算进去，一两 token 之差，属可以争论的细节。</p>
+    <p>信息源里的分布并不整齐：rlhf-book 只训最后一轮 assistant——多轮对话中间的 assistant 回复也 mask，连 &lt;|assistant|&gt; 生成头本身都 mask；hands-on 课程的代码用 "text" 列喂 SFTTrainer、对整个序列计 loss，而自家文档把 user / system 计入 loss 称为"最常见的坑……这不是洁癖，这是在保护你训练出来的模型不去背诵提示词"——同一仓库，代码与文档互相矛盾，是"教学实现 ≠ 最佳实践"的最直接样本。trl 现在的方案是 <span class="chain">assistant_only_loss</span> + 模板里的 <span class="chain">{% generation %}</span> 标记，但通常只把 assistant content 包进标记，即生成头不计 loss；极简实现把头也算进去，一两 token 之差，属可以争论的细节。</p>
   </div>
   <div class="wide xl">
     <div id="masking-chart" class="chart-frame"></div>
   </div>
   <div class="prose">
     <p>更根本的挑战来自研究。《Instruction Tuning with Loss over Instructions》（arXiv 2405.14394）发现：对 instruction 部分也算 loss（IM）在 21 个 benchmark 的许多场景下优于只在 output 上算 loss（OM）——completion-only 是当前框架默认，不是被证明的正确；当目标是让模型内化指令分布时，masking 会丢信号。</p>
-    <p>裁决：<b>维持 forge 现状</b>（全 assistant 段），但把 masking 从"理所当然"改写为"有争议的设计选择"。证伪条件写死：若目标只是"让模型只学接话"，OM 仍是无争议默认；争议只在"是否还要内化指令分布"。两条未决一并登记：0.5B 小模型上 IM 优势是否保持、多轮场景 IM 与 OM 的差距方向——见 §7 赔率板。</p>
+    <p>裁决：<b>维持全 assistant 段口径</b>，但把 masking 从"理所当然"改写为"有争议的设计选择"。证伪条件写死：若目标只是"让模型只学接话"，OM 仍是无争议默认；争议只在"是否还要内化指令分布"。两条未决一并登记：0.5B 小模型上 IM 优势是否保持、多轮场景 IM 与 OM 的差距方向——见 §7 赔率板。</p>
   </div>
 </section>
 <section id="sec-sched" class="band" data-win="4">
@@ -665,7 +664,7 @@ html{ scroll-behavior:smooth; }
     <p class="sec-no">§4 · 调度与精度 Schedule &amp; precision</p>
     <h2>cosine vs linear 是配方之争，不是对错</h2>
     <p class="dek">lr、schedule、warmup 三个旋钮，7 个来源给出 5 种配方；不显式指定 scheduler，本身就是一个决策。</p>
-    <p>forge 用 cosine 调度加 3% warmup。生产侧的答案并不统一：Tulu 3 的 8B SFT 配方是 lr 5e-6 + linear decay + warmup 0.03（open-instruct 官方可复现配置，比论文转述更硬）；Zephyr 是 2e-5 + cosine + warmup 0.1；OpenRLHF 默认 cosine_with_min_lr；rlhf-book 干脆手写线性衰减——教学书自己也不用 cosine。forge 的 lr 1e-5 落在 5e-6~2e-5 生产区间（模型越小 lr 越大），warmup 0.03、weight decay 0.0、grad clip 1.0、epochs 2 与 tulu3 / OpenRLHF 逐项吻合。有效 batch 32（8×4）对 0.5B 是教学缩放——rlhf-book 巧合地也是 32（4×8），生产是 128–256。</p>
+    <p>手写极简实现用 cosine 调度加 3% warmup。生产侧的答案并不统一：Tulu 3 的 8B SFT 配方是 lr 5e-6 + linear decay + warmup 0.03（open-instruct 官方可复现配置，比论文转述更硬）；Zephyr 是 2e-5 + cosine + warmup 0.1；OpenRLHF 默认 cosine_with_min_lr；rlhf-book 干脆手写线性衰减——教学书自己也不用 cosine。极简实现的 lr 1e-5 落在 5e-6~2e-5 生产区间（模型越小 lr 越大），warmup 0.03、weight decay 0.0、grad clip 1.0、epochs 2 与 tulu3 / OpenRLHF 逐项吻合。有效 batch 32（8×4）对 0.5B 是教学缩放——rlhf-book 巧合地也是 32（4×8），生产是 128–256。</p>
   </div>
   <div class="wide">
     <table class="dt">
@@ -673,7 +672,7 @@ html{ scroll-behavior:smooth; }
         <tr><th>来源</th><th>LR</th><th>schedule</th><th>warmup</th><th>备注</th></tr>
       </thead>
       <tbody>
-        <tr class="hl"><td>forge（本仓库）</td><td class="num">1e-5</td><td>cosine</td><td class="num">3%</td><td>wd 0 · clip 1.0 · epochs 2</td></tr>
+        <tr class="hl"><td>手写极简（本报告基准）</td><td class="num">1e-5</td><td>cosine</td><td class="num">3%</td><td>wd 0 · clip 1.0 · epochs 2</td></tr>
         <tr><td>rlhf-book</td><td class="num">5e-6</td><td>手写线性衰减</td><td class="num">—</td><td>教材自己也不用 cosine</td></tr>
         <tr><td>hands-on 课程</td><td class="num">2e-5</td><td>linear</td><td class="num">0</td><td>默认配置；不显式指定 = 隐藏决策</td></tr>
         <tr><td>trl SFTTrainer</td><td class="num">2e-5（默认）</td><td>cosine（默认）</td><td class="num">—</td><td>默认 lr 与默认 schedule 都不显式</td></tr>
@@ -682,11 +681,11 @@ html{ scroll-behavior:smooth; }
         <tr><td>OpenRLHF</td><td class="num">5e-6（默认）</td><td>cosine_with_min_lr</td><td class="num">—</td><td>官方默认配方</td></tr>
       </tbody>
     </table>
-    <p class="chart-src">Source · K2 教材代码 · K3 课程代码 · K4 生产框架快照（2026-08-28）· K9 forge 工作区</p>
+    <p class="chart-src">Source · K2 教材代码 · K3 课程代码 · K4 生产框架快照（2026-08-28）· K9 基准实现工作区</p>
   </div>
   <div class="prose">
     <div class="note-box">
-      <p><b>精度：纯 bf16，和一层多余的 autocast。</b> 两本教材都是纯 bf16 加载权重：不用 autocast、没有 fp32 master weights、没有 GradScaler；教学场景图省事，0.5B 也确实犯不上。forge 的自我修正点：权重已按 bf16 加载，forward 外又包了一层 autocast——权重已是 bf16 时这层基本是冗余的，Stage 2 顺手去掉。真正的混合精度（fp32 master + loss scaling）在 Megatron / DeepSpeed 那一层。生产侧背书：Tulu 3 官方配方同样是 bf16 混合精度，与课程文档"BF16 比 FP32 快 2 倍"的社区经验一致。</p>
+      <p><b>精度：纯 bf16，和一层多余的 autocast。</b> 两本教材都是纯 bf16 加载权重：不用 autocast、没有 fp32 master weights、没有 GradScaler；教学场景图省事，0.5B 也确实犯不上。一个值得自我修正的点：权重已按 bf16 加载，forward 外又包一层 autocast——权重已是 bf16 时这层基本是冗余的，很容易顺手写多。真正的混合精度（fp32 master + loss scaling）在 Megatron / DeepSpeed 那一层。生产侧背书：Tulu 3 官方配方同样是 bf16 混合精度，与课程文档"BF16 比 FP32 快 2 倍"的社区经验一致。</p>
     </div>
     <p>两个值得记住的观察。其一，<b>默认 scheduler 是个陷阱</b>：不显式指定时，HF / TRL 默认 linear + warmup 0——你以为没做决策，其实已经做了。其二，<b>lr 与 packing 强耦合</b>：教材引用的 OLMo 3 实践是 sequence packing 显著增大有效 token batch，lr 要跟着上调——离开吞吐配置谈 lr 没有意义。epochs=2 有研究侧的支持：SFT 的 scaling 研究显示重复数据的收益约在前 4 个 epoch 内（arXiv 2402.17193），《SFT Memorizes, RL Generalizes》（arXiv 2501.17161）进一步指出多训 epoch 主要强化记忆而非泛化——2 个 epoch 在安全区，也预示了纯 SFT 切片的天花板（§7）。</p>
   </div>
@@ -695,8 +694,8 @@ html{ scroll-behavior:smooth; }
   <div class="prose">
     <p class="sec-no">§5 · 数据光谱 Data spectrum</p>
     <h2>1 万条单源：最大的简化，正好照出生产的全貌</h2>
-    <p class="dek">光谱从 1,000 条到 100 万条都有名字；forge 的 10,000 条站在"先验证链路"的一端。</p>
-    <p>forge 用 HuggingFaceTB/smoltalk 的 everyday-conversations 子集 1 万条，单源、零质量过滤——这是全仓库最大的简化点。数据集卡片（已核实）写明：全集 1.1M 条、14 个子集，核心新数据是 Smol-Magpie-Ultra 400K（Magpie 管线 + Llama-3.1-405B 生成）；everyday-conversations 是多轮日常对话，只是"基础对话行为"切片，数学、代码、长上下文由其他子集承担。用它单独训练，产出的是完整配方里的对话层，不是完整能力。</p>
+    <p class="dek">光谱从 1,000 条到 100 万条都有名字；极简实现用的 10,000 条站在"先验证链路"的一端。</p>
+    <p>极简实现用 HuggingFaceTB/smoltalk 的 everyday-conversations 子集 1 万条，单源、零质量过滤——这是最大的简化点。数据集卡片（已核实）写明：全集 1.1M 条、14 个子集，核心新数据是 Smol-Magpie-Ultra 400K（Magpie 管线 + Llama-3.1-405B 生成）；everyday-conversations 是多轮日常对话，只是"基础对话行为"切片，数学、代码、长上下文由其他子集承担。用它单独训练，产出的是完整配方里的对话层，不是完整能力。</p>
     <p>一个实际约束要记牢：现在 <span class="chain">max_len=1024</span>，长推理链数据动辄 2,000–8,000 token；换数据时上下文长度必须一起动，否则大量样本会被截成"问题加半个思考过程"，还顺手切掉了 &lt;|im_end|&gt;。</p>
   </div>
   <div class="wide xl">
@@ -704,8 +703,8 @@ html{ scroll-behavior:smooth; }
   </div>
   <div class="prose">
     <h3 class="sub-h">光谱两端：LIMA 与 Tulu 3</h3>
-    <p><b>LIMA</b>（arXiv 2305.11206）用 1,000 条人工精选让 65B 模型接近当时的 GPT-4，提出"表面对齐假说"：预训练已储备能力，SFT 只做浅层对齐。<b>Tulu 3</b>（arXiv 2411.15124）用 94 万条做严格的多技能配比消融，并配去污染工具链——它证明的不是"越多越好"，而是配比要靠消融、不靠先验。中间地带同样有据可查：AlpaGasus（2307.08701）从 52K 里判 90% 为低质、筛出 9K 反超全量；Deita（2312.15685）按复杂性、质量、多样性打分，6–10K 超越更大的混合集。rlhf-book 的 No Robots 9.5K 与 forge 同处一个量级。</p>
-    <p>生产侧数据工程的真实形态，中文社区与飞书群给出两端。知乎专栏把 curation 链路（去重 → 质量门 → 剔除与评测集重合 → 保证多轮完整）称为"整条链路里删得最多、也最不透明的一环"；配比上混 10%–20% 通用数据防灾难性遗忘是社区共识度最高的经验——但也有 1:1 和 1:10~1:100 经验重放两种相差十倍的说法，配比本身没有定论。"SFT 效果 90% 取决于数据质量"在社区流传很广，但给不出实验出处，只能当情绪指标（存疑）。业界动态群的更新信号是：上海 AI Lab 的 SKT、AutoCompact 的 judge-guided SFT、MindForge 的轨迹微调——生产 SFT 数据越来越多是"强模型轨迹 + 验证器"，forge 直接加载的 smoltalk 本质上也是他人蒸馏好的轨迹。反向注脚来自《SFT Conflicts, RL Coexists》（arXiv 2608.03573）：多阶段多任务 SFT 平均退化 23.1%，而同样的多阶段 RL 提升 24.9%——单任务单阶段的最小 SFT 避开的坑不在循环本身，在数据组合。</p>
+    <p><b>LIMA</b>（arXiv 2305.11206）用 1,000 条人工精选让 65B 模型接近当时的 GPT-4，提出"表面对齐假说"：预训练已储备能力，SFT 只做浅层对齐。<b>Tulu 3</b>（arXiv 2411.15124）用 94 万条做严格的多技能配比消融，并配去污染工具链——它证明的不是"越多越好"，而是配比要靠消融、不靠先验。中间地带同样有据可查：AlpaGasus（2307.08701）从 52K 里判 90% 为低质、筛出 9K 反超全量；Deita（2312.15685）按复杂性、质量、多样性打分，6–10K 超越更大的混合集。rlhf-book 的 No Robots 9.5K 与极简实现同处一个量级。</p>
+    <p>生产侧数据工程的真实形态，中文社区与飞书群给出两端。知乎专栏把 curation 链路（去重 → 质量门 → 剔除与评测集重合 → 保证多轮完整）称为"整条链路里删得最多、也最不透明的一环"；配比上混 10%–20% 通用数据防灾难性遗忘是社区共识度最高的经验——但也有 1:1 和 1:10~1:100 经验重放两种相差十倍的说法，配比本身没有定论。"SFT 效果 90% 取决于数据质量"在社区流传很广，但给不出实验出处，只能当情绪指标（存疑）。业界动态群的更新信号是：上海 AI Lab 的 SKT、AutoCompact 的 judge-guided SFT、MindForge 的轨迹微调——生产 SFT 数据越来越多是"强模型轨迹 + 验证器"，极简实现直接加载的 smoltalk 本质上也是他人蒸馏好的轨迹。反向注脚来自《SFT Conflicts, RL Coexists》（arXiv 2608.03573）：多阶段多任务 SFT 平均退化 23.1%，而同样的多阶段 RL 提升 24.9%——单任务单阶段的最小 SFT 避开的坑不在循环本身，在数据组合。</p>
     <p>判断：单源 1 万条是合理的教学起点——先把链路验证正确，配比和质量门是 Stage 2 的事。</p>
   </div>
 </section>
@@ -714,7 +713,7 @@ html{ scroll-behavior:smooth; }
     <p class="sec-no">§6 · Stage 2 闸门 Priority gates</p>
     <h2>没做的清单，就是 Stage 2 的路线图</h2>
     <p class="dek">对照完六个信息源，刻意没做的与应该尽快补的，按优先级排成 7 道闸门；其中两道明确不跟进。</p>
-    <p><b>P0 只有一道</b>：packing + padding-free + flash-attention 2——四个生产框架全有，是 forge 与生产的第一工程差距，Netflix 的 4.7 倍吞吐说明这不是细节。<b>P1 三道</b>：mask 边界对齐生产口径（assistant 头不计 loss、结束 token 必计）；截断样本强制 EOS 收尾（OpenRLHF 在数据集出口把序列末位强制设为 EOS，一行可修，防切断 &lt;|im_end|&gt; 教坏停止）；grad accumulation 尾部按实际组数归一，顺手去掉那层冗余 autocast。<b>P2 两道</b>：chunked loss、梯度检查点——大模型阶段再说；去污染属于数据准备层，不进训练器。<b>不跟进两道</b>：NEFTune（arXiv 2310.05914，框架支持、主流 recipe 未启用）；cosine 换 linear（两派并存的配方之争，forge 站多数派）。</p>
+    <p><b>P0 只有一道</b>：packing + padding-free + flash-attention 2——四个生产框架全有，是极简实现与生产的第一工程差距，Netflix 的 4.7 倍吞吐说明这不是细节。<b>P1 三道</b>：mask 边界对齐生产口径（assistant 头不计 loss、结束 token 必计）；截断样本强制 EOS 收尾（OpenRLHF 在数据集出口把序列末位强制设为 EOS，一行可修，防切断 &lt;|im_end|&gt; 教坏停止）；grad accumulation 尾部按实际组数归一，顺手去掉那层冗余 autocast。<b>P2 两道</b>：chunked loss、梯度检查点——大模型阶段再说；去污染属于数据准备层，不进训练器。<b>不跟进两道</b>：NEFTune（arXiv 2310.05914，框架支持、主流 recipe 未启用）；cosine 换 linear（两派并存的配方之争，极简实现站多数派）。</p>
     <p>这些都不进 Stage 1——极简的意义就是让你看清没有它们时系统在干什么。</p>
   </div>
   <div class="wide">
@@ -725,8 +724,8 @@ html{ scroll-behavior:smooth; }
   <div class="prose">
     <p class="sec-no">§7 · 未决问题 Open questions</p>
     <h2>四个还没有答案的问题</h2>
-    <p class="dek">手写 511 行买到的不是性能，是一张决策清单——清单的末栏写着哪些结论仍可能翻转。</p>
-    <p>第一道已在途：<b>masking 之争在 0.5B 小模型上的方向</b>。IM（arXiv 2405.14394）的实验基于更大模型，forge 的 0.5B 是天然消融场——若 0.5B 上 OM 稳定不差，教学默认就无需改。其余三道留给 Stage 2：<b>数据配比的最优解</b>（社区数字 1:1 与 1:10~1:100 相差十倍，Tulu 3 靠消融不靠先验，Stage 2 混合数据时做小规模消融）；<b>packing 的 mask 串味风险</b>（BFD packing 需 position_ids 重置，IBM arXiv 2407.09105 给出方案，实现时必须带 attention 隔离）；<b>纯 SFT 切片的性能天花板</b>（《SFT Memorizes, RL Generalizes》：泛化提升主要在 RL 阶段——Stage 1 只验证链路，不追指标）。</p>
+    <p class="dek">手写循环买到的不是性能，是一张决策清单——清单的末栏写着哪些结论仍可能翻转。</p>
+    <p>第一道已在途：<b>masking 之争在 0.5B 小模型上的方向</b>。IM（arXiv 2405.14394）的实验基于更大模型，0.5B 小模型是天然消融场——若 0.5B 上 OM 稳定不差，教学默认就无需改。其余三道留给 Stage 2：<b>数据配比的最优解</b>（社区数字 1:1 与 1:10~1:100 相差十倍，Tulu 3 靠消融不靠先验，Stage 2 混合数据时做小规模消融）；<b>packing 的 mask 串味风险</b>（BFD packing 需 position_ids 重置，IBM arXiv 2407.09105 给出方案，实现时必须带 attention 隔离）；<b>纯 SFT 切片的性能天花板</b>（《SFT Memorizes, RL Generalizes》：泛化提升主要在 RL 阶段——Stage 1 只验证链路，不追指标）。</p>
   </div>
   <div class="wide">
     <div id="odds-chart" class="chart-frame"></div>
@@ -740,7 +739,7 @@ html{ scroll-behavior:smooth; }
     <div class="note-box">
       <p><b>事实分级。</b> 凡标"已验证"者，均直接读到源码/数据集卡片原文（具体行号登记于配套 blog）；论文结论经 arXiv API 核实标题与日期；社区经验凡给不出实验出处的，正文标注"存疑"。</p>
       <p><b>来源分类。</b> <span class="src-cat kimi">个人研究整理</span> <span class="src-cat company">官方仓库/数据集卡片</span> <span class="src-cat industry">社区与业界</span></p>
-      <p><b>测量纪律。</b> 表中没有的实体不画；被挑战的数字在渲染层标注验证状态；forge 侧事实以 2026-08-28 工作区快照为准。</p>
+      <p><b>测量纪律。</b> 表中没有的实体不画；被挑战的数字在渲染层标注验证状态；基准实现的事实以 2026-08-28 工作区快照为准。</p>
     </div>
   </div>
   <div class="wide xl">
@@ -770,21 +769,21 @@ window.RPT = {
     blog: "https://njx-njx.github.io/posts/forge-sft-anatomy/",
   },
 
-  // ── §0 证据实物图：挂在 forge 工件上的数字 ──
+  // ── §0 证据实物图：挂在工件上的发现 ──
   evidence: {
-    object: "forge 工件（Stage 1 产出的第一件成品）",
+    object: "SFT 训练器工件（本报告解剖对象）",
     items: [
-      { part: "铭牌", label: "仓库总行数", value: "511 行", sub: "5 个核心模块 + 3 个入口脚本 + 测试与配置", src: "K9" },
-      { part: "刃口", label: "决策点", value: "7 个", sub: "模板 / masking / collate·loss / 精度 / 调度 / 数据 / 验证", src: "K1" },
-      { part: "锤痕", label: "对照信息源", value: "6 路", sub: "2 套教材 · 4 个生产框架 · arXiv · 知乎 · 飞书 · Notion", src: "K1" },
-      { part: "原料签", label: "训练数据", value: "10,000 条", sub: "smoltalk everyday-conversations（全集 1.1M 的 0.9%）", src: "K8" },
-      { part: "质检牌", label: "单元测试", value: "3 项", sub: "模板渲染 / 多轮 masking / collate padding，全过", src: "K9" },
-      { part: "火印", label: "生产配方互证项", value: "5 项", sub: "lr 1e-5 · warmup 0.03 · wd 0 · clip 1.0 · epochs 2，与 tulu3/OpenRLHF 逐项吻合", src: "K4" },
+      { part: "铭牌", label: "决策点", value: "7 个", sub: "模板 / masking / collate·loss / 精度 / 调度 / 数据 / 验证", src: "K1" },
+      { part: "刃口", label: "最大分歧", value: "masking", sub: "三种做法并存：只训末轮（rlhf-book）· 不 mask（课程代码）· generation 标记（trl）", src: "K2" },
+      { part: "锤痕", label: "教材的坑", value: "2 处", sub: "grad-accum 尾部两书各有瑕疵 · micro-batch 平均口径偏差", src: "K2" },
+      { part: "原料签", label: "数据光谱", value: "1K → 1M", sub: "LIMA 1K 精选到 OpenHermes 1M 混合；1 万条站在先验证链路的一端", src: "K5" },
+      { part: "质检牌", label: "强共识区", value: "3 项", sub: "collate·loss 两处独立实现逐行同构 · lr 落 5e-6~2e-5 · checkpoint 连 tokenizer 保存", src: "K4" },
+      { part: "火印", label: "配方互证", value: "5 项", sub: "lr 1e-5 · warmup 0.03 · wd 0 · clip 1.0 · epochs 2，与 tulu3 / OpenRLHF 逐项吻合", src: "K4" },
     ],
   },
 
   // ── 决策对照矩阵（P5）：行 = 决策，列 = 来源实现 ──
-  matrixCols: ["forge", "rlhf-book", "hands-on 课程", "trl SFTTrainer", "Zephyr recipe", "tulu3 8B", "OpenRLHF"],
+  matrixCols: ["手写极简", "rlhf-book", "hands-on 课程", "trl SFTTrainer", "Zephyr recipe", "tulu3 8B", "OpenRLHF"],
   decisions: [
     { name: "训练循环形态", cells: [
       { v: "手写，全显式", cls: "ref" },
@@ -812,7 +811,7 @@ window.RPT = {
       { v: "自定义 Jinja", cls: "part" },
       { v: "Tulu 模板族", cls: "part" },
       { v: "切分 prompt/response", cls: "part" } ],
-      note: "forge 手写渲染与 Qwen 官方模板逐字符一致（已验证）" },
+      note: "手写渲染与 Qwen 官方模板逐字符一致（已验证）" },
     { name: "LR schedule", cells: [
       { v: "cosine + 3% warmup", cls: "ref" },
       { v: "线性 warmup+衰减", cls: "diff" },
@@ -881,7 +880,7 @@ window.RPT = {
   // ── 数据规模光谱（P1）：1 格 = 1 万条 ──
   dataSpectrum: [
     { name: "LIMA", samples: 0.1, unit: "1,000 条", kind: "人工精选", note: "65B 接近当时 GPT-4；表面对齐假说", src: "K5" },
-    { name: "forge（本仓库）", samples: 1, unit: "10,000 条", kind: "单源切片", note: "smoltalk 对话层子集，零过滤", src: "K9", ref: true },
+    { name: "手写极简", samples: 1, unit: "10,000 条", kind: "单源切片", note: "smoltalk 对话层子集，零过滤", src: "K9", ref: true },
     { name: "AlpaGasus", samples: 0.9, unit: "9K（从 52K 筛）", kind: "自动筛选", note: "90% 判为低质；9K 反超全量", src: "K5" },
     { name: "Deita", samples: 1, unit: "6-10K", kind: "自动打分", note: "复杂性/质量/多样性三维，超更大混合集", src: "K5" },
     { name: "rlhf-book", samples: 0.95, unit: "9.5K", kind: "人工编写", note: "No Robots 单轮为主", src: "K2" },
@@ -891,7 +890,7 @@ window.RPT = {
 
   // ── masking 裁决天平（P18）──
   maskingCase: {
-    left: { name: "completion-only（forge 站位）", weights: [
+    left: { name: "completion-only（基准实现站位）", weights: [
       { t: "trl 警告：end token 不计 loss → 学不会停止", w: 3 },
       { t: "课程文档：防模型背诵提示词", w: 2 },
       { t: "主流框架默认（tulu3 / trl generation 标记）", w: 2 },
@@ -904,7 +903,7 @@ window.RPT = {
       { t: "0.5B 小模型上 IM 优势是否保持", note: "IM 实验基于更大模型" },
       { t: "多轮场景 IM 与 OM 的差距方向", note: "未查到此设定的消融" } ],
     falsify: "若目标是'让模型只学接话'，OM 仍是无争议默认；争议只在'是否还要内化指令分布'",
-    verdict: "维持 forge 现状（全 assistant 段），把 masking 从'理所当然'改写为'有争议的设计选择'",
+    verdict: "维持全 assistant 段口径，把 masking 从'理所当然'改写为'有争议的设计选择'",
   },
 
   // ── Stage 2 优先级闸门（P13）──
@@ -920,23 +919,12 @@ window.RPT = {
 
   // ── 未决问题赔率板（P7）──
   odds: [
-    { name: "masking 之争在小模型上的方向", p: "未定", range: [1, 3], evidence: "IM 2405.14394 基于更大模型；forge 0.5B 是天然消融场", boundary: "若 0.5B 上 OM 稳定不差，教学默认无需改", status: "UNDER WAY" },
+    { name: "masking 之争在小模型上的方向", p: "未定", range: [1, 3], evidence: "IM 2405.14394 基于更大模型；0.5B 小模型是天然消融场", boundary: "若 0.5B 上 OM 稳定不差，教学默认无需改", status: "UNDER WAY" },
     { name: "数据配比的最优解", p: "低置信", range: [1, 2], evidence: "社区数字 1:1 与 1:10~1:100 相差十倍；Tulu 3 靠消融不靠先验", boundary: "Stage 2 混合数据时做小规模消融", status: null },
     { name: "packing 的 mask 串味风险", p: "可控", range: [2, 3], evidence: "BFD packing 需 position_ids 重置；IBM 2407.09105 给出方案", boundary: "实现时必须带 attention 隔离", status: null },
     { name: "纯 SFT 切片的性能天花板", p: "较低", range: [1, 2], evidence: "SFT Memorizes, RL Generalizes：泛化提升主要在 RL 阶段", boundary: "Stage 1 只验证链路，不追指标", status: null },
   ],
 
-  // ── 右栏仪表盘读数 ──
-  rail: {
-    phases: ["模板", "masking", "loss", "精度", "调度", "数据", "验证"],
-    current: 1,
-    stats: [
-      { k: "仓库行数", v: "511" },
-      { k: "决策点", v: "7" },
-      { k: "信息源", v: "6" },
-      { k: "互证配方项", v: "5" } ],
-    readout: { label: "对照来源", value: "15+", sub: "论文与工程分享" },
-  },
 };
 
 </script>
@@ -951,7 +939,7 @@ window.SOURCES = [
   { id: "K6", cls: "industry", date: "2026-08", text: "中文社区：HF Chat Templates（Silent Performance Killer，2024-01）· 知乎 SFT 数据 curation 专栏（2026-08-19）· 知乎 SFT 与 RL 数据准备（2026-04-03）· llm-study Trainer 排错清单" },
   { id: "K7", cls: "industry", date: "2026-05~08", text: "飞书业界动态群：SKT（2026-08-04）· AutoCompact judge-guided SFT（2026-08-03）· MindForge 轨迹微调（2026-08-01）· SFT/RL/OPD 分布视角博客（2026-06-15）" },
   { id: "K8", cls: "company", date: "2026-08-28", text: "HuggingFaceTB/smoltalk 数据集卡片 —— 全集 1.1M/14 子集；everyday-conversations 为基础对话行为切片" },
-  { id: "K9", cls: "kimi", date: "2026-08-28", text: "forge 仓库本地工作区（尚未推送）—— src/forge/{data,train,model}.py、configs/sft.yaml、tests/test_data.py；行号以当日为准" },
+  { id: "K9", cls: "kimi", date: "2026-08-28", text: "极简手写 SFT 实现（blog 配套，尚未开源推送）——超参与行为事实以 2026-08-28 工作区快照为准" },
   { id: "K10", cls: "industry", date: "2026-02", text: "Netflix 工程博客 Scaling LLM Post-Training（经 Notion 材料库索引）—— loss masking、packing 吞吐 4.7×" },
 ];
 
@@ -1136,7 +1124,7 @@ window.U = (() => {
   const NAME = ["一锤火花", "一件工件", "刀架阵列", "整座工坊"];
   const ARG = [
     "每一次 step，都是把梯度锤进权重",
-    "511 行 · 7 个决策 · 逐个落锤成形",
+    "7 个决策 · 逐个落锤成形",
     "2 套教材 · 4 个生产框架逐件对照",
     "更大的锻造版图 —— 规模化一路向上",
   ];
@@ -1468,10 +1456,10 @@ window.U = (() => {
       sub: "val loss + 8 条生成 · 3 项单测全过",
       w: 15.5, d: 11.5, h: 4.2, mat: { top: "#46525f", side: "#37424d", kind: "steel" },
       drill: { title: "淬火槽 · 验证", value: "val loss + 8 条生成", sub: "单测 3 项全过：模板渲染 / 多轮 masking / collate padding", source: "K9 · K1" } },
-    { key: "knife", name: "刀", role: "产出", arg: (ev("铭牌").value || "511 行") + " · 7 个决策",
+    { key: "knife", name: "刀", role: "产出", arg: (ev("铭牌").value || "7 个决策") + " · 全篇解剖",
       sub: "5 项配方与生产框架逐项互证",
       knife: true,
-      drill: { title: "刀 · 产出", value: ev("铭牌").value || "511 行", sub: (ev("铭牌").sub || "") + " · " + (ev("刃口").sub || ""), source: "K9 · K1" } },
+      drill: { title: "刀 · 产出", value: ev("铭牌").value || "7 个决策", sub: (ev("铭牌").sub || "") + " · " + (ev("刃口").sub || ""), source: "K9 · K1" } },
   ];
   const ZA = [1.2, 4.8, 13.3, 17.5, 21.7];      // 各层组装态底面 z（含托盘 1.2）
   const SEP = [9, 15.5, 22, 28.5, 36];          // 各层爆炸位移
@@ -2404,9 +2392,9 @@ window.U = (() => {
   const MONO = 'Menlo,Consolas,"SF Mono","Liberation Mono","DejaVu Sans Mono",ui-monospace,monospace';
 
   const body = frame(host, {
-    title: "511 行、7 个旋钮：整件工件就这么多",
+    title: "7 个旋钮：整件工件就这么多",
     sub: "读法 · 每个数字挂在刀胚的语义部位（铭牌=行数 · 刃口=决策点 · 锤痕=信息源 · 原料签=数据 · 质检牌=测试 · 火印=配方互证）· 单位见各件 · 点任意部位下钻口径与出处",
-    src: "K1 blog 正文 2026-08-28 · K4 生产框架源码 2026-08-28 · K8 smoltalk 卡片 2026-08-28 · K9 forge 工作区 2026-08-28（均源码已验证）",
+    src: "K1 blog 正文 2026-08-28 · K4 生产框架源码 2026-08-28 · K8 smoltalk 卡片 2026-08-28 · K9 基准实现工作区 2026-08-28（均源码已验证）",
   });
 
   const cv = document.createElement("canvas");
@@ -2841,8 +2829,8 @@ window.U = (() => {
   };
 
   const CLS = {
-    ref:  { en: "REF",  zh: "forge 参照实现" },
-    same: { en: "SAME", zh: "与 forge 同构" },
+    ref:  { en: "REF",  zh: "手写极简（参照）" },
+    same: { en: "SAME", zh: "与参照实现同构" },
     part: { en: "PART", zh: "部分同构" },
     diff: { en: "DIFF", zh: "实现路线不同" },
     warn: { en: "WARN", zh: "有坑 / 存疑" },
@@ -2851,7 +2839,7 @@ window.U = (() => {
 
   // 列 → K 锚点出处（见 js/sources.js；trl/Zephyr/tulu3/OpenRLHF 同属 K4 生产框架源码快照）
   const COLSRC = [
-    "K9 · forge 仓库本地工作区（2026-08-28）",
+    "K9 · 极简实现工作区（2026-08-28）",
     "K2 · rlhf-book 教材代码",
     "K3 · hands-on-modern-rl ch08 + ch15",
     "K4 · trl 源码快照",
@@ -2933,8 +2921,8 @@ window.U = (() => {
   // ── 图表骨架三件套（标题=发现；mono 副题=读法+交互提示；来源行挂在表尾）──
   const body = frame(host, {
     title: "学习率全在共识区，masking 全篇最大分歧：10 个决策 × 7 路实现",
-    sub: "HOW TO READ · 行 = 决策，列 = 来源，首列 forge 为参照实现 · 点任意格下钻该来源做法与出处 · 蓝 = 同构 · 斜纹 = 部分同构 · 灰 = 不同 · 红框 = 有坑",
-    src: "个人研究 + 官方仓库 + 社区 — K1 blog(2026-08-28) · K2/K3 教材 · K4 生产框架源码快照 · K9 forge 工作区",
+    sub: "HOW TO READ · 行 = 决策，列 = 来源，首列为参照实现 · 点任意格下钻该来源做法与出处 · 蓝 = 同构 · 斜纹 = 部分同构 · 灰 = 不同 · 红框 = 有坑",
+    src: "个人研究 + 官方仓库 + 社区 — K1 blog(2026-08-28) · K2/K3 教材 · K4 生产框架源码快照 · K9 基准实现工作区",
   });
 
   // ── 表格 ──
@@ -3003,7 +2991,7 @@ window.U = (() => {
   const legend = document.createElement("div");
   legend.className = "mx-legend";
   [
-    ["sw-ref",  "ref · forge 参照"],
+    ["sw-ref",  "ref · 参照实现"],
     ["sw-same", "same · 同构"],
     ["sw-part", "part · 部分同构"],
     ["sw-diff", "diff · 不同"],
@@ -3070,7 +3058,7 @@ window.U = (() => {
   sides.forEach(s => { s.sum = s.weights.reduce((a, w) => a + w.w, 0); });
 
   const body = U.frame(host, {
-    title: "维持 forge 现状：masking 是有争议的设计选择，不是理所当然",
+    title: "维持全 assistant 段口径：masking 是有争议的设计选择，不是理所当然",
     sub: "读法 · 左右盘=两案证据砝码（梯形=一条证据，W=权重）；梁倾方向=证据权重侧——倾角为定性示意，不是打分；盘外虚线空心砝码=未满足触发器，全部落盘后才复称；底部红斜纹封条=共同证伪线 · 点击砝码 / 封条 / 读数牌下钻全文与出处",
     src: "K1 blog 正文 · K3 课程文档 · K4 生产框架源码 · K5 arXiv 清单 · K7 业界动态群 · 2026-08-28",
   });
@@ -3416,7 +3404,7 @@ window.U = (() => {
 // ═══ P1 数据规模光谱：七座 iso 数据塔 ═══
 // 计数单元 = 数据块（1 块 = 1 万条样本，画成一册「数据册」：封面 + 书脊）。
 // 塔高 = 样本量；大塔（Tulu 3 / OpenHermes）只画前 12 块 + 虚线截断块，
-// 截断标注本身就是数据表达。电蓝塔 = forge（本仓库，主角）。
+// 截断标注本身就是数据表达。电蓝塔 = 手写极简实现（主角）。
 (() => {
   "use strict";
   const host = document.getElementById("spectrum-chart");
@@ -3434,7 +3422,7 @@ window.U = (() => {
   // 图表骨架三件套：标题 / 副题 / 出处
   const body = frame(host, {
     title: "数据规模光谱 · 七座数据塔的实物对照",
-    sub: "计数单元 = 数据块（1 块 = 1 万条样本 · 一册）· 实心册 = 实绩 · 电蓝塔 = forge（本仓库）· 大塔只画前 12 块，截断即表达",
+    sub: "计数单元 = 数据块（1 块 = 1 万条样本 · 一册）· 实心册 = 实绩 · 电蓝塔 = 手写极简实现· 大塔只画前 12 块，截断即表达",
     src: "K2 · K4 · K5 · K9",
   });
 
@@ -3974,7 +3962,7 @@ window.U = (() => {
 
   // 行 → K 锚点出处（见 js/sources.js；odds 数据本身不携带 src 字段，按 evidence 指向的实物登记）
   const SRC = [
-    "K5 · arXiv 清单(2026-08-28) — IM 2405.14394；K9 · forge 仓库工作区 — 0.5B 天然消融场",
+    "K5 · arXiv 清单(2026-08-28) — IM 2405.14394；K9 · 基准实现工作区 — 0.5B 天然消融场",
     "K5 · arXiv 清单 — Tulu 3 消融 2411.15124；K6 · 中文社区 — 配方数字 1:1 vs 1:10~1:100",
     "K5 · arXiv 清单 — Packing-FA 2407.09105",
     "K5 · arXiv 清单 — SFT Memorizes, RL Generalizes 2501.17161",
@@ -4056,7 +4044,7 @@ window.U = (() => {
   const body = frame(host, {
     title: "四道未决题，只有 masking 方向那道已经开跑",
     sub: "HOW TO READ · 刻度 1–4 = 主观概率档位，双点=估计区间，连线=跨度 · 整行蓝 tint + UNDER WAY = 进行中的消融 · 点任意行下钻证据与边界",
-    src: "K4 生产框架源码快照 · K5 arXiv 论文清单(2026-08-28) · K6 中文社区 · K9 forge 工作区",
+    src: "K4 生产框架源码快照 · K5 arXiv 论文清单(2026-08-28) · K6 中文社区 · K9 基准实现工作区",
   });
 
   const wrap = document.createElement("div");
