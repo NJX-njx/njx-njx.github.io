@@ -1,6 +1,6 @@
 ---
 title: "“答错就写长一点”：GRPO 的两个归一化项是如何扭曲优化方向的"
-date: 2026-08-29T12:15:00+08:00
+date: 2026-08-29T12:05:00+08:00
 draft: false
 math: true
 tags: ["rl", "post-training", "grpo", "dr-grpo", "normalization"]
