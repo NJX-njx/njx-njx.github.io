@@ -69,7 +69,7 @@ $$\tilde{A}_i = R_i - \mathrm{mean}(\{R_j\}_{j=1}^G)$$
 
 本周已发的几篇文章，恰好分别从三个层面回应了这件事：
 
-- **DAPO 的 token-mean**（§3.2）：把“样本内先平均再对 G 条求平均”改成“batch 内所有 token 统一按总 token 数平均”，也就是 $\frac{1}{\sum_i|y_i|}\sum_i\sum_t$。同时所有 token 都按 token 总数加权，从形式上消除长度偏差——但 DAPO 的 advantage 保留 z-score（含 std），**只解决了一半**；
+- **DAPO 的 token-mean**（§3.3）：把“样本内先平均再对 G 条求平均”改成“batch 内所有 token 统一按总 token 数平均”，也就是 $\frac{1}{\sum_i|y_i|}\sum_i\sum_t$。同时所有 token 都按 token 总数加权，从形式上消除长度偏差——但 DAPO 的 advantage 保留 z-score（含 std），**只解决了一半**；
 - **GSPO**：在序列级使用一个比率，且不再在目标函数里逐项对 token 求和，因此并不存在“每个 token 除以 |y|”这一平均操作——它从结构上绕开了这一偏差；
 - **Dr.GRPO**（本篇）：不改目标函数结构，只从归一化项中去掉两个变量除数。
 
