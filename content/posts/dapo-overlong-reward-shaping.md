@@ -8,6 +8,8 @@ categories: ["AI"]
 summary: "RL 训练必须有生成长度上限，被截断的回答默认按答错处理——这会把“无法判定”的样本错判成“错”样本，把奖励噪声直接注入组内 advantage。DAPO 的两个方案：Overlong Filtering 承认不可判定、屏蔽其 loss；Soft Overlong Punishment 在悬崖前修一段线性缓冲坡，让长度控制变成连续信号。本文拆解机制、公式、配置数值，并把它和 Dr.GRPO、token-mean 拼成完整的长度问题图景。"
 ---
 
+> 本文有配套的[交互报告](/reports/dapo-overlong-reward-shaping/)，含可下钻的长度标尺、Equation 13 三段拆解与三种处理方式的对比切换。
+
 ## 无法回避的一个工程设定
 
 RL 训练的 rollout 必须有生成长度上限。显存要按最长序列预留，batch 要等最慢的一条写完，一条失控的 response 能拖垮整批吞吐。DAPO 的配置是：预期最大长度 16,384 token，额外保留 4,096 token 的缓冲区间，硬性生成上限为 20,480（论文 §4.1）。
