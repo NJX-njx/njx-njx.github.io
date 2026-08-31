@@ -8,6 +8,8 @@ categories: ["AI"]
 summary: "单轮 RL 里 advantage 整条序列共享，从没人为难过；到了多轮 agentic RL，同一条轨迹里第 1 轮搜索做对了、第 2 轮 query 跑偏、最后答错——单一 trajectory reward 该怎么分摊，变成一个真实的设计决策。本文拆解形式化层（action mask、轨迹概率）、归因谱系（ORM/PRM/turn 折扣/三条中间路线）、以及 GSPO-token 为多轮留的那个口子。"
 ---
 
+> 本文有配套的[交互报告](/reports/turn-level-reward-credit-assignment/)，含可切换的 ORM/PRM 归因对照、γ 滑杆反向折扣与 GSPO-token 公式拆解。
+
 ## 一个单轮训练里不存在的难题
 
 看一条五轮交互的轨迹：第 1 轮搜索命中了关键证据，第 2 轮改写 query 时跑偏带回了无关内容，第 3 轮纠错找回一半，第 4 轮计算出错，第 5 轮给出错误答案。环境只回了一个数：失败，reward = 0。
