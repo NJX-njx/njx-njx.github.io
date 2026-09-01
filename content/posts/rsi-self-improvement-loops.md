@@ -1,6 +1,6 @@
 ---
 title: "「模型自己把自己练强」拆开看是三个闭环：RSI 与自我改进的层次"
-date: 2026-09-01T12:45:00+08:00
+date: 2026-09-01T12:30:00+08:00
 draft: false
 math: true
 tags: ["rl", "post-training", "agentic-rl", "rsi", "self-improvement"]
