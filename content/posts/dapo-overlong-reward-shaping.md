@@ -1,5 +1,5 @@
 ---
-title: "截断的回答该怎么判：DAPO 的 Overlong Reward Shaping 在修什么噪声"
+title: "截断的回答该怎么判：DAPO Overlong 在修什么"
 date: 2026-08-30T12:05:00+08:00
 draft: false
 math: true

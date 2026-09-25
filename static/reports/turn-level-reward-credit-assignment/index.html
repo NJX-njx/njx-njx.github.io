@@ -960,7 +960,7 @@ main, footer#sec-sources { margin-right: 0; }
     <p class="sec-no">§5 · GRPO / GSPO 家族在这张地图上的位置</p>
     <h2>GSPO-token 留的那个口子</h2>
     <p class="dek">数值上恒等于序列级比率——梯度结构里却出现一个"逐 token 可定制的 advantage 位"。</p>
-    <p>上周 GSPO 那篇留下的尾巴今天兑现（姊妹报告：<a href="/reports/gspo-sequence-level-importance-sampling/">比率用错了单位：GSPO 为什么把重要性采样提到序列级</a>）。GSPO 的"优化单位应匹配奖励单位"原则在多轮场景会遇到真实张力：GSPO 的目标函数把整条 response 当一个 action，适合 outcome 级奖励；多轮 RL 想要 turn 级归因，等于要求<b>比序列更细的粒度</b>。GSPO 论文 §4.3 为此设计的 GSPO-token 变体 <button class="src" data-k="k4">K4</button>，公式很能说明问题，逐项点：</p>
+    <p>上周 GSPO 那篇留下的尾巴今天兑现（姊妹报告：<a href="/reports/gspo-sequence-level-importance-sampling/">比率用错了单位：GSPO 把重要性采样提到序列级</a>）。GSPO 的"优化单位应匹配奖励单位"原则在多轮场景会遇到真实张力：GSPO 的目标函数把整条 response 当一个 action，适合 outcome 级奖励；多轮 RL 想要 turn 级归因，等于要求<b>比序列更细的粒度</b>。GSPO 论文 §4.3 为此设计的 GSPO-token 变体 <button class="src" data-k="k4">K4</button>，公式很能说明问题，逐项点：</p>
   </div>
   <div class="prose">
     <div class="formula" id="gspo-formula" role="group" aria-label="GSPO-token 公式">
@@ -1053,12 +1053,12 @@ main, footer#sec-sources { margin-right: 0; }
     <div class="sister-grid">
       <a class="sister" href="https://njx-njx.github.io/posts/turn-level-reward-credit-assignment/">
         <span class="s-k">原文 · BLOG</span>
-        <span class="s-t">7 轮交互失败了该怪谁：多轮轨迹的奖励归因怎么进 GRPO/GSPO</span>
+        <span class="s-t">7 轮交互失败了该怪谁：奖励归因怎么进 GRPO/GSPO</span>
         <span class="s-d">本报告的配套长文 · 2026-08-31</span>
       </a>
       <a class="sister" href="/reports/gspo-sequence-level-importance-sampling/">
         <span class="s-k">姊妹报告 · GSPO</span>
-        <span class="s-t">比率用错了单位：GSPO 为什么把重要性采样提到序列级</span>
+        <span class="s-t">比率用错了单位：GSPO 把重要性采样提到序列级</span>
         <span class="s-d">§5 引用的"上周那篇" · 序列级比率的来龙去脉</span>
       </a>
       <a class="sister" href="/reports/grpo-group-size-tradeoffs/">

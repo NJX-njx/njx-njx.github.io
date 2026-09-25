@@ -1,5 +1,5 @@
 ---
-title: "Product Evals: Travel Planner, Long Context, and The Weight Of Taste"
+title: "Product Evals: A Travel Planner Taste Test"
 date: 2026-05-22T16:00:00+08:00
 draft: false
 tags: ["travel-planner", "eval", "product", "agent", "long-context"]

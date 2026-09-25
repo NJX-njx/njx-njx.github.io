@@ -1,5 +1,5 @@
 ---
-title: "比率用错了单位：GSPO 为什么把重要性采样提到序列级"
+title: "比率用错了单位：GSPO 把重要性采样提到序列级"
 date: 2026-08-26T17:40:00+08:00
 draft: false
 math: true

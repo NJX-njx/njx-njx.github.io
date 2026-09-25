@@ -1,5 +1,5 @@
 ---
-title: "“答错就写长一点”：GRPO 的两个归一化项是如何扭曲优化方向的"
+title: "“答错就写长一点”：GRPO 归一化项在扭曲什么"
 date: 2026-08-29T12:05:00+08:00
 draft: false
 math: true
@@ -92,4 +92,4 @@ $$\tilde{A}_i = R_i - \mathrm{mean}(\{R_j\}_{j=1}^G)$$
 - Sea AI Lab / NUS：[Understanding R1-Zero-Like Training: A Critical Perspective](https://arxiv.org/abs/2503.20783)（本文公式、实验与偏差定义的出处；v2）
 - 本地教材 hands-on-modern-rl：第 16.4 节（采用勘误后的表述）与附录 DAPO cheatsheet（`docs/en/appendix_code_cheatsheet/dapo.md`，DAPO 的 z-score advantage 与 token-mean 损失粒度对照）
 - RLOO 参照：[Back to Basics: Revisiting REINFORCE Style Optimization](https://arxiv.org/abs/2402.14740)
-- 前篇：[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/)、[比率用错了单位：GSPO 为什么把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)、[同一个模型，两个概率：训练推理不一致怎么把 on-policy 变成 off-policy](/posts/tis-train-inference-mismatch/)
+- 前篇：[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/)、[比率用错了单位：GSPO 把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)、[同一个模型，两个概率：训练推理不一致的代价](/posts/tis-train-inference-mismatch/)

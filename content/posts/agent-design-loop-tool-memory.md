@@ -1,5 +1,5 @@
 ---
-title: "Agent Design: Loops, Tools, and the Shape of Memory"
+title: "Agent Design: Loops, Tools, and Memory"
 date: 2026-05-22T15:20:00+08:00
 draft: false
 tags: ["agent", "llm", "tool-use", "memory", "product"]

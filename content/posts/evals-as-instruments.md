@@ -1,5 +1,5 @@
 ---
-title: "Evals As Instruments: Measuring What The Demo Hides"
+title: "Evals As Instruments: What Demos Hide"
 date: 2026-05-22T15:30:00+08:00
 draft: false
 tags: ["eval", "benchmark", "llm", "agent", "product"]

@@ -1,5 +1,5 @@
 ---
-title: "Context Engineering: Retrieval, Memory, and The Shape Of Evidence"
+title: "Context Engineering: The Shape of Evidence"
 date: 2026-05-22T15:50:00+08:00
 draft: false
 tags: ["retrieval", "rag", "context-engineering", "llm", "memory", "agent"]

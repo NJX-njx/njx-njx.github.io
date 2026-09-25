@@ -96,4 +96,4 @@ Dr.GRPO（本周后面会专门写）对 std 的批评——全对全错组 std 
 - What is the Alignment Objective of GRPO?：[arXiv:2502.18548](https://arxiv.org/abs/2502.18548)
 - RLHF Book 第 6 章（baseline 无偏条件、RLOO 留一公式）：本地仓库 `book-zh/chapters/06-policy-gradients.md`；教学代码默认 `num_rollouts: 8`：`code/policy_gradients/configs/`
 - 零梯度组概率表、误判丢弃、clip 触发率链条为本文推算/推断，文中已逐处标注
-- 前篇：[比率用错了单位：GSPO 为什么把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)
+- 前篇：[比率用错了单位：GSPO 把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)

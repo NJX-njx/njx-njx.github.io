@@ -1,5 +1,5 @@
 ---
-title: "7 轮交互失败了该怪谁：多轮轨迹的奖励归因怎么进 GRPO/GSPO"
+title: "7 轮交互失败了该怪谁：奖励归因怎么进 GRPO/GSPO"
 date: 2026-08-31T12:55:00+08:00
 draft: false
 math: true
@@ -87,4 +87,4 @@ GRPO 家族走对称的另一条路：组内比较多条轨迹的机制不动，
 - GSPO 论文：[arXiv:2507.18071](https://arxiv.org/abs/2507.18071) §4.3（GSPO-token 公式与等价性论证）
 - AppWorld：[Executable Code Actions Elicit Better LLM Agents](https://arxiv.org/abs/2404.14394)；ORM/PRM 原始框架：[Let's Verify Step by Step](https://arxiv.org/abs/2305.20050)（Lightman et al., 2023）
 - 中间路线：SALT [2510.20022]、GiGPO/HGPO [2604.18401]、SPA-RL [2505.20732]、IGPO [2504.05678]、Turn-PPO [2512.17008]、StepPO [2604.18401]（arXiv id 均转引自教材）
-- 前篇：[比率用错了单位：GSPO 为什么把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)、[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/)
+- 前篇：[比率用错了单位：GSPO 把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)、[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/)

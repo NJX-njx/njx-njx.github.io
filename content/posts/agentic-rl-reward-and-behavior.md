@@ -1,5 +1,5 @@
 ---
-title: "Agentic RL: Reward, Behavior, and The Long Shadow Of Feedback"
+title: "Agentic RL: The Long Shadow of Feedback"
 date: 2026-05-22T15:40:00+08:00
 draft: false
 tags: ["agentic-rl", "reinforcement-learning", "agent", "reward", "eval"]

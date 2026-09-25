@@ -1,5 +1,5 @@
 ---
-title: "同一个模型，两个概率：训练推理不一致怎么把 on-policy 变成 off-policy"
+title: "同一个模型，两个概率：训练推理不一致的代价"
 date: 2026-08-27T13:00:00+08:00
 draft: false
 math: true
@@ -100,4 +100,4 @@ BF16 与 FP16 同样 16 位，分配不同。BF16 用 8 位指数 + 7 位尾数�
 - Liu 等：《When Speed Kills Stability: Demystifying RL Collapse from the Inference-Training Mismatch》，2025，Notion 发布；序列级掩码校正，同上转述
 - 工程路线：[Unified FP8: Moving Beyond Mixed Precision for Stable and Accelerated MoE RL](https://www.lmsys.org/blog/2025-11-25-fp8-rl/)（LMSYS）；Miles/slime：All-In-One Solution to Training-Inference Mismatch
 - 本地教材 hands-on-modern-rl 附录 B.1：rollout engine 产出 old logprob 的两种工程处理（直接采用推理端返回的结果，或在训练端重新计算并核对其准确性）
-- 前篇：[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/) 与 [比率用错了单位：GSPO 为什么把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)
+- 前篇：[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/) 与 [比率用错了单位：GSPO 把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)
