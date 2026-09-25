@@ -10,12 +10,13 @@ Production site: <https://njx-njx.github.io/>
 
 ```text
 content/posts/              Blog posts in Markdown
-content/*.md                Special pages such as About, FAQ, Search, Archive
+content/*.md                Special pages such as About, FAQ, Search, Archive, Reports
 hugo.yaml                   Main Hugo configuration
-layouts/_default/           Local layout overrides
-assets/css/                 Custom CSS processed by Hugo Pipes
+layouts/_default/           Local layout overrides (reports, search-assistant, rss, baseof)
+assets/css/extended/        Custom CSS auto-loaded by PaperMod after theme styles
 assets/js/                  Custom JavaScript processed by Hugo Pipes
-static/                     Static files copied as-is
+static/reports/             Standalone interactive report pages (one folder per report)
+static/*.png|jpg            Favicons, logo, OG image
 workers/openrouter-proxy/   Cloudflare Worker proxy for the AI assistant
 themes/PaperMod/            PaperMod theme submodule
 .github/workflows/hugo.yaml GitHub Pages deployment workflow
@@ -26,7 +27,16 @@ the root `layouts/` and `assets/` directories instead.
 
 ## Local Setup
 
-This site requires Hugo Extended. On Windows with Scoop:
+This site requires Hugo Extended.
+
+macOS (Homebrew):
+
+```bash
+brew install hugo
+hugo version
+```
+
+Windows (Scoop):
 
 ```powershell
 scoop install hugo-extended
@@ -37,7 +47,7 @@ Other install options are documented at <https://gohugo.io/installation/>.
 
 After cloning, initialize the theme submodule if needed:
 
-```powershell
+```bash
 git submodule update --init --recursive
 ```
 
@@ -90,6 +100,19 @@ summary: "Short description for lists and search results."
 ---
 ```
 
+## Interactive Reports
+
+Long posts can have a companion interactive report in `static/reports/<slug>/`
+(a self-contained HTML page, linked from the matching blog post). To publish
+one:
+
+1. Drop the report folder into `static/reports/<slug>/`.
+2. Register it in the front matter of `content/reports.md` (title, url, date,
+   desc) so it appears on the Reports page (`/reports/`).
+
+The Reports page is rendered by `layouts/_default/reports.html` and reuses
+PaperMod's `post-entry` card styles, so it always matches the site theme.
+
 ## Search And AI Assistant
 
 The search page uses a custom layout, `search-assistant`, at `/search/`. It
@@ -134,10 +157,15 @@ You can also run the workflow manually from the GitHub Actions tab.
 
 ## Quick Checks
 
-```powershell
+```bash
 node --check assets/js/search-assistant.js
 node --check scripts/search_quality.js
 python -m py_compile scripts/llm_model.py
 hugo --gc --minify
 node scripts/search_quality.js public/index.json
 ```
+
+## For AI Agents
+
+See [AGENTS.md](AGENTS.md) for repository conventions, structure, and
+workflows when working on this project with an AI coding agent.

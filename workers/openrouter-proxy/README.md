@@ -118,7 +118,7 @@ Response:
 ```json
 {
   "answer": "Assistant answer",
-  "model": "openai/gpt-4o-mini",
+  "model": "openai/gpt-oss-20b:free",
   "usage": null
 }
 ```
