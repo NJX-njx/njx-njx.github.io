@@ -18,7 +18,7 @@ params:
   env: production
   title: Njx's Blog
   description: "记录 AI/ML 与工程实践的学习笔记。"
-  keywords: [AI, ML, LLM, RAG, Multimodal, MLOps, Engineering]
+  keywords: [Harness, Model Architecture, Mid-training, Post-training, Evals, Benchmarks, Reasoning RL, Agentic RL, RSI, Rollout System, Data Synthesis]
   author: jiaxing ni
   DateFormat: "January 2, 2006"
   defaultTheme: auto
@@ -59,7 +59,7 @@ params:
   homeInfoParams:
     Title: "👋 Welcome to Njx'Log"
     Content: >
-        Hi, this is Jiaxing Ni. I write about AI/ML, product thinking and building, evals, agentic RL, and the engineering work of turning ideas into systems.
+        Hi, this is Jiaxing Ni. I write about harness and rollout systems, model architecture, mid-training and post-training, evals and benchmarks, reasoning RL and agentic RL, RSI, data synthesis, and the engineering work of turning ideas into systems.
         
         Posts started in 2024 and are updated as I learn more.
 
