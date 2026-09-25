@@ -1,0 +1,22 @@
+/* 回到顶部按钮：贴合暗色主题的玻璃拟态风格 */
+
+.top-link {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    color: var(--secondary);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 50%;
+}
+
+.top-link,
+.top-link svg {
+    filter: none;
+    fill: currentColor;
+}
+
+.top-link:hover {
+    color: var(--primary);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--secondary);
+}
