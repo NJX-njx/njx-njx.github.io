@@ -11,82 +11,61 @@ ShowShareButtons: false
 ---
 ## 👋 Jiaxing Ni (倪家兴)
 
-Computer Science student at Beijing Institute of Technology, Xu Teli Elite Class.
+19, post-training researcher @ ByteDance. CS at Beijing Institute of Technology, Xu Teli Elite Class.
 
-I build near a small constellation: **AI products, evals, agentic RL, multimodal systems, and the engineering needed to make fragile ideas usable**.
+I work where **harness, eval, and post-training** meet — the engineering side of modern LLM training. Good systems feel quiet on the surface. Underneath, there are rollout pipelines, reward traces, eval slices, and a few scripts watching the night shift.
 
-Good systems feel quiet on the surface. Underneath, there are datasets, prompts, failure cases, retrieval traces, metrics, and a few scripts watching the night shift.
+---
+
+## 🔭 Now
+
+Post-train researcher @ ByteDance. Current research threads:
+
+- A full **harness–eval–post-train rollout system**
+- **Interpretable generalization** in evals
+- High-quality **SFT data synthesis**
+- **Agentic RL** environment construction
+
+---
+
+## 🕰️ Before
+
+- **Moonshot AI (Kimi)** — researcher: harness (swarm, Kimi work memory), post-training (rollout system), eval (science / multi-turn / single-turn).
+- **paperboy** — agent engineer: a context OS built on user-context modeling.
+- **ByteDance Xpert** — expert data pipeline and translation bench.
+- **Maxagent** — eval research: deterministic evidence extraction from transcripts, and why an eval generalizes.
+- **PKU Wangxuan Institute** — research intern on fine-grained sports video understanding: 3D pose reconstruction, action localization.
+- Earlier fragments: quadruped robot simulation training and vision models (Baidu Software Cup), PaddlePaddle / PaddleDetection modules, and a series of agent architectures — AI notes, research reading assistant, code generation, video, companion.
 
 ---
 
 ## 🧭 Coordinates
 
-- **Identity:** student, builder, product-minded engineer.
+- **Identity:** researcher, builder, engineer.
 - **Base:** Beijing / Shanghai.
-- **Current focus:** LLM/VLM applications, evaluation infrastructure, agent behavior, retrieval-heavy products.
+- **Current focus:** rollout systems, post-training recipes, evals and benchmarks, reasoning RL and agentic RL.
 - **Taste:** prototype quickly, measure honestly, keep only what survives contact with real edges.
 
 ---
 
-## 🛠️ What I Build
-
-- **AI products from 0 to 1:** user problems, product loops, workflow design, usable demos.
-- **Evals and benchmarks:** OOD cases, task metrics, A/B experiments, annotation rules, agent-arena style tests.
-- **LLM/VLM systems:** fine-tuning, OCR/document parsing, multimodal fusion, RAG, context engineering.
-- **Agentic RL thinking:** reward signals, behavior shaping, online/offline evaluation.
-- **Engineering foundations:** reproducible experiments, Docker, distributed training/inference, small tools that remove confusion.
-
----
-
-## 📌 Proof of Work
-
-### AI Travel Planner — Product & Tech Lead
-
-Built a travel planning product around itinerary generation, recommendation, long-context reasoning, and real user loops.
-
-- **100K users in three months**, DAU share over **35%**.
-- Recommendation accuracy **82%**, user satisfaction **91%**, order conversion up **40%**.
-- Built a travel-agent benchmark with OOD scenes and long-context consistency checks.
-- Worked with roughly **40B tokens** of training data and **5B domain tokens**.
-
-### AI Note Assistant — Baidu Hackathon
-
-Multimodal note and knowledge retrieval assistant: document parsing, semantic search, personalized summaries, Notion-style organization.
-
-- Led model selection, retrieval-generation pipeline design, prompt/context engineering, and end-to-end evaluation.
-- Used PaddleOCR-VL, embeddings, retrieval, and Notion integration.
-- Won the Baidu Hackathon **Model Power Award** and entered incubation.
-
-### ByteDance Xpert — Expert Data & Evaluation
-
-Worked on expert-level annotation standards and benchmark design.
-
-- Designed data quality control flows, labeling guidelines, and evaluation mechanisms.
-- Provided samples and analysis for model alignment and iteration.
-
-### PKU Wangxuan Institute — Research Intern
-
-Worked with Prof. Peng Yuxin's group on fine-grained sports video understanding.
-
-- 3D pose reconstruction, action localization, model training, data preprocessing, and metric design.
-
-### Other Fragments
-
-- Robot perception and control for quadruped systems.
-- Target detection modules for laser weeding robots.
-- Multimodal human-computer interaction for commercial aerospace scenarios.
-
----
-
-## 🧰 Toolkit
+## 🛠️ Toolkit
 
 - **Languages:** Python, C++.
 - **ML:** PyTorch, PaddlePaddle, Transformers, DeepSpeed.
-- **Retrieval:** FAISS, Milvus, reranking, vector indexing.
 - **Infra:** Docker, Git, distributed training/inference.
-- **Open source:** Paddle, PaddleOCR, PaddleDetection, and nearby ecosystems.
+- **Agents:** harness design, tool loops, context engineering, eval pipelines.
 
 Tools are not ornaments here. A tool earns its place when the next experiment becomes less vague.
+
+---
+
+## 📝 About This Blog
+
+A field notebook on the mechanisms behind LLM training: what a knob actually does, what breaks when you turn it, and what the metric said.
+
+Topics orbit **harness and rollout systems, model architecture, mid-training and post-training, evals and benchmarks, reasoning RL and agentic RL, RSI, and data synthesis**. Longer posts often come with an interactive report edition — see [Reports](/reports/).
+
+Built with [Hugo](https://gohugo.io/) and [PaperMod](https://github.com/adityatelange/hugo-PaperMod), hosted on [GitHub Pages](https://pages.github.com/), and open source on [GitHub](https://github.com/NJX-njx/njx-njx.github.io).
 
 ---
 
@@ -94,12 +73,4 @@ Tools are not ornaments here. A tool earns its place when the next experiment be
 
 - [GitHub](https://github.com/NJX-njx)
 - [Hugging Face](https://huggingface.co/NJX-njx)
-- [Twitter / X](https://x.com/NJX_njx_ai)
-
----
-
-## 📝 About This Blog
-
-This blog is my field notebook: build logs, experiments, product reflections, and records of what the metric did not explain.
-
-Built with [Hugo](https://gohugo.io/) and [PaperMod](https://github.com/adityatelange/hugo-PaperMod), hosted on [GitHub Pages](https://pages.github.com/), and open source on [GitHub](https://github.com/NJX-njx/njx-njx.github.io).
+- [X](https://x.com/NJX_njx_ai)
