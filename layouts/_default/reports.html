@@ -1,13 +1,7 @@
 {{- define "main" }}
 
 <header class="page-header">
-  {{- partial "breadcrumbs.html" . }}
   <h1>{{ .Title }}</h1>
-  {{- if .Description }}
-  <div class="post-description">
-    {{ .Description | markdownify }}
-  </div>
-  {{- end }}
 </header>
 
 {{- range .Params.reports }}
@@ -19,7 +13,7 @@
     <p>{{ .desc }}</p>
   </div>
   <footer class="entry-footer">
-    <span>{{ time.Format site.Params.DateFormat .date }} · 交互研报</span>
+    <span>{{ time.Format site.Params.DateFormat .date }}</span>
   </footer>
   <a class="entry-link" aria-label="report link to {{ .title | plainify }}" href="{{ .url }}"></a>
 </article>
