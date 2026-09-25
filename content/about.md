@@ -9,7 +9,7 @@ ShowWordCount: false
 ShowBreadCrumbs: false
 ShowShareButtons: false
 ---
-## Jiaxing Ni (倪家兴)
+## Jiaxing Ni
 
 19, post-training researcher @ ByteDance. CS at Beijing Institute of Technology, Xu Teli Elite Class.
 
