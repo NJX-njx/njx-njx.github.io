@@ -1,6 +1,6 @@
 baseURL: "https://njx-njx.github.io/"
-locale: "zh-cn"
-defaultContentLanguage: "zh-cn"
+locale: "zh"
+defaultContentLanguage: "zh"
 hasCJKLanguage: true
 title: "Njx'Log"
 theme: "PaperMod"
