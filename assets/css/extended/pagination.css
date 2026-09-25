@@ -1,0 +1,22 @@
+/* 分页按钮：与暗色主题一致的圆角矩形风格 */
+
+.pagination a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 36px;
+    padding: 0 14px;
+    font-size: 18px;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    color: var(--secondary);
+    border-radius: 10px;
+}
+
+.pagination a:hover {
+    color: var(--primary);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--secondary);
+}
