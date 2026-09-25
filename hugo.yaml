@@ -82,6 +82,10 @@ menu:
       name: Posts
       url: /posts/
       weight: 10
+    - identifier: reports
+      name: Reports
+      url: /reports/
+      weight: 15
     - identifier: archives
       name: Archive
       url: /archives/
