@@ -19,7 +19,7 @@ params:
   title: Njx's Blog
   description: "记录 AI/ML 与工程实践的学习笔记。"
   keywords: [Harness, Model Architecture, Mid-training, Post-training, Evals, Benchmarks, Reasoning RL, Agentic RL, RSI, Rollout System, Data Synthesis]
-  author: jiaxing ni
+  author: njx
   DateFormat: "January 2, 2006"
   defaultTheme: auto
   disableThemeToggle: false
