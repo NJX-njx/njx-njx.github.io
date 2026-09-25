@@ -34,6 +34,7 @@ params:
   UseHugoToc: true
   disableSpecial1stPost: false
   disableScrollToTop: false
+  disableAnchoredHeadings: true
   comments: false
   hidemeta: false
   hideSummary: false
