@@ -45,14 +45,14 @@ params:
     endpoint: "https://njx-log-ai-assistant.njx-log.workers.dev/ask"
 
   assets:
-    favicon: "/capybara-right.png"
+    favicon: "/blog-icon.png"
     favicon16x16: "/favicon-16x16.png"
     favicon32x32: "/favicon-32x32.png"
     apple_touch_icon: "/apple-touch-icon.png"
 
   label:
     text: "Njx'Log"
-    icon: "/capybara-right.png"
+    icon: "/blog-icon.png"
     iconHeight: 35
 
   # home-info mode
@@ -64,10 +64,11 @@ params:
         Posts started in 2024 and are updated as I learn more.
 
   images:
-    - "/capybara-right.png"
+    - "/blog-cover.jpg"
 
   socialIcons:
-    - name: twitter
+    - name: x
+      title: X
       url: "https://x.com/NJX_njx_ai"
     - name: github
       url: "https://github.com/NJX-njx"
