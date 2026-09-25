@@ -9,7 +9,7 @@ ShowWordCount: false
 ShowBreadCrumbs: false
 ShowShareButtons: false
 ---
-## 👋 Jiaxing Ni (倪家兴)
+## Jiaxing Ni (倪家兴)
 
 19, post-training researcher @ ByteDance. CS at Beijing Institute of Technology, Xu Teli Elite Class.
 
@@ -17,7 +17,7 @@ I work where **harness, eval, and post-training** meet — the engineering side 
 
 ---
 
-## 🔭 Now
+## Now
 
 Post-train researcher @ ByteDance. Current research threads:
 
@@ -28,7 +28,7 @@ Post-train researcher @ ByteDance. Current research threads:
 
 ---
 
-## 🕰️ Before
+## Before
 
 - **Moonshot AI (Kimi)** — researcher: harness (swarm, Kimi work memory), post-training (rollout system), eval (science / multi-turn / single-turn).
 - **paperboy** — agent engineer: a context OS built on user-context modeling.
@@ -39,7 +39,7 @@ Post-train researcher @ ByteDance. Current research threads:
 
 ---
 
-## 🧭 Coordinates
+## Coordinates
 
 - **Identity:** researcher, builder, engineer.
 - **Base:** Beijing / Shanghai.
@@ -48,7 +48,7 @@ Post-train researcher @ ByteDance. Current research threads:
 
 ---
 
-## 🛠️ Toolkit
+## Toolkit
 
 - **Languages:** Python, C++.
 - **ML:** PyTorch, PaddlePaddle, Transformers, DeepSpeed.
@@ -59,7 +59,7 @@ Tools are not ornaments here. A tool earns its place when the next experiment be
 
 ---
 
-## 📝 About This Blog
+## About This Blog
 
 A field notebook on the mechanisms behind LLM training: what a knob actually does, what breaks when you turn it, and what the metric said.
 
@@ -69,7 +69,7 @@ Built with [Hugo](https://gohugo.io/) and [PaperMod](https://github.com/adityate
 
 ---
 
-## 🌐 Find Me Online
+## Find Me Online
 
 - [GitHub](https://github.com/NJX-njx)
 - [Hugging Face](https://huggingface.co/NJX-njx)
