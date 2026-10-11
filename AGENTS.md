@@ -45,7 +45,7 @@ static/favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png
 static/blog-cover.jpg       OG share image
 workers/openrouter-proxy/   Cloudflare Worker proxying the Ask feature to OpenRouter
 .github/workflows/hugo.yaml Deploy workflow
-.github/copilot-instructions.md  Lighter-weight agent hints (keep in sync)
+.github/copilot-instructions.md  Pointer to this file (do not duplicate content there)
 ```
 
 ## Common Commands
