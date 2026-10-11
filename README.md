@@ -102,15 +102,13 @@ summary: "Short description for lists and search results."
 ## Interactive Reports
 
 Long posts can have a companion interactive report in `static/reports/<slug>/`
-(a self-contained HTML page, linked from the matching blog post). To publish
-one:
+(a self-contained HTML page, linked from the matching blog post). `<slug>` must
+match the post's file name, `content/posts/<slug>.md`.
 
-1. Drop the report folder into `static/reports/<slug>/`.
-2. Register it in the front matter of `content/reports.md` (title, url, date,
-   desc) so it appears on the Reports page (`/reports/`).
-
-The Reports page is rendered by `layouts/_default/reports.html` and reuses
-PaperMod's `post-entry` card styles, so it always matches the site theme.
+The Reports page (`layouts/_default/reports.html`) lists every post that has a
+report folder, using the post's own title, summary and date, so dropping the
+folder in place is all it takes to publish a report. Cards reuse PaperMod's
+`post-entry` styles.
 
 ## Search
 
