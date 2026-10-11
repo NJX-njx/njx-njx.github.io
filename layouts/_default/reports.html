@@ -2,21 +2,27 @@
 
 <header class="page-header">
   <h1>{{ .Title }}</h1>
+  {{- with .Description }}
+  <div class="post-description">{{ . }}</div>
+  {{- end }}
 </header>
 
-{{- range .Params.reports }}
+{{- range where site.RegularPages "Section" "posts" }}
+{{- $slug := .File.ContentBaseName }}
+{{- if os.FileExists (printf "static/reports/%s/index.html" $slug) }}
 <article class="post-entry">
   <header class="entry-header">
-    <h2>{{ .title }}</h2>
+    <h2>{{ .Title }}</h2>
   </header>
   <div class="entry-content">
-    <p>{{ .desc }}</p>
+    <p>{{ .Summary | plainify | htmlUnescape }}</p>
   </div>
   <footer class="entry-footer">
-    <span>{{ time.Format site.Params.DateFormat .date }}</span>
+    <span>{{ .Date | time.Format site.Params.DateFormat }}</span>
   </footer>
-  <a class="entry-link" aria-label="report link to {{ .title | plainify }}" href="{{ .url }}"></a>
+  <a class="entry-link" aria-label="{{ i18n "open_report" }}: {{ .Title | plainify }}" href="{{ printf "/reports/%s/" $slug | absURL }}"></a>
 </article>
+{{- end }}
 {{- end }}
 
 {{- end }}{{/* end main */}}

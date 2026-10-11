@@ -27,10 +27,10 @@ content/about.md            About page
 content/faq.md              FAQ page
 content/search.md           Search page (layout: site-search)
 content/archives.md         Archive page (layout: archives)
-content/reports.md          Reports listing (layout: reports) + report registry
+content/reports.md          Reports listing (layout: reports)
 hugo.yaml                   Site configuration
 layouts/_default/           Layout overrides:
-  reports.html              Reports card listing (reads .Params.reports)
+  reports.html              Reports cards: posts that have static/reports/<slug>/
   site-search.html          Chunk-based search UI
   index.json                Chunk-based search index (heading-section records)
   baseof.html, single.html, rss.xml
@@ -80,12 +80,12 @@ gh run list --limit 3
 
 ### Adding an interactive report
 
-1. Place the self-contained report at `static/reports/<slug>/index.html`.
-2. Register it in `content/reports.md` front matter under `reports:` with
-   `title` (match the blog post title), `url: /reports/<slug>/`, `date`
-   (match the post date), and a `desc` (~100 chars) for the card.
-3. The card appears on `/reports/` automatically; entries are sorted by the
-   site owner by ordering them newest-first in the file.
+1. Place the self-contained report at `static/reports/<slug>/index.html`,
+   where `<slug>` is the companion post's file name
+   (`content/posts/<slug>.md`).
+2. That is the whole registration: `/reports/` lists every post whose report
+   folder exists, using the post's own title, summary and date (newest
+   first). There is no separate registry to keep in sync.
 
 ### Styling changes
 
