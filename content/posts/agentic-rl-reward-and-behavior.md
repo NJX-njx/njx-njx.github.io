@@ -1,102 +1,102 @@
 ---
-title: "Agentic RL: The Long Shadow of Feedback"
+title: "Agentic RL：反馈投下的长影"
 date: 2026-05-22T15:40:00+08:00
 draft: false
 tags: ["agentic-rl", "reinforcement-learning", "agent", "reward", "eval"]
 categories: ["AI"]
-summary: "A field note on agentic RL: reward design, behavior shaping, credit assignment, online and offline evaluation, and the feedback loops behind agents."
+summary: "一篇关于 agentic RL 的田野笔记：reward 设计、行为塑造、信用分配、在线与离线评测，以及 agent 背后的反馈循环。"
 ---
 
-## Before Reward
+## 在 reward 之前
 
-Before reward, there is behavior.
+在 reward 之前，先有行为。
 
-I think this is easy to forget. We name the reward, tune the policy, plot the curve, and only later ask what kind of creature we have trained into the interface. For agentic systems, the curve is not enough. The behavior has texture: hesitation, overconfidence, tool obsession, premature final answers, stubborn loops, graceful recovery.
+我觉得这一点很容易被忘记。我们给 reward 命名，调 policy，画曲线，直到后来才问：我们究竟往这个界面里训练出了一个什么样的造物？对 agentic 系统来说，光有曲线是不够的。行为是有质地的：犹豫、过度自信、对工具的执迷、过早给出最终答案、顽固的死循环、优雅的恢复。
 
-Agentic RL should begin with a behavioral vocabulary.
+Agentic RL 应该从一套行为词汇开始。
 
-What should the agent notice? When should it ask? When should it search? When should it stop? What does a good recovery sound like? What is forbidden even if it helps the score?
+Agent 应该注意到什么？什么时候该提问？什么时候该搜索？什么时候该停下？一次好的恢复听起来是什么样子？哪些事即使有助于提分，也是被禁止的？
 
-Reward is only useful after the desired behavior has a shape.
+只有当期望的行为有了形状，reward 才有用。
 
-## The Credit Problem
+## 信用分配难题
 
-Agents stretch credit assignment across time.
+Agent 把信用分配沿着时间轴拉长了。
 
-A final answer may fail because the model misunderstood the user, chose the wrong tool, retrieved the wrong note, trusted stale evidence, summarized too early, or never noticed an exception. If the reward only lands at the end, it becomes a distant bell. The agent hears that something was wrong, but not where the wrongness entered.
+最终答案出错，可能是因为模型误解了用户、选错了工具、检索到了错误的笔记、相信了过时的证据、总结得太早，或者压根没注意到某个异常。如果 reward 只在最后落下，它就成了远处的一声钟响。Agent 听见了有什么不对，却听不出错误是从哪里进来的。
 
-This is why agentic RL needs intermediate signals:
+这就是为什么 agentic RL 需要中间信号：
 
-- plan quality,
-- tool selection,
-- argument correctness,
-- evidence relevance,
-- state tracking,
-- recovery behavior,
-- final answer quality.
+- 计划质量；
+- 工具选择；
+- 参数正确性；
+- 证据相关性；
+- 状态追踪；
+- 恢复行为；
+- 最终答案质量。
 
-The signals do not need to be perfect. They need to be useful enough to guide repair.
+这些信号不需要完美。它们只需要足够有用，能够指导修复。
 
-## Reward Is A Product Decision
+## Reward 是一个产品决策
 
-Reward design is not only a modeling decision. It is a product decision.
+Reward 设计不只是一个建模决策。它也是一个产品决策。
 
-If you reward speed too hard, the agent may stop asking clarifying questions. If you reward task completion without user trust, it may become forceful. If you reward tool use, it may turn every thought into an API call. If you reward short answers, it may hide uncertainty.
+如果你过度奖励速度，agent 可能会不再提澄清问题。如果你奖励任务完成却不顾用户信任，它可能会变得强势。如果你奖励 tool use，它可能会把每个念头都变成一次 API 调用。如果你奖励简短的回答，它可能会把不确定性藏起来。
 
-The reward function is a compressed philosophy of the product.
+Reward 函数是被压缩过的产品哲学。
 
-For a research assistant, citation faithfulness may matter more than speed. For a coding agent, preserving user changes may matter more than finishing fast. For a travel planner, constraints and taste may matter more than itinerary density. The correct reward depends on what kind of harm the product must avoid.
+对研究助手来说，引用的忠实度可能比速度更重要。对编程 agent 来说，保住用户的改动可能比快速完成更重要。对旅行规划助手来说，约束和品味可能比行程密度更重要。正确的 reward 取决于产品必须避免哪一种伤害。
 
-## Offline And Online
+## 离线与在线
 
-Offline training is a cold room. Online behavior is weather.
+离线训练是一间冷房间。在线行为则是天气。
 
-Offline data can teach style, structure, and many useful habits. It can also preserve the assumptions of the dataset. Online feedback reveals the friction of real use: ambiguous intent, partial context, broken tools, impatient users, and tasks that do not fit the benchmark.
+离线数据可以教会风格、结构和许多有用的习惯。它也可能把数据集的假设一并保留下来。在线反馈则暴露出真实使用中的摩擦：模糊的意图、残缺的 context、坏掉的工具、没有耐心的用户，以及和 benchmark 对不上的任务。
 
-I like to separate three loops:
+我喜欢把三个循环分开来看：
 
-- **Imitation loop:** learn from good traces.
-- **Critique loop:** learn from labeled failures and model judges.
-- **Interaction loop:** learn from real user outcomes with guardrails.
+- **模仿循环：** 从好的轨迹中学习。
+- **批评循环：** 从标注过的失败和模型判官那里学习。
+- **交互循环：** 在护栏之内，从真实的用户结果中学习。
 
-The third loop is the most tempting and the most dangerous. It needs conservative rollout, logging, privacy boundaries, and a way to stop learning from noisy reward.
+第三个循环最诱人，也最危险。它需要保守的灰度上线、日志、隐私边界，以及一种能在 reward 噪声太大时停止从中学习的办法。
 
-An agent that learns from the world must also be protected from the world.
+从世界中学习的 agent，也必须被保护起来，免受这个世界的伤害。
 
-## Evals For Agentic RL
+## Agentic RL 的 eval
 
-Agentic RL without evals is just hope with gradients.
+没有 eval 的 agentic RL，不过是带着梯度的一厢情愿。
 
-The eval suite should measure both outcomes and manners. Did the task finish? Did it finish for the right reason? Did the agent keep track of state? Did it avoid unnecessary tools? Did it ask when ambiguity was real? Did it recover when a tool failed?
+Eval 套件既要衡量结果，也要衡量举止。任务完成了吗？是出于正确的理由完成的吗？Agent 有没有跟住状态？有没有避免使用不必要的工具？在确实存在歧义时，它有没有发问？工具失败时，它有没有恢复过来？
 
-I want eval cases that include:
+我希望 eval 用例包括：
 
-- long-horizon tasks,
-- tool failures,
-- conflicting constraints,
-- stale retrieval,
-- partial success,
-- user correction,
-- and cases where the right answer is to stop.
+- 长程任务；
+- 工具失败；
+- 相互冲突的约束；
+- 过时的检索结果；
+- 部分成功；
+- 用户纠正；
+- 以及正确答案就是停下来的情形。
 
-The last case is essential. A capable agent should know when not to continue.
+最后一种至关重要。一个有能力的 agent 应该知道什么时候不该继续。
 
-## Behavior Shaping
+## 行为塑造
 
-The beautiful part of agentic RL is also the frightening part: small signals can shape large habits.
+Agentic RL 美妙的地方，也正是它可怕的地方：微小的信号能塑造出庞大的习惯。
 
-A reward for "helpfulness" can become verbosity. A reward for "autonomy" can become impatience. A reward for "using evidence" can become citation theater. The policy learns the shadow of the metric, not the intention behind it.
+奖励“有帮助”，可能换来啰嗦。奖励“自主”，可能换来急躁。奖励“使用证据”，可能换来引用作秀。Policy 学到的是指标的影子，而不是指标背后的意图。
 
-So the work is slow. Watch traces. Cluster failures. Write sharper evals. Add counterexamples. Penalize the habit, not only the final mistake. Reward restraint when restraint is the product value.
+所以这份工作很慢。看轨迹。给失败聚类。写更锋利的 eval。补反例。惩罚习惯，而不只是惩罚最终的错误。当克制本身就是产品价值时，就去奖励克制。
 
-There is no pure reward. There is only a better conversation between metric and behavior.
+不存在纯粹的 reward。只存在指标与行为之间一场更好的对话。
 
-## The Long Shadow
+## 长长的影子
 
-Every feedback signal casts a shadow.
+每一个反馈信号都会投下影子。
 
-In agentic RL, the shadow reaches into how the system plans, asks, searches, acts, and stops. That is why I want reward design to stay close to product design and evaluation design. The three should not live in separate rooms.
+在 agentic RL 里，这道影子一直延伸到系统如何规划、提问、搜索、行动和停下。所以我希望 reward 设计始终贴近产品设计和评测设计。这三者不该住在不同的房间里。
 
-The agent is a loop. RL changes the loop. Evals listen to the loop.
+Agent 是一个循环。RL 改变这个循环。Eval 倾听这个循环。
 
-If those three are aligned, the system may become not only stronger, but more legible.
+如果这三者对齐了，系统也许不只会变得更强，还会变得更容易读懂。

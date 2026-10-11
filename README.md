@@ -145,7 +145,7 @@ You can also run the workflow manually from the GitHub Actions tab.
 node --check assets/js/site-search.js
 node --check scripts/search_quality.js
 hugo --gc --minify
-node scripts/search_quality.js public/index.json
+node scripts/search_quality.js public/en/index.json
 ```
 
 ## For AI Agents

@@ -1,101 +1,101 @@
 ---
-title: "Evals As Instruments: What Demos Hide"
+title: "Eval 是仪器：Demo 藏起了什么"
 date: 2026-05-22T15:30:00+08:00
 draft: false
 tags: ["eval", "benchmark", "llm", "agent", "product"]
 categories: ["AI"]
-summary: "A note on evaluation as an instrument: failure cases, metrics, benchmark design, product loops, and the discipline of measuring agents."
+summary: "一篇关于把评测当作仪器的笔记：失败案例、指标、benchmark 设计、产品闭环，以及测量 agent 时该有的纪律。"
 ---
 
-## The Instrument
+## 仪器
 
-An eval is an instrument. It does not tell the whole truth. It tells one truth repeatedly enough that we can notice a change.
+Eval 是一件仪器。它不会说出全部真相。它只讲一个真相，但重复的次数足以让我们察觉到变化。
 
-This is why I distrust both empty demos and overloaded benchmarks. A demo is often a lantern pointed at the best path. A benchmark can become a museum of numbers with no living user nearby. The useful eval sits between them: close enough to the product to hurt, clean enough to compare.
+这就是为什么我既不信任空洞的 demo，也不信任塞得过满的 benchmark。Demo 往往是一盏照向最好那条路的灯笼。Benchmark 则可能变成一座数字博物馆，附近没有一个活生生的用户。有用的 eval 介于两者之间：离产品足够近，近到会疼；又足够干净，干净到可以比较。
 
-When I build an eval, I start with the failure I want to hear more clearly.
+构建 eval 时，我会从那个想听得更清楚的失败入手。
 
-Does the model lose long-context facts? Does the agent call tools too early? Does it refuse when it should ask a clarifying question? Does retrieval bring back pretty but irrelevant context? Does a metric improve while user trust gets worse?
+模型会不会丢掉长上下文里的事实？Agent 会不会过早调用工具？它会不会在本该提出澄清问题时选择拒绝？检索会不会带回好看却无关的 context？会不会指标在变好，用户的信任却在变差？
 
-The eval should make one of these failures audible.
+Eval 应该让其中某一种失败被听见。
 
-## Units Of Failure
+## 失败的单元
 
-A good eval has small units.
+好的 eval 由很小的单元构成。
 
-For language systems, a single "accuracy" score is usually too thick. I want to split the behavior into pieces that can be inspected:
+对语言系统来说，一个单一的“准确率”分数通常太粗了。我想把行为拆成可以检视的小块：
 
-- **Intent capture:** did the system understand what the user was trying to do?
-- **Retrieval quality:** did the right evidence enter the context?
-- **Reasoning path:** did the answer use the evidence in a sane order?
-- **Tool behavior:** did the agent call the right tool with the right arguments?
-- **Final usefulness:** did the result reduce the user's next step?
-- **Recovery:** did the system notice and repair failure?
+- **意图捕捉：** 系统是否理解了用户想做什么？
+- **检索质量：** 正确的证据是否进入了 context？
+- **推理路径：** 回答是否以合理的顺序使用了证据？
+- **工具行为：** agent 是否用正确的参数调用了正确的工具？
+- **最终有用性：** 结果是否减轻了用户下一步的负担？
+- **恢复：** 系统是否察觉并修复了失败？
 
-The unit of failure should point to the unit of repair. If a score drops and nobody knows where to look, the eval is only weather.
+失败的单元，应当指向修复的单元。如果分数掉了，却没有人知道该往哪里看，那这个 eval 就只是天气。
 
-## OOD Cases Are The Real Room
+## OOD 用例才是真正的房间
 
-Out-of-distribution cases are not a footnote. They are where the room becomes visible.
+分布外用例不是脚注。正是在这些用例里，房间才显现出来。
 
-For agents, I like OOD cases that bend the workflow rather than merely change the topic:
+对 agent 来说，我喜欢那些能把工作流掰弯、而不只是换个话题的 OOD 用例：
 
-- The user asks for two conflicting goals.
-- The document is long and the key line is near the end.
-- A tool returns partial data.
-- A source disagrees with another source.
-- The user gives a casual phrase that hides a hard constraint.
-- The task requires saying "not enough information."
+- 用户提出两个相互冲突的目标。
+- 文档很长，而关键的那一行靠近结尾。
+- 工具只返回了部分数据。
+- 一个来源和另一个来源说法不一。
+- 用户随口一句话，里面藏着一个硬约束。
+- 任务要求回答“信息不足”。
 
-These cases do not exist to embarrass the model. They exist to map the boundary. A system without a known boundary is not more powerful; it is less honest.
+这些用例不是为了让模型难堪而存在的。它们为绘出边界而存在。一个没有已知边界的系统并不更强大；它只是更不诚实。
 
-## The Dataset Is A Weather Station
+## 数据集是一座气象站
 
-A benchmark dataset should not be a pile of prompts. It should be a weather station.
+Benchmark 数据集不该是一堆 prompt。它应该是一座气象站。
 
-Each case should carry metadata: task type, domain, difficulty, expected evidence, known trap, required tool, answer form, and the behavior being tested. Without metadata, failures become anecdotes. With metadata, patterns appear.
+每个用例都应该带上元数据：任务类型、领域、难度、预期证据、已知陷阱、所需工具、答案形式，以及被测试的行为。没有元数据，失败就只是轶事。有了元数据，模式就会浮现。
 
-If long-context cases fail together, you know where to dig. If tool-call cases pass offline but fail in product, you look at latency, schema, and user timing. If retrieval-heavy cases degrade after adding new content, you inspect the index instead of blaming the model.
+如果长上下文用例一起失败，你就知道该往哪里挖。如果工具调用用例在离线时通过、在产品里却失败，你就去查延迟、schema 和用户的操作时机。如果重度依赖检索的用例在加入新内容后变差，你就去检查索引，而不是怪罪模型。
 
-The dataset should make debugging less mystical.
+数据集应该让调试少一点玄学。
 
-## Product Evals
+## 产品 eval
 
-A product eval is not finished when it returns a score.
+产品 eval 并不是返回一个分数就算完成了。
 
-For real products, I care about three layers:
+对真实的产品，我关心三个层次：
 
-- **Offline evals:** controlled, repeatable, cheap enough to run often.
-- **Shadow evals:** run against real traffic without affecting users.
-- **User-loop evals:** measure whether the system changed behavior in the world.
+- **离线 eval：** 可控、可重复，并且足够便宜，可以经常跑。
+- **影子 eval：** 在真实流量上运行，但不影响用户。
+- **用户闭环 eval：** 衡量系统是否改变了现实世界中的行为。
 
-Each layer has a different truth. Offline evals are good for regression. Shadow evals reveal distribution. User loops reveal whether anyone cares.
+每一层都有各自的真相。离线 eval 适合做回归测试。影子 eval 揭示分布。用户闭环则揭示到底有没有人在乎。
 
-The danger is optimizing the first layer until it becomes beautiful and irrelevant.
+危险在于把第一层不断优化，直到它变得既漂亮又无关紧要。
 
-## Taste In Measurement
+## 测量中的品味
 
-There is taste in measurement.
+测量是讲品味的。
 
-A good eval is small enough to run, sharp enough to fail, stable enough to compare, and honest enough to admit what it does not measure. It should create fewer arguments, not more. It should make the next experiment obvious.
+好的 eval 足够小，可以跑起来；足够锋利，能测出失败；足够稳定，可以比较；也足够诚实，愿意承认自己不测什么。它应该减少争论，而不是制造更多争论。它应该让下一个实验显而易见。
 
-I like eval reports that contain:
+我喜欢包含这些内容的 eval 报告：
 
-- the headline metric,
-- the top regressions,
-- representative failures,
-- suspected causes,
-- next actions,
-- and the cases that should be added because the current eval was blind.
+- 主指标；
+- 退化最严重的几项；
+- 有代表性的失败；
+- 疑似原因；
+- 下一步行动；
+- 以及当前 eval 看不见、因而应该补上的用例。
 
-The last part matters. Every eval should improve after being surprised.
+最后这部分很重要。每个 eval 在吃了一惊之后，都应该变得更好。
 
-## The Quiet Standard
+## 安静的标尺
 
-The goal is not to make models look good. The goal is to make systems less self-deceptive.
+目标不是让模型看起来很好。目标是让系统少一些自欺。
 
-An eval is a quiet standard kept beside the workbench. Each run leaves a mark. Some marks are small. Some marks change the whole design.
+Eval 是一把安静的标尺，就放在工作台旁边。每跑一次，都会留下一道刻痕。有些刻痕很小。有些刻痕会改变整个设计。
 
-When the metric moves, ask what moved with it. When the metric does not move, ask what it cannot hear.
+指标动了，就问问还有什么跟着它一起动了。指标没动，就问问它听不见什么。
 
-That is where the real engineering begins.
+真正的工程，就从那里开始。

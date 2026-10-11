@@ -1,92 +1,92 @@
 ---
-title: "Product Evals: A Travel Planner Taste Test"
+title: "产品 Eval：旅行规划助手的品味测试"
 date: 2026-05-22T16:00:00+08:00
 draft: false
 tags: ["travel-planner", "eval", "product", "agent", "long-context"]
 categories: ["AI"]
-summary: "A product note on evaluating an AI travel planner: itinerary quality, OOD scenes, long-context consistency, recommendation taste, and user loops."
+summary: "一篇产品笔记，谈如何评测一个 AI 旅行规划助手：行程质量、OOD 场景、长上下文一致性、推荐品味，以及用户闭环。"
 ---
 
-## A Map Is Not A Trip
+## 地图不是旅行
 
-A travel planner can produce a map and still fail the trip.
+一个旅行规划助手可以给出一张地图，却依然辜负这趟旅行。
 
-This is the first lesson. The model may know attractions, distances, opening hours, and the polite grammar of an itinerary. But a trip is made of smaller forces: tired feet, budget, weather, a parent's pace, a museum closed on Monday, the user's private idea of what a good afternoon feels like.
+这是第一课。模型也许知道景点、距离、开放时间，以及行程单那套得体的语法。但一趟旅行是由更细小的力量构成的：走累的双脚、预算、天气、父母的步速、一座周一闭馆的博物馆，还有用户心里对“美好的下午该是什么感觉”的私人想象。
 
-The product problem is not only generation. It is judgment.
+产品上的难题不只是生成。它关乎判断。
 
-## The Eval Behind The Itinerary
+## 行程背后的 eval
 
-For an AI travel product, I would not trust a single "itinerary quality" score. It is too smooth. The useful eval needs to break the trip into inspectable pieces:
+对一个 AI 旅行产品，我不会相信单一的“行程质量”分数。它太光滑了。有用的 eval 需要把旅行拆成可以检视的小块：
 
-- **Constraint following:** dates, budget, cities, pace, forbidden places.
-- **Recommendation relevance:** places match user taste, not only popularity.
-- **Route sanity:** distance, order, time windows, transportation friction.
-- **Long-context consistency:** preferences survive across the whole plan.
-- **OOD scenes:** rainy days, elderly travelers, children, sudden closures, niche interests.
-- **Conversion usefulness:** the plan should make the next user action lighter.
+- **约束遵循：** 日期、预算、城市、节奏、被排除的地点。
+- **推荐相关性：** 推荐的地点契合用户的品味，而不只是看热度。
+- **路线合理性：** 距离、顺序、时间窗口、交通上的摩擦。
+- **长上下文一致性：** 偏好在整份计划中始终存续。
+- **OOD 场景：** 雨天、老年旅客、孩子、临时关闭、小众兴趣。
+- **转化效用：** 计划应当让用户的下一步动作更轻松。
 
-The score should tell us where the journey cracked.
+分数应该告诉我们，旅程是在哪里裂开的。
 
-## Long Context Has A Memory Of Its Own
+## 长上下文自有它的记忆
 
-Travel planning is a long-context task wearing a friendly face.
+旅行规划，是一个戴着友善面孔的长上下文任务。
 
-The user gives constraints at the beginning, modifies one detail in the middle, asks for alternatives near the end, and still expects the system to remember that dinner should stay near the hotel. A weak system forgets politely. It does not crash. It simply drifts.
+用户在开头给出约束，在中间改掉一个细节，快结束时又要备选方案，却仍然期待系统记得晚饭要安排在酒店附近。弱的系统会礼貌地遗忘。它不会崩溃。它只是在慢慢漂移。
 
-That drift is dangerous because it looks acceptable in a screenshot.
+这种漂移之所以危险，是因为它在截图里看起来还过得去。
 
-This is why long-context evals need consistency checks. Did the plan preserve the original budget? Did it repeat an attraction? Did it schedule two faraway places back to back? Did it obey the user's "quiet morning" preference after adding a new museum?
+这就是为什么长上下文 eval 需要一致性检查。计划有没有守住最初的预算？有没有重复安排某个景点？有没有把两个相距很远的地方前后紧挨着排在一起？加了一座新博物馆之后，它还遵守用户“安静的早晨”这个偏好吗？
 
-The best failures are visible enough to repair.
+最好的失败，是清晰到足以被修复的失败。
 
-## OOD Is Where Taste Appears
+## OOD 是品味显形的地方
 
-Out-of-distribution scenes are where the product starts to show its character.
+分布外场景，是产品开始显露性格的地方。
 
-A normal tourist route is easy to imitate. A useful planner has to handle stranger requests:
+常规的游客路线很容易模仿。一个有用的规划助手得应付更古怪的请求：
 
-- "I like bookstores and quiet alleys, not landmarks."
-- "My parents cannot walk much."
-- "Plan around a concert at night."
-- "It may rain, give me a soft fallback."
-- "I want the city to feel local without becoming inconvenient."
+- “我喜欢书店和安静的小巷，不喜欢地标。”
+- “我爸妈走不了太多路。”
+- “围绕晚上的一场演唱会来安排。”
+- “可能会下雨，给我留一个轻松点的备选。”
+- “我想让这座城市有本地的感觉，但别因此变得不方便。”
 
-These cases test taste as much as intelligence. They force the system to trade off density, distance, novelty, and comfort. They also reveal whether the agent is optimizing for an impressive page or a livable day.
+这些用例考验品味，不亚于考验智能。它们逼着系统在密度、距离、新奇和舒适之间权衡取舍。它们也会暴露出 agent 究竟是在为一张光鲜的页面做优化，还是在为真正过得下去的一天做优化。
 
-## Product Loop
+## 产品闭环
 
-The product loop matters more than the first answer.
+产品闭环比第一个答案更重要。
 
-Users revise travel plans conversationally. They remove a place, ask for cheaper options, swap a neighborhood, or say something wonderfully vague like "make it less tiring." The agent has to update the plan without losing the structure that still works.
+用户是在对话中修改旅行计划的。他们会删掉一个地方，要更便宜的选项，换一个街区，或者说出一句含糊得可爱的话，比如“别那么累”。Agent 得在更新计划的同时，不丢掉那些依然奏效的结构。
 
-A strong travel planner should keep a working state:
+一个强的旅行规划助手应该维护一份工作状态：
 
-- current itinerary,
-- hard constraints,
-- soft preferences,
-- rejected options,
-- unresolved questions,
-- and the reason each recommendation survived.
+- 当前行程；
+- 硬约束；
+- 软偏好；
+- 被否掉的选项；
+- 悬而未决的问题；
+- 以及每条推荐之所以被留下的理由。
 
-This is where agent design meets product design. The system is not just writing. It is carrying a small world forward.
+这正是 agent 设计与产品设计交汇的地方。系统不只是在写作。它在带着一个小小的世界往前走。
 
-## What I Would Measure
+## 我会测什么
 
-If I were building the eval suite again, I would keep three views side by side:
+如果让我重新搭一次 eval 套件，我会把三种视角并排摆着：
 
-- **Case-level metrics:** constraint pass rate, route validity, preference match, repetition rate.
-- **Trace-level metrics:** retrieval quality, tool calls, revision behavior, memory consistency.
-- **User-loop metrics:** satisfaction, edit distance after first answer, conversion, retention.
+- **用例级指标：** 约束通过率、路线有效性、偏好匹配度、重复率。
+- **轨迹级指标：** 检索质量、工具调用、修改行为、记忆一致性。
+- **用户闭环指标：** 满意度、首个答案之后的编辑距离、转化、留存。
 
-The offline eval protects the system from regression. The trace eval explains why. The user loop decides whether the whole machine deserves to exist.
+离线 eval 防止系统退化。轨迹 eval 解释原因。用户闭环决定这整台机器值不值得存在。
 
-## The Weight Of Taste
+## 品味的分量
 
-Travel is a gentle domain until it is not.
+旅行是一个温和的领域，直到它不再温和。
 
-A good itinerary is not the densest one. It has rhythm. It knows when not to add another place. It leaves a little air between the train station and dinner. It understands that recommendation is a form of taste under constraint.
+好的行程不是最密的那一份。它有节奏。它知道什么时候不该再加一个地方。它会在火车站和晚饭之间留一点白。它明白，推荐是约束之下的一种品味。
 
-That is the work I find interesting: turning a beautiful but fragile idea into something that can survive real users, real edges, and real days.
+这正是我觉得有意思的工作：把一个美丽却脆弱的想法，变成经得起真实用户、真实边界和真实日子检验的东西。
 
-The map matters. The trip matters more.
+地图很重要。旅行更重要。

@@ -1,14 +1,14 @@
 ---
-title: "Hello World"
+title: "你好，世界"
 date: 2026-01-27T10:00:00+08:00
 draft: false
 tags: ["first", "hello"]
 ---
 
-## Hello World
+## 你好，世界
 
-I recently read an interview with my idol Wenli, in which she mentioned how having her own blog helped her learn about AI. I also hope to have a blog where I can continue my ideas and let others see them.
+最近我读到了偶像 Wenli 的一篇采访，她在采访中谈到了拥有自己的博客如何帮助她学习 AI。我也希望拥有一个博客，可以在这里延续我的想法，并让别人看到。
 
-I want to keep moving forward on the path of AI.
+我想在 AI 这条路上不断前行。
 
-If you are new here, start with the search page or the tags list to find topics you care about.
+如果你是第一次来，可以先从搜索页或标签列表入手，找到你关心的话题。

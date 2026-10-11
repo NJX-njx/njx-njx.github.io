@@ -1,88 +1,88 @@
 ---
-title: "Context Engineering: The Shape of Evidence"
+title: "上下文工程：证据的形状"
 date: 2026-05-22T15:50:00+08:00
 draft: false
 tags: ["retrieval", "rag", "context-engineering", "llm", "memory", "agent"]
 categories: ["AI"]
-summary: "A note on RAG and context engineering: retrieval quality, evidence shape, memory boundaries, and why context is a product surface."
+summary: "一篇关于 RAG 与上下文工程的笔记：检索质量、证据的形状、记忆的边界，以及为什么 context 是一个产品界面。"
 ---
 
-## The Room Before The Answer
+## 回答之前的房间
 
-Before the model answers, there is a room.
+在模型回答之前，有一个房间。
 
-The room has documents on the table, old notes in the corner, tool results still warm from the network, and a user sentence that may be smaller than the thing it wants. Context engineering is the work of arranging that room so the next token has fewer ways to lie.
+房间里，桌上有文档，角落里有旧笔记，还有刚从网络上取回、尚带余温的工具结果，以及一句用户的话——这句话可能装不下它真正想要的东西。上下文工程，就是布置这个房间的工作，好让下一个 token 少几种撒谎的可能。
 
-I do not think of RAG as "attach search to a model." That phrase is too thin. Retrieval is a decision about what the system is allowed to see, what it must ignore, and what kind of evidence should become visible at the moment of reasoning.
+我不把 RAG 看作“给模型接上搜索”。这种说法太单薄了。检索是一种决策：系统被允许看到什么，必须忽略什么，以及在推理的那一刻，什么样的证据应该变得可见。
 
-Bad context makes the model sound fluent inside a fog.
+糟糕的 context 会让模型在迷雾里也说得十分流利。
 
-## Retrieval Is Not Recall Alone
+## 检索不只是召回
 
-Recall matters. But recall alone is a wide net thrown into dark water.
+召回很重要。但光有召回，就像往幽暗的水里撒下一张大网。
 
-A useful retrieval pipeline needs several questions:
+一条有用的检索管线，需要回答几个问题：
 
-- Did the query preserve the user's real intent?
-- Did we retrieve the right unit: page, heading, paragraph, table, trace, or code block?
-- Did the result include enough surrounding structure to be understood?
-- Did ranking prefer evidence over decorative similarity?
-- Did the final context contain contradictions that need to be named?
+- Query 是否保留了用户的真实意图？
+- 我们检索到的单元对不对：页面、标题、段落、表格、轨迹，还是代码块？
+- 结果是否带上了足够的周边结构，让它能被读懂？
+- 排序是否偏向证据，而不是装饰性的相似？
+- 最终的 context 里，是否有需要点明的矛盾？
 
-For blog search, this is why I prefer heading-level chunks over whole posts. A whole article is too large to be a source. A chunk has a doorway. It can say: this answer came from here, under this section, with this nearby meaning.
+就博客搜索而言，这正是我更喜欢标题级 chunk、而不是整篇文章的原因。整篇文章太大，当不了一个来源。一个 chunk 有一道门。它可以说：这个答案来自这里，位于这一节之下，周围是这样一层意思。
 
-## The Shape Of Evidence
+## 证据的形状
 
-Evidence has shape.
+证据是有形状的。
 
-A product metric is not shaped like a personal preference. A tool error is not shaped like a paragraph. A Notion note is not shaped like a benchmark row. If the retrieval layer flattens all of them into anonymous text, the model has to guess what kind of object it is holding.
+产品指标和个人偏好长得不一样。工具报错和一段文字长得不一样。Notion 笔记和 benchmark 里的一行长得不一样。如果检索层把它们统统压平成匿名文本，模型就只能去猜自己手里拿着的是什么东西。
 
-Good context should carry metadata:
+好的 context 应该携带元数据：
 
-- title,
-- section,
-- date,
-- tags,
-- anchor,
-- source URL,
-- and a small summary of why the chunk exists.
+- 标题；
+- 章节；
+- 日期；
+- 标签；
+- 锚点；
+- 来源 URL；
+- 以及一句简短的摘要，说明这个 chunk 为什么存在。
 
-This metadata is not clerical. It is part of reasoning. It tells the model whether a sentence is a memory, a measurement, a project note, or a public claim.
+这些元数据不是文书杂务。它们是推理的一部分。它们告诉模型，一句话是一段记忆、一次测量、一条项目笔记，还是一个公开的论断。
 
-## Memory And Retrieval
+## 记忆与检索
 
-Memory and retrieval are cousins, not twins.
+记忆和检索是表亲，不是双胞胎。
 
-Memory should hold durable preferences and working state. Retrieval should bring in refreshable evidence. If an agent treats both as the same thing, it becomes confused in a very human-looking way: it remembers stale facts, cites private assumptions, and carries temporary instructions too far.
+记忆应该保存长期的偏好和工作状态。检索应该带来可以刷新的证据。如果一个 agent 把两者当成一回事，它就会以一种非常像人的方式犯糊涂：记着过时的事实，引用私下的假设，把临时指令带得太远。
 
-I like the split to be explicit:
+我喜欢把这种划分写得明明白白：
 
-- **Memory:** what changes future behavior.
-- **Retrieval:** what grounds the present answer.
-- **Trace:** what explains how this run happened.
+- **记忆：** 会改变未来行为的东西。
+- **检索：** 让当下的回答有据可依的东西。
+- **轨迹：** 解释这次运行如何发生的东西。
 
-The trace is especially important. Without it, retrieval quality becomes a mood. With it, you can see the query, the candidates, the rejected chunks, the final sources, and the answer that grew from them.
+轨迹尤其重要。没有它，检索质量就沦为一种感觉。有了它，你就能看到 query、候选结果、被拒掉的 chunk、最终的来源，以及从它们之中长出来的答案。
 
-## RAG As A Product Surface
+## RAG 是一个产品界面
 
-RAG is often treated as backend plumbing. In real products, it becomes a user-facing surface.
+RAG 常被当作后端的管道工程。在真实的产品里，它会变成一个面向用户的界面。
 
-Users notice when search feels literal but not thoughtful. They notice when an answer cites a page but misses the decisive line. They notice when the system remembers something it should have forgotten. They may not name the retrieval layer, but they feel its weather.
+搜索只懂字面、不懂用心，用户会察觉到。答案引用了某个页面，却漏掉了起决定作用的那一行，用户会察觉到。系统记住了本该忘掉的东西，用户也会察觉到。他们也许叫不出“检索层”这个名字，却能感受到它的天气。
 
-So I want retrieval to be designed with product taste:
+所以，我希望检索带着产品品味来设计：
 
-- show the source,
-- jump to the section,
-- expose a snippet,
-- prefer precise chunks,
-- and let failure be honest.
+- 展示来源；
+- 跳转到对应章节；
+- 露出一段摘录；
+- 优先选择精确的 chunk；
+- 并且让失败保持诚实。
 
-If the system cannot find enough evidence, it should say so. There is grace in a clean boundary.
+如果系统找不到足够的证据，就应该直说。干净的边界自有一种优雅。
 
-## The Quiet Work
+## 安静的工作
 
-Context engineering is quiet work. It has fewer fireworks than model choice and more small knives: chunking, normalization, anchors, deduping, reranking, freshness, permissions, and tests that ask whether the right piece of text reached the model.
+上下文工程是安静的工作。比起选模型，它少些烟花，多些小刀：分块、规范化、锚点、去重、重排序、时效性、权限，还有那些追问“正确的那段文本到底有没有送到模型面前”的测试。
 
-But when it works, the answer feels less like a performance and more like a window opening.
+但当它奏效时，答案就不那么像一场表演，而更像一扇窗被推开。
 
-The model still speaks. The context teaches it where to look.
+开口说话的仍然是模型。Context 教会它该往哪里看。

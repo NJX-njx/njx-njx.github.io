@@ -1,89 +1,89 @@
 ---
-title: "Agent Design: Loops, Tools, and Memory"
+title: "Agent 设计：循环、工具与记忆"
 date: 2026-05-22T15:20:00+08:00
 draft: false
 tags: ["agent", "llm", "tool-use", "memory", "product"]
 categories: ["AI"]
-summary: "A field note on designing agents as observable loops, with tools, memory, failure recovery, and product boundaries."
+summary: "一篇田野笔记，谈如何把 agent 设计成可观察的循环，以及其中的工具、记忆、失败恢复与产品边界。"
 ---
 
-## A Loop You Can Inspect
+## 一个可以检视的循环
 
-An agent is not a magic noun. It is a loop.
+Agent 不是一个魔法名词。它是一个循环。
 
-Something observes. Something decides. Something acts. Something reads the trace of that action and changes its next step. The whole thing becomes useful only when the loop is visible enough to debug.
+有东西在观察。有东西在决策。有东西在行动。还有东西读取这次行动留下的轨迹，并据此改变下一步。只有当这个循环清楚可见、足以调试时，整件事才会变得有用。
 
-I like to design agents from the trace outward. Before choosing a model, I ask what a good run should leave behind: the user intent, the plan, the chosen tools, the failed calls, the recovered branch, the final answer, and the small reasons in between. If the trace is poor, the agent may look clever for one demo and become unknowable in production.
+我喜欢以轨迹为起点，向外设计 agent。选模型之前，我会先问：一次好的运行应该留下什么？用户意图、计划、选用的工具、失败的调用、恢复过来的分支、最终答案，以及夹在它们之间的那些细小理由。如果轨迹贫乏，agent 也许能在某一次 demo 里显得很聪明，到了生产环境却变得不可捉摸。
 
-The first design question is therefore not "how autonomous should it be?" It is "where can we look when it is wrong?"
+因此，第一个设计问题不是“它应该有多自主？”，而是“它出错时，我们能去哪里看？”
 
-## Tools Have Contracts
+## 工具是有契约的
 
-Tool use is where language meets the hard floor.
+Tool use 是语言触到坚硬地面的地方。
 
-A tool should not be a decoration attached to a prompt. It needs a contract: input schema, output schema, timeout, error vocabulary, permission boundary, and a small set of examples that make failure ordinary. The model should not have to guess whether a failed search means "no result", "bad query", "network error", or "try again later".
+工具不应该是挂在 prompt 上的装饰品。它需要一份契约：输入 schema、输出 schema、超时、错误词汇表、权限边界，以及一小组让失败变得稀松平常的示例。模型不该去猜一次失败的搜索究竟意味着“没有结果”“查询有误”“网络错误”，还是“稍后再试”。
 
-Good tool design reduces poetry at the interface. The tool may serve an imaginative task, but its surface should be almost boring. Names are literal. Arguments are narrow. Errors are typed. Return values are small enough to fit back into the loop.
+好的工具设计会减少接口上的诗意。工具服务的任务也许充满想象力，但它的表面应该近乎乏味。名字直白。参数收窄。错误有类型。返回值足够小，能重新放回循环里。
 
-When a tool is vague, the model improvises. Improvisation is lovely in writing and dangerous in systems.
+工具一含糊，模型就会即兴发挥。即兴发挥在写作里很美，在系统里却很危险。
 
-## Memory Is A Working Surface
+## 记忆是一张工作台
 
-Memory is often discussed as if it were a drawer. I prefer to treat it as a working surface.
+人们谈论记忆时，常常把它当成一个抽屉。我更愿意把它当作一张工作台。
 
-The agent should not remember everything. It should keep only what changes future behavior: user preferences, unfinished commitments, durable facts, task state, and decisions that would be expensive or rude to ask again. Everything else can remain in the run trace.
+Agent 不应该记住所有东西。它只该留下会改变未来行为的部分：用户偏好、尚未兑现的承诺、长期有效的事实、任务状态，以及那些再问一遍就会代价高昂或显得失礼的决定。其余的一切，都可以留在运行轨迹里。
 
-There are at least three kinds of memory:
+记忆至少有三种：
 
-- **Session memory:** what matters inside this conversation.
-- **Project memory:** what matters across related tasks.
-- **World memory:** what should be retrieved, cited, and refreshed because it may become stale.
+- **会话记忆：** 在这次对话之内要紧的东西。
+- **项目记忆：** 在多个相关任务之间都要紧的东西。
+- **世界记忆：** 因为可能过时，所以应该被检索、引用和刷新的东西。
 
-Mixing these layers makes agents feel haunted. They recall the wrong thing at the wrong time. They confuse a temporary instruction with a durable preference. They carry yesterday's debugging assumption into today's production question.
+把这几层混在一起，agent 就会像闹了鬼一样。它们会在错误的时间想起错误的事。它们会把临时指令误当成长期偏好。它们会把昨天调试时的假设，带进今天的生产问题里。
 
-Good memory design is mostly forgetting with discipline.
+好的记忆设计，大半是有纪律的遗忘。
 
-## The Boundary Of Autonomy
+## 自主的边界
 
-Autonomy should be granted like access to a database: narrowly, intentionally, and with logs.
+自主权应该像数据库访问权限那样授予：范围要窄，意图要明确，还要留下日志。
 
-For product agents, I tend to separate actions into four bands:
+对于产品中的 agent，我倾向于把动作分成四档：
 
-- **Think:** reason, summarize, compare, draft.
-- **Prepare:** create a plan, stage a change, preview a command.
-- **Act:** call tools, edit files, submit forms, trigger jobs.
-- **Commit:** publish, pay, delete, notify, merge.
+- **思考：** 推理、总结、比较、起草。
+- **准备：** 制定计划、暂存改动、预览命令。
+- **行动：** 调用工具、编辑文件、提交表单、触发任务。
+- **落定：** 发布、付款、删除、通知、合并。
 
-The higher the band, the more the agent needs either explicit user confirmation or a reversible path. A good agent does not merely do more. It knows which actions deserve friction.
+档位越高，agent 就越需要用户的明确确认，或者一条可以回退的路径。好的 agent 不只是能做更多事。它知道哪些动作值得多一点摩擦。
 
-The user should feel the system moving with them, not around them.
+用户应该感觉到系统是在陪着自己走，而不是绕开自己走。
 
-## Failure As A Design Material
+## 失败是一种设计材料
 
-Agent design becomes real when the first run breaks.
+Agent 设计，是在第一次运行出故障时才变得真实的。
 
-The browser times out. The search result is stale. The tool returns a malformed payload. The model cites a source that was never provided. The user changes their mind halfway through. The environment has a file with the same name and different intent.
+浏览器超时了。搜索结果过期了。工具返回了格式错乱的 payload。模型引用了一个从未提供过的来源。用户做到一半改了主意。环境里有一个同名、用意却不同的文件。
 
-These are not edge cases. They are the material.
+这些不是边缘情况。它们正是材料。
 
-For every agent workflow, I want a small failure table:
+每一条 agent 工作流，我都希望配一张小小的失败表：
 
-- What can fail?
-- How can we detect it?
-- What should the agent try once?
-- When should it stop?
-- What should it tell the user?
+- 什么会失败？
+- 我们怎样发现它？
+- Agent 应该尝试一次什么？
+- 它什么时候该停下？
+- 它应该告诉用户什么？
 
-The difference between a demo and a system is often the sentence after failure. A demo says "something went wrong." A system says what happened, what it preserved, what it will not touch, and what can be tried next.
+Demo 和系统的差别，往往就在失败之后的那句话。Demo 说：“出了点问题。”系统则会说清楚发生了什么、它保住了什么、它不会去碰什么，以及接下来可以尝试什么。
 
-## Product Shape
+## 产品形态
 
-The best agent is not always the most general one.
+最好的 agent 不一定是最通用的那个。
 
-Sometimes the right shape is a quiet assistant that drafts and waits. Sometimes it is a batch runner that disappears into logs. Sometimes it is a narrow workflow with one excellent button. The product decides how much intelligence should be visible.
+有时，合适的形态是一个安静的助手：写好草稿，然后等待。有时，它是一个消失在日志里的批处理程序。有时，它是一条很窄的工作流，只有一个出色的按钮。该让多少智能露在外面，由产品决定。
 
-I do not want agents that perform intelligence theatrically. I want agents that make the next human action lighter.
+我不想要那种戏剧化地表演智能的 agent。我想要能让人的下一步动作更轻松的 agent。
 
-Design the loop. Name the tools. Keep the memory clean. Draw the boundary. Make failure legible.
+设计好循环。给工具起好名字。保持记忆干净。划清边界。让失败清晰可读。
 
-Then the agent has a chance to become something better than a prompt with ambition.
+这样，agent 才有机会成为比“一个怀揣野心的 prompt”更好的东西。

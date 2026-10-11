@@ -68,7 +68,7 @@ hugo server                         # production content only
 # Build & check
 hugo --gc --minify                  # output in public/
 node --check assets/js/site-search.js
-node scripts/search_quality.js public/index.json
+node scripts/search_quality.js public/en/index.json
 
 # Deploy = push to main; then watch
 gh run list --limit 3

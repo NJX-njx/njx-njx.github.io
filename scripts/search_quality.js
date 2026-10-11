@@ -3,7 +3,7 @@ const path = require('path');
 
 const Fuse = require('../themes/PaperMod/assets/js/fuse.basic.min.js');
 
-const indexPath = process.argv[2] || path.join(process.cwd(), 'public', 'index.json');
+const indexPath = process.argv[2] || path.join(process.cwd(), 'public', 'en', 'index.json');
 
 const TEST_QUERIES = [
   {
