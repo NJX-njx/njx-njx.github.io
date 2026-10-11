@@ -1,10 +1,8 @@
 {{- define "main" }}
 
-{{ $css := resources.Get "css/search-assistant.css" | minify | fingerprint }}
+{{ $css := resources.Get "css/site-search.css" | minify | fingerprint }}
 {{ $fuse := resources.Get "js/fuse.basic.min.js" | fingerprint }}
-{{ $js := resources.Get "js/search-assistant.js" | minify | fingerprint }}
-{{ $assistant := site.Params.aiAssistant }}
-{{ $assistantEnabled := and $assistant.enabled $assistant.endpoint }}
+{{ $js := resources.Get "js/site-search.js" | minify | fingerprint }}
 
 <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
 
@@ -28,21 +26,6 @@
         aria-label="search" type="search" autocomplete="off" maxlength="64">
     <ul id="searchResults" aria-label="search results"></ul>
 </div>
-
-{{- if $assistantEnabled }}
-<div id="ai-assistant" data-endpoint="{{ $assistant.endpoint }}">
-    <header class="ask-header">
-        <h2>Ask</h2>
-        <div class="post-description">Ask a question grounded in matching blog posts.</div>
-    </header>
-
-    <div id="askbox">
-        <textarea id="chat-input" placeholder="Ask about articles ↵" rows="1"></textarea>
-    </div>
-
-    <ul id="assistantResults" aria-label="assistant answers"></ul>
-</div>
-{{- end }}
 
 <script src="{{ $fuse.RelPermalink }}" integrity="{{ $fuse.Data.Integrity }}" defer></script>
 <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>

@@ -1,6 +1,6 @@
 ---
 title: "Search"
-layout: "search-assistant"
+layout: "site-search"
 url: "/search/"
 summary: "Search articles"
 description: "Search articles across Njx'Log"

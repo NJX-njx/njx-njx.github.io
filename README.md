@@ -12,12 +12,11 @@ Production site: <https://njx-njx.github.io/>
 content/posts/              Blog posts in Markdown
 content/*.md                Special pages such as About, FAQ, Search, Archive, Reports
 hugo.yaml                   Main Hugo configuration
-layouts/_default/           Local layout overrides (reports, search-assistant, rss, baseof)
+layouts/_default/           Local layout overrides (reports, site-search, rss, baseof)
 assets/css/extended/        Custom CSS auto-loaded by PaperMod after theme styles
 assets/js/                  Custom JavaScript processed by Hugo Pipes
 static/reports/             Standalone interactive report pages (one folder per report)
 static/*.png|jpg            Favicons, logo, OG image
-workers/openrouter-proxy/   Cloudflare Worker proxy for the AI assistant
 themes/PaperMod/            PaperMod theme submodule
 .github/workflows/hugo.yaml GitHub Pages deployment workflow
 ```
@@ -113,33 +112,20 @@ one:
 The Reports page is rendered by `layouts/_default/reports.html` and reuses
 PaperMod's `post-entry` card styles, so it always matches the site theme.
 
-## Search And AI Assistant
+## Search
 
-The search page uses a custom layout, `search-assistant`, at `/search/`. It
-loads a custom browser script from `assets/js/search-assistant.js` and reads
+The search page uses a custom layout, `site-search`, at `/search/`. It
+loads a custom browser script from `assets/js/site-search.js` and reads
 Hugo's generated `/index.json` search index. The project overrides PaperMod's
 default JSON index in `layouts/_default/index.json` so the index is chunk-based:
 each Markdown heading section becomes a searchable record with `title`,
 `section`, `content`, `permalink`, `anchor`, `summary`, `tags`, and `date`.
 Search results link directly to the matched section anchor.
 
-The Ask box uses the same chunk search layer. It sends the top matching chunks
-to the Cloudflare Worker as contextual excerpts before the Worker calls
-OpenRouter.
-
 This custom layout intentionally does not use PaperMod's built-in `search`
 layout name, because PaperMod automatically injects its own `fastsearch` script
 for pages whose layout is exactly `search`. Keeping this page on
-`search-assistant` prevents two scripts from binding to the same search input.
-
-The AI assistant is enabled in `hugo.yaml` and points at the deployed
-Cloudflare Worker endpoint:
-`https://njx-log-ai-assistant.njx-log.workers.dev/ask`. Keep
-`OPENROUTER_API_KEY` as a Cloudflare secret; never commit it or place it in
-Hugo/JavaScript frontend code.
-
-See `workers/openrouter-proxy/README.md` for local development, secret setup,
-and deployment commands.
+`site-search` prevents two scripts from binding to the same search input.
 
 ## Deployment
 
@@ -158,9 +144,8 @@ You can also run the workflow manually from the GitHub Actions tab.
 ## Quick Checks
 
 ```bash
-node --check assets/js/search-assistant.js
+node --check assets/js/site-search.js
 node --check scripts/search_quality.js
-python -m py_compile scripts/llm_model.py
 hugo --gc --minify
 node scripts/search_quality.js public/index.json
 ```

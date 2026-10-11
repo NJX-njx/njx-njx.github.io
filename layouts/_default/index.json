@@ -1,6 +1,6 @@
 {{- $.Scratch.Set "index" slice -}}
 {{- range site.RegularPages -}}
-  {{- if and (not .Params.searchHidden) (ne .Layout `archives`) (ne .Layout `search`) (ne .Layout `search-assistant`) -}}
+  {{- if and (not .Params.searchHidden) (ne .Layout `archives`) (ne .Layout `search`) (ne .Layout `site-search`) -}}
     {{- $page := . -}}
     {{- $tags := slice -}}
     {{- with $page.Params.tags -}}

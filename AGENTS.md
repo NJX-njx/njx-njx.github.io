@@ -25,25 +25,24 @@ Production: <https://njx-njx.github.io/>
 content/posts/              Blog posts (Markdown + YAML frontmatter)
 content/about.md            About page
 content/faq.md              FAQ page
-content/search.md           Search + Ask page (layout: search-assistant)
+content/search.md           Search page (layout: site-search)
 content/archives.md         Archive page (layout: archives)
 content/reports.md          Reports listing (layout: reports) + report registry
 hugo.yaml                   Site configuration
 layouts/_default/           Layout overrides:
   reports.html              Reports card listing (reads .Params.reports)
-  search-assistant.html     Chunk search + Ask UI
+  site-search.html          Chunk-based search UI
   index.json                Chunk-based search index (heading-section records)
   baseof.html, single.html, rss.xml
   partials/                 social_icons.html (X logo), toc.html, ...
 assets/css/extended/        Auto-loaded after theme styles:
   pagination.css            Pagination button overrides
   side-toc.css              Side TOC layout + drawer (desktop/mobile)
-assets/js/                  search-assistant.js, toc-drawer.js
+assets/js/                  site-search.js, toc-drawer.js
 static/reports/<slug>/      Standalone interactive report pages (self-contained HTML)
 static/blog-icon.png        Site logo + favicon source (avatar from cover art)
 static/favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png
 static/blog-cover.jpg       OG share image
-workers/openrouter-proxy/   Cloudflare Worker proxying the Ask feature to OpenRouter
 .github/workflows/hugo.yaml Deploy workflow
 .github/copilot-instructions.md  Pointer to this file (do not duplicate content there)
 ```
@@ -61,7 +60,7 @@ hugo server                         # production content only
 
 # Build & check
 hugo --gc --minify                  # output in public/
-node --check assets/js/search-assistant.js
+node --check assets/js/site-search.js
 node scripts/search_quality.js public/index.json
 
 # Deploy = push to main; then watch
@@ -96,18 +95,6 @@ gh run list --limit 3
   (`rgba(255,255,255,0.06)`), 1px `var(--border)` borders, small radii
   (10–12px), `--secondary` text / `--primary` on hover.
 
-### Ask feature (AI assistant) operations
-
-- Backend: Cloudflare Worker `njx-log-ai-assistant`
-  (`workers/openrouter-proxy/`); the secret `OPENROUTER_API_KEY` lives only
-  in Cloudflare.
-- If the UI shows raw upstream errors (e.g. `User not found.` from
-  OpenRouter), the API key is invalid — rotate it:
-  1. Create a new key at <https://openrouter.ai/keys>.
-  2. `cd workers/openrouter-proxy && npx wrangler login && npm run secret:set`
-  3. Paste the key; verify by asking a question on `/search/`.
-- Never write the key into any committed file.
-
 ## Configuration Gotchas
 
 - `locale` / `defaultContentLanguage` must be `"zh"` — the theme only ships
@@ -115,7 +102,7 @@ gh run list --limit 3
   「下一页」render empty).
 - `disableAnchoredHeadings: true` is intentional — no `#` anchor icons on
   headings.
-- The Search page must keep `layout: "search-assistant"` (not `search`) so
+- The Search page must keep `layout: "site-search"` (not `search`) so
   PaperMod's built-in fastsearch script does not double-bind the input.
 - Social icons are customized in `layouts/partials/social_icons.html`;
   the `x`/`twitter` name renders the current X logo.
@@ -127,7 +114,7 @@ gh run list --limit 3
 
 1. Never modify `themes/PaperMod/` — override via root `layouts/` and
    `assets/css/extended/`.
-2. Never commit secrets (Worker API key, `.dev.vars`).
+2. Never commit secrets or credentials.
 3. Never convert the site to `hugo.toml` or change the theme.
 4. Keep generated artifacts out of git (`public/` is gitignored; don't
    force-add it).
