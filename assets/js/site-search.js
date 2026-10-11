@@ -2,8 +2,11 @@
     let searchIndex = null;
     let fuse = null;
 
+    const searchBox = document.getElementById('searchbox');
     const searchInput = document.getElementById('searchInput');
     const searchResults = document.getElementById('searchResults');
+    const indexUrl = searchBox.dataset.index;
+    const noResultsText = searchBox.dataset.noResults;
 
     async function init() {
         await loadSearchIndex();
@@ -12,7 +15,7 @@
 
     async function loadSearchIndex() {
         try {
-            const response = await fetch('/index.json');
+            const response = await fetch(indexUrl);
             searchIndex = await response.json();
 
             if (typeof Fuse !== 'undefined') {
@@ -116,7 +119,7 @@
 
         const results = searchRelevantChunks(query, 12);
         if (results.length === 0) {
-            searchResults.innerHTML = '<li class="no-results">No results found</li>';
+            searchResults.innerHTML = `<li class="no-results">${escapeHtml(noResultsText)}</li>`;
             return;
         }
 

@@ -7,8 +7,13 @@ Guidelines for AI coding agents working on **Njx'Log** (`njx-njx.github.io`).
 A personal technical blog (Hugo + PaperMod → GitHub Pages) about the
 engineering side of LLM training: harness and rollout systems, model
 architecture, mid-training and post-training, evals and benchmarks,
-reasoning RL and agentic RL, RSI, and data synthesis. Posts are mixed
-Chinese/English; the site language is Chinese (`locale: "zh"`).
+reasoning RL and agentic RL, RSI, and data synthesis.
+
+The site is bilingual: Chinese is the default language and lives at `/`;
+English lives under `/en/`. Every page exists in both languages as a pair of
+files with the same base name: `<name>.md` (Chinese) and `<name>.en.md`
+(English). The header's language link jumps to the current page's
+translation.
 
 Production: <https://njx-njx.github.io/>
 
@@ -22,13 +27,15 @@ Production: <https://njx-njx.github.io/>
 ## Repository Layout
 
 ```text
-content/posts/              Blog posts (Markdown + YAML frontmatter)
-content/about.md            About page
-content/faq.md              FAQ page
-content/search.md           Search page (layout: site-search)
-content/archives.md         Archive page (layout: archives)
-content/reports.md          Reports listing (layout: reports)
-hugo.yaml                   Site configuration
+content/posts/              Blog posts: <slug>.md (zh) + <slug>.en.md (en)
+content/about(.en).md       About page
+content/faq(.en).md         FAQ page
+content/search(.en).md      Search page (layout: site-search)
+content/archives(.en).md    Archive page (layout: archives)
+content/reports(.en).md     Reports listing (layout: reports)
+hugo.yaml                   Site configuration; per-language menus/params
+i18n/zh.yaml, i18n/en.yaml  Strings used by our own templates
+layouts/partials/header.html  Theme header + page-level language switch
 layouts/_default/           Layout overrides:
   reports.html              Reports cards: posts that have static/reports/<slug>/
   site-search.html          Chunk-based search UI
@@ -76,7 +83,12 @@ gh run list --limit 3
    one-line `summary`, `draft: true` until ready.
 3. Keep `title` short — list cards should render on one line
    (~46 display units; CJK chars count ~2, ASCII ~1).
-4. Build locally and confirm the card renders correctly.
+4. Add the translation as `<kebab-case-slug>.en.md` (or `.md` if the original
+   is English). Keep `date`, `tags` and the heading structure identical;
+   translate `title` and `summary`. Links to other posts point at the same
+   language (`/posts/...` in Chinese, `/en/posts/...` in English); report
+   links stay `/reports/<slug>/` because reports are Chinese-only.
+5. Build locally and confirm the card renders correctly in both languages.
 
 ### Adding an interactive report
 
@@ -97,9 +109,15 @@ gh run list --limit 3
 
 ## Configuration Gotchas
 
-- `locale` / `defaultContentLanguage` must be `"zh"` — the theme only ships
-  `zh.yaml`; `zh-cn` silently loses every translation (buttons like
-  「下一页」render empty).
+- The Chinese language key and `defaultContentLanguage` must be `"zh"` — the
+  theme only ships `zh.yaml`; `zh-cn` silently loses every translation
+  (buttons like 「下一页」render empty).
+- Do not set `url:` in content front matter. Default paths already give
+  `/about/` and `/en/about/`; a `url:` would pin both languages to one path.
+- `layouts/partials/header.html` is a copy of the theme header with one
+  change: the language link targets the current page's translation (falling
+  back to the other language's home) and uses `.Language.Label`. Re-apply that
+  block if the theme header is ever re-synced.
 - `disableAnchoredHeadings: true` is intentional — no `#` anchor icons on
   headings.
 - The Search page must keep `layout: "site-search"` (not `search`) so

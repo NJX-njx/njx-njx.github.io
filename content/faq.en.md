@@ -1,6 +1,5 @@
 ---
 title: "FAQ"
-url: "/faq/"
 summary: "Frequently Asked Questions"
 ShowShareButtons: false
 ShowBreadCrumbs: false

@@ -1,9 +1,8 @@
 ---
-title: "Search"
+title: "搜索"
 layout: "site-search"
-url: "/search/"
-summary: "Search articles"
-description: "Search articles across Njx'Log"
+summary: "搜索文章"
+description: "搜索 Njx'Log 的全部文章"
 ShowShareButtons: false
 searchHidden: true
 ---

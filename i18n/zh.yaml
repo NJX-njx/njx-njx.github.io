@@ -1,0 +1,14 @@
+- id: toc_close
+  translation: "关闭目录"
+
+- id: search_input_label
+  translation: "搜索"
+
+- id: search_results_label
+  translation: "搜索结果"
+
+- id: search_no_results
+  translation: "没有找到相关内容"
+
+- id: open_report
+  translation: "打开报告"

@@ -1,0 +1,14 @@
+- id: toc_close
+  translation: "Close table of contents"
+
+- id: search_input_label
+  translation: "Search"
+
+- id: search_results_label
+  translation: "Search results"
+
+- id: search_no_results
+  translation: "No results found"
+
+- id: open_report
+  translation: "Open report"

@@ -1,6 +1,5 @@
 ---
-title: "Posts"
-url: "/posts/"
-summary: "Posts"
+title: "文章"
+summary: "文章"
 ShowBreadCrumbs: false
 ---
