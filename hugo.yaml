@@ -4,6 +4,7 @@ theme: "PaperMod"
 defaultContentLanguage: "zh"
 defaultContentLanguageInSubdir: false
 hasCJKLanguage: true
+capitalizeListTitles: false
 
 enableRobotsTXT: true
 enableGitInfo: true
