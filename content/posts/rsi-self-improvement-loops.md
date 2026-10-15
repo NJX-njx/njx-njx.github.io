@@ -19,7 +19,7 @@ summary: "RSI（递归自我改进）这个词在 2025-2026 年重新变热，�
 
 ## 层次一：数据闭环——最成熟，也最不像 RSI
 
-第一个层次是数据在环里转：模型 rollout → 按可验证结果筛选成功轨迹 → 混入下一轮 SFT/RL 训练 → 模型变强 → 再 rollout。本周谈 LoopTool 时见过这个形态（评估发现弱点 → 定向合成数据 → 再训练），工业界更完整的例子是 WebSailor 系列（arXiv:2507.02592，V2 版 2509.13305 明确把合成数据 + 可扩展 RL 写进标题）：用强模型造浏览轨迹、用结果奖励训练、用自我批评过滤、再自动合成更难的训练任务。DeepResearcher（2504.03160）报告了一个值得记住的现象：这类闭环训练里，预搜索规划、信息分层、交叉验证这些行为**没有被任何奖励项显式鼓励，是 RL 优化的副产品**。
+第一个层次是数据在环里转：模型 rollout → 按可验证结果筛选成功轨迹 → 混入下一轮 SFT/RL 训练 → 模型变强 → 再 rollout。LoopTool（[arXiv:2511.09148](https://arxiv.org/abs/2511.09148)）就是这个形态（评估发现弱点 → 定向合成数据 → 再训练），工业界更完整的例子是 WebSailor 系列（arXiv:2507.02592，V2 版 2509.13305 明确把合成数据 + 可扩展 RL 写进标题）：用强模型造浏览轨迹、用结果奖励训练、用自我批评过滤、再自动合成更难的训练任务。DeepResearcher（2504.03160）报告了一个值得记住的现象：这类闭环训练里，预搜索规划、信息分层、交叉验证这些行为**没有被任何奖励项显式鼓励，是 RL 优化的副产品**。
 
 这个层次已经工业化，但严格说它不是"自我"改进——闭环里做选择的是工程师设计的筛选器，模型只是数据源。它的天花板也很清楚：筛选标准本身是可 hack 的（"碰巧成功"的低效轨迹会被留下），而且数据分布越窄，闭环转得越快，模型越快地把自己收敛到当前验证器喜欢的样子。
 
@@ -35,7 +35,7 @@ summary: "RSI（递归自我改进）这个词在 2025-2026 年重新变热，�
 
 第三个层次才是 RSI 的本体：模型（或其产物）改进用于改进它的东西——更好的助手、更好的数据、更好的评测——形成递归。2018 年 Leike 等人的奖励建模研究纲领（arXiv:1811.07871）里就有一节明确讨论递归奖励建模：用 AI 帮助人类评估 AI 的输出，评估能力随被评估者一起涨。
 
-这个层次的前置条件是 scalable oversight（2211.03592，教材第 30 章引为对齐核心方向）：当模型能力超过人类评估能力，谁来验收改进是真的？闭环里每一轮都在做选择，选择标准一旦可 hack，**闭环转速越快，崩得越快**——数据闭环里已经能看到小尺度版本（指标通胀），系统闭环把它放大到全流程。这也是为什么"证明持续学到的是可迁移能力"是丁铎列出的硬问题：闭环内的提升常常是"在这个闭环的评测里变强"，出了闭环未必。
+这个层次的前置条件是 scalable oversight（2211.03540，教材 hands-on-modern-rl 第 30 章引为对齐核心方向）：当模型能力超过人类评估能力，谁来验收改进是真的？闭环里每一轮都在做选择，选择标准一旦可 hack，**闭环转速越快，崩得越快**——数据闭环里已经能看到小尺度版本（指标通胀），系统闭环把它放大到全流程。这也是为什么"证明持续学到的是可迁移能力"是丁铎列出的硬问题：闭环内的提升常常是"在这个闭环的评测里变强"，出了闭环未必。
 
 ## 三个层次共用一张考卷
 
@@ -61,9 +61,9 @@ summary: "RSI（递归自我改进）这个词在 2025-2026 年重新变热，�
 
 ## 参考来源
 
-- 丁铎对谈笔记：《在模型持续进步的时代，创业者应该站在哪里》§20（RSI 与持续学习的两条路线、三个硬问题），`/Users/moonshot/Documents/thinking/`
+- 丁铎对谈笔记：《在模型持续进步的时代，创业者应该站在哪里》§20（RSI 与持续学习的两条路线、三个硬问题）
 - RLSVR：[arXiv:2607.23802](https://arxiv.org/abs/2607.23802)（摘要与核心主张）
 - WebSailor：[arXiv:2507.02592](https://arxiv.org/abs/2507.02592)、[V2 2509.13305](https://arxiv.org/abs/2509.13305)（标题与系列定位）；DeepResearcher [arXiv:2504.03160](https://arxiv.org/abs/2504.03160)
-- 递归奖励建模：Leike et al. [arXiv:1811.07871](https://arxiv.org/abs/1811.07871)；Scalable Oversight [arXiv:2211.03592](https://arxiv.org/abs/2211.03592)（本地教材 `docs/chapter30_alignment_failures/scaling-and-defenses.md`）
-- Test-Time Training 经典：Sun et al. [arXiv:2007.12880](https://arxiv.org/abs/2007.12880)；test-time scaling：s1 [arXiv:2501.19393](https://arxiv.org/abs/2501.19393)
+- 递归奖励建模：Leike et al. [arXiv:1811.07871](https://arxiv.org/abs/1811.07871)；Scalable Oversight [arXiv:2211.03540](https://arxiv.org/abs/2211.03540)（教材 hands-on-modern-rl：[`docs/chapter30_alignment_failures/scaling-and-defenses.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter30_alignment_failures/scaling-and-defenses.md)）
+- Test-Time Training 经典：Sun et al. [arXiv:1909.13231](https://arxiv.org/abs/1909.13231)；test-time scaling：s1 [arXiv:2501.19393](https://arxiv.org/abs/2501.19393)
 - 前篇：[7 轮交互失败了该怪谁：多轮轨迹的奖励归因](/posts/turn-level-reward-credit-assignment/)（昨天：局内归因；今天：跨局闭环）

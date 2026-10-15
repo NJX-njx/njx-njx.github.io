@@ -82,5 +82,5 @@ Third, **the cache width and the masking ratio are two hyperparameters that need
 ## References
 
 - DAPO paper: [arXiv:2503.14476v2](https://arxiv.org/abs/2503.14476) (source of the §3.4 mechanism description, Equation 13, the §4.1 configuration values, and Figure 5)
-- Local copy of the textbook hands-on-modern-rl: Chapter 18 deepseek-dapo.md and the appendix DAPO cheatsheet (`docs/en/appendix_code_cheatsheet/dapo.md`)
+- Textbook [hands-on-modern-rl](https://github.com/walkinglabs/hands-on-modern-rl): Chapter 18 [`docs/chapter18_grpo/deepseek-dapo.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter18_grpo/deepseek-dapo.md) and the appendix DAPO cheatsheet ([`docs/en/appendix_code_cheatsheet/dapo.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/en/appendix_code_cheatsheet/dapo.md))
 - Previous posts: [Entropy Collapse: What DAPO's Clip-Higher Fixes](/en/posts/dapo-clip-higher-entropy-collapse/), ["When Wrong, Write Longer": How GRPO's Two Normalization Terms Distort the Optimization Direction](/en/posts/dr-grpo-length-and-difficulty-bias/)

@@ -82,8 +82,8 @@ GRPO 家族走对称的另一条路：组内比较多条轨迹的机制不动，
 
 ## 参考来源
 
-- 本地教材 hands-on-modern-rl：22.2 多轮 RL 形式化（AppWorld POMDP、action mask、reward 四类）与 22.3 轨迹信用分配（三层信号、ORM/PRM 实验、三条中间路线、turn-level discounting、选型分档），本地仓库 `docs/chapter22_agentic/formulation.md` 与 `docs/chapter22_agentic/credit-assignment.md`
+- 教材 [hands-on-modern-rl](https://github.com/walkinglabs/hands-on-modern-rl)：22.2 多轮 RL 形式化（AppWorld POMDP、action mask、reward 四类）与 22.3 轨迹信用分配（三层信号、ORM/PRM 实验、三条中间路线、turn-level discounting、选型分档），[`docs/chapter22_agentic/formulation.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter22_agentic/formulation.md) 与 [`docs/chapter22_agentic/credit-assignment.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter22_agentic/credit-assignment.md)
 - GSPO 论文：[arXiv:2507.18071](https://arxiv.org/abs/2507.18071) §4.3（GSPO-token 公式与等价性论证）
-- AppWorld：[Executable Code Actions Elicit Better LLM Agents](https://arxiv.org/abs/2404.14394)；ORM/PRM 原始框架：[Let's Verify Step by Step](https://arxiv.org/abs/2305.20050)（Lightman et al., 2023）
-- 中间路线：SALT [2510.20022]、GiGPO/HGPO [2604.18401]、SPA-RL [2505.20732]、IGPO [2504.05678]、Turn-PPO [2512.17008]、StepPO [2604.18401]（arXiv id 均转引自教材）
+- AppWorld：[AppWorld: A Controllable World of Apps and People for Benchmarking Interactive Coding Agents](https://arxiv.org/abs/2407.18901)；ORM/PRM 原始框架：[Let's Verify Step by Step](https://arxiv.org/abs/2305.20050)（Lightman et al., 2023）
+- 中间路线：SALT [2510.20022]、GiGPO [2505.10978]、HGPO [2602.22817]、SPA-RL [2505.20732]、IGPO [2510.14967]、Turn-PPO [2512.17008]、StepPO（教材给出的编号指向另一篇论文，未能核实原文）（arXiv id 已逐一对照 arXiv 核对）
 - 前篇：[比率用错了单位：GSPO 把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)、[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/)

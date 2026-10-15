@@ -165,10 +165,10 @@ DAPO 把它整个去掉了（$\beta=0$，参考模型不用加载），论文 §
 ## 参考来源
 
 - DAPO 论文：[arXiv:2503.14476](https://arxiv.org/abs/2503.14476)（机制、数值例子、消融数据、训练细节的一手来源）
-- RLHF Book 第 6 章及配套实现：`code/policy_gradients/loss.py`、`configs/dapo.yaml`（本地仓库，含 [book-zh 中文对照](https://github.com/natolambert/rlhf-book)）
+- RLHF Book 第 6 章及配套实现：[`code/policy_gradients/loss.py`](https://github.com/natolambert/rlhf-book/blob/main/code/policy_gradients/loss.py)、[`code/policy_gradients/configs/dapo.yaml`](https://github.com/natolambert/rlhf-book/blob/main/code/policy_gradients/configs/dapo.yaml)（[natolambert/rlhf-book](https://github.com/natolambert/rlhf-book)）
 - verl 生产实现：[`verl/trainer/ppo/core_algos.py`](https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py)（clip_ratio_low/high、dual-clip）
 - B 站视频：[GRPO loss/objective 分析及 biases 分析（DAPO，Dr. GRPO），BV1LgXbY5EFD](https://www.bilibili.com/video/BV1LgXbY5EFD)（注意：该集主要讲动态采样与长度 bias、Dr. GRPO 的标准差问题，Clip-Higher 着墨很少）
-- hands-on-modern-rl `docs/chapter18_grpo/deepseek-dapo.md`（中文讲解，Clip-Higher 一节有表述混乱，正文已标注）
+- hands-on-modern-rl [`docs/chapter18_grpo/deepseek-dapo.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter18_grpo/deepseek-dapo.md)（中文讲解，Clip-Higher 一节有表述混乱，正文已标注）
 - Notion「共同语言」笔记页（GRPO 三轮工业改造线：DAPO / Dr.GRPO / GSPO）
 
 ---

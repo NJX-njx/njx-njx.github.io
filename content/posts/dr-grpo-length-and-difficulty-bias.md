@@ -64,7 +64,7 @@ $$\tilde{A}_i = R_i - \mathrm{mean}(\{R_j\}_{j=1}^G)$$
 
 ## 一次教材勘误，以及和前两天的分工
 
-本地教材 hands-on-modern-rl 的 16.4 节也讲到了这组偏差，但表述值得修正：它把“std 趋近于零时优势被放大”标成了“长度偏差”，并把长度膨胀归因于“除以 std 鼓励模型增加组内方差”。对照论文原文，这个说法有两层错位：std 造成的是**难度偏差**（不同题之间的权重不等），不是长度偏差；而长度偏差的直接来源是 $1/|y_i|$，与 std 无关，作用在回答内部每个 token 的权重上。两项归一化、两种偏差各自独立存在——勘误的价值在于，整改方案的选择依赖这个区分：去掉 std 解决不了长度问题。
+教材 [hands-on-modern-rl](https://github.com/walkinglabs/hands-on-modern-rl) 的 16.4 节也讲到了这组偏差，但表述值得修正：它把“std 趋近于零时优势被放大”标成了“长度偏差”，并把长度膨胀归因于“除以 std 鼓励模型增加组内方差”。对照论文原文，这个说法有两层错位：std 造成的是**难度偏差**（不同题之间的权重不等），不是长度偏差；而长度偏差的直接来源是 $1/|y_i|$，与 std 无关，作用在回答内部每个 token 的权重上。两项归一化、两种偏差各自独立存在——勘误的价值在于，整改方案的选择依赖这个区分：去掉 std 解决不了长度问题。
 
 本周已发的几篇文章，恰好分别从三个层面回应了这件事：
 
@@ -89,6 +89,6 @@ $$\tilde{A}_i = R_i - \mathrm{mean}(\{R_j\}_{j=1}^G)$$
 ## 参考来源
 
 - Sea AI Lab / NUS：[Understanding R1-Zero-Like Training: A Critical Perspective](https://arxiv.org/abs/2503.20783)（本文公式、实验与偏差定义的出处；v2）
-- 本地教材 hands-on-modern-rl：第 16.4 节（采用勘误后的表述）与附录 DAPO cheatsheet（`docs/en/appendix_code_cheatsheet/dapo.md`，DAPO 的 z-score advantage 与 token-mean 损失粒度对照）
+- 教材 [hands-on-modern-rl](https://github.com/walkinglabs/hands-on-modern-rl)：第 16.4 节（采用勘误后的表述）与附录 DAPO cheatsheet（[`docs/en/appendix_code_cheatsheet/dapo.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/en/appendix_code_cheatsheet/dapo.md)，DAPO 的 z-score advantage 与 token-mean 损失粒度对照）
 - RLOO 参照：[Back to Basics: Revisiting REINFORCE Style Optimization](https://arxiv.org/abs/2402.14740)
 - 前篇：[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/)、[比率用错了单位：GSPO 把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)、[同一个模型，两个概率：训练推理不一致的代价](/posts/tis-train-inference-mismatch/)

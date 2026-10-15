@@ -82,5 +82,5 @@ $$R_{length}(y) = \begin{cases} 0, & |y| \le L_{max} - L_{cache} \\ \dfrac{(L_{m
 ## 参考来源
 
 - DAPO 论文：[arXiv:2503.14476v2](https://arxiv.org/abs/2503.14476)（§3.4 机制描述、Equation 13、§4.1 配置数值、Figure 5 的出处）
-- 本地教材 hands-on-modern-rl：第 18 章 deepseek-dapo.md 与附录 DAPO cheatsheet（`docs/en/appendix_code_cheatsheet/dapo.md`）
+- 教材 [hands-on-modern-rl](https://github.com/walkinglabs/hands-on-modern-rl)：第 18 章 [`docs/chapter18_grpo/deepseek-dapo.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter18_grpo/deepseek-dapo.md) 与附录 DAPO cheatsheet（[`docs/en/appendix_code_cheatsheet/dapo.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/en/appendix_code_cheatsheet/dapo.md)）
 - 前篇：[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/)、[“答错就写长一点”：GRPO 两个归一化项怎么扭曲优化方向](/posts/dr-grpo-length-and-difficulty-bias/)

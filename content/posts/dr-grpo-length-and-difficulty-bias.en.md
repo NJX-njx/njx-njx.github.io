@@ -64,7 +64,7 @@ The controlled experiments are run in the Oat framework on Qwen2.5-1.5B. The res
 
 ## A Textbook Erratum, and the Division of Labor with the Previous Posts
 
-Section 16.4 of the local textbook hands-on-modern-rl also covers this pair of biases, but its wording deserves a correction: it labels “the advantage gets amplified as std approaches zero” as “length bias”, and attributes length inflation to “dividing by std encourages the model to increase within-group variance”. Checked against the original paper, this account is off on two counts: std causes **difficulty bias** (unequal weights across questions), not length bias; and the direct source of length bias is $1/|y_i|$, which has nothing to do with std and acts on the weight of each token within a response. The two normalizations and the two biases each exist independently — the value of the erratum is that choosing a fix depends on this distinction: removing std does not solve the length problem.
+Section 16.4 of the textbook [hands-on-modern-rl](https://github.com/walkinglabs/hands-on-modern-rl) also covers this pair of biases, but its wording deserves a correction: it labels “the advantage gets amplified as std approaches zero” as “length bias”, and attributes length inflation to “dividing by std encourages the model to increase within-group variance”. Checked against the original paper, this account is off on two counts: std causes **difficulty bias** (unequal weights across questions), not length bias; and the direct source of length bias is $1/|y_i|$, which has nothing to do with std and acts on the weight of each token within a response. The two normalizations and the two biases each exist independently — the value of the erratum is that choosing a fix depends on this distinction: removing std does not solve the length problem.
 
 The recent posts in this series happen to tackle this at three different levels:
 
@@ -89,6 +89,6 @@ Third, **when checking a normalization, first check “whether the divisor is a 
 ## References
 
 - Sea AI Lab / NUS: [Understanding R1-Zero-Like Training: A Critical Perspective](https://arxiv.org/abs/2503.20783) (the source of this post's formulas, experiments, and bias definitions; v2)
-- Local textbook hands-on-modern-rl: Section 16.4 (using the corrected wording) and the appendix DAPO cheatsheet (`docs/en/appendix_code_cheatsheet/dapo.md`, a side-by-side of DAPO's z-score advantage and the token-mean loss granularity)
+- Textbook [hands-on-modern-rl](https://github.com/walkinglabs/hands-on-modern-rl): Section 16.4 (using the corrected wording) and the appendix DAPO cheatsheet ([`docs/en/appendix_code_cheatsheet/dapo.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/en/appendix_code_cheatsheet/dapo.md), a side-by-side of DAPO's z-score advantage and the token-mean loss granularity)
 - RLOO reference: [Back to Basics: Revisiting REINFORCE Style Optimization](https://arxiv.org/abs/2402.14740)
 - Previous posts: [Entropy Collapse: What DAPO's Clip-Higher Fixes](/en/posts/dapo-clip-higher-entropy-collapse/), [The Ratio's Wrong Unit: GSPO Goes Sequence-Level](/en/posts/gspo-sequence-level-importance-sampling/), [One Model, Two Probabilities: Cost of Mismatch](/en/posts/tis-train-inference-mismatch/)

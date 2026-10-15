@@ -93,6 +93,6 @@ Dr.GRPO（本周后面会专门写）对 std 的批评——全对全错组 std 
 - DAPO 论文：[arXiv:2503.14476](https://arxiv.org/abs/2503.14476)，Dynamic Sampling 约束见公式 8，奖励 ±1 见公式 7
 - It Takes Two: Your GRPO Is Secretly DPO：[arXiv:2510.00977](https://arxiv.org/abs/2510.00977)
 - What is the Alignment Objective of GRPO?：[arXiv:2502.18548](https://arxiv.org/abs/2502.18548)
-- RLHF Book 第 6 章（baseline 无偏条件、RLOO 留一公式）：本地仓库 `book-zh/chapters/06-policy-gradients.md`；教学代码默认 `num_rollouts: 8`：`code/policy_gradients/configs/`
+- RLHF Book 第 6 章（baseline 无偏条件、RLOO 留一公式）：[`book/chapters/06-policy-gradients.md`](https://github.com/natolambert/rlhf-book/blob/main/book/chapters/06-policy-gradients.md)；教学代码默认 `num_rollouts: 8`：[`code/policy_gradients/configs/`](https://github.com/natolambert/rlhf-book/tree/main/code/policy_gradients/configs)
 - 零梯度组概率表、误判丢弃、clip 触发率链条为本文推算/推断，文中已逐处标注
 - 前篇：[比率用错了单位：GSPO 把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)

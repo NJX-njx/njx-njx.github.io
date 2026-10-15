@@ -165,10 +165,10 @@ Placed back into this post's failure chain, the division of labor between the tw
 ## References
 
 - DAPO paper: [arXiv:2503.14476](https://arxiv.org/abs/2503.14476) (primary source for the mechanism, numerical examples, ablation data, and training details)
-- RLHF Book Chapter 6 and its companion implementation: `code/policy_gradients/loss.py`, `configs/dapo.yaml` (local repo, including the [book-zh Chinese parallel edition](https://github.com/natolambert/rlhf-book))
+- RLHF Book Chapter 6 and its companion implementation: [`code/policy_gradients/loss.py`](https://github.com/natolambert/rlhf-book/blob/main/code/policy_gradients/loss.py), [`code/policy_gradients/configs/dapo.yaml`](https://github.com/natolambert/rlhf-book/blob/main/code/policy_gradients/configs/dapo.yaml) ([natolambert/rlhf-book](https://github.com/natolambert/rlhf-book))
 - verl production implementation: [`verl/trainer/ppo/core_algos.py`](https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py) (clip_ratio_low/high, dual-clip)
 - Bilibili video: [Analysis of the GRPO loss/objective and its biases (DAPO, Dr. GRPO), BV1LgXbY5EFD](https://www.bilibili.com/video/BV1LgXbY5EFD) (note: this episode mainly covers dynamic sampling and length bias, and Dr. GRPO's standard-deviation issue; it spends very little time on Clip-Higher)
-- hands-on-modern-rl `docs/chapter18_grpo/deepseek-dapo.md` (a Chinese-language explainer; the wording in its Clip-Higher section is muddled, as flagged in the main text)
+- hands-on-modern-rl [`docs/chapter18_grpo/deepseek-dapo.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter18_grpo/deepseek-dapo.md) (a Chinese-language explainer; the wording in its Clip-Higher section is muddled, as flagged in the main text)
 - Notion "Common Language" notes page (the three rounds of industrial reworking of GRPO: DAPO / Dr.GRPO / GSPO)
 
 ---

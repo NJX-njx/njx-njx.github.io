@@ -49,7 +49,7 @@ The core is the definition of the sequence-level ratio $s_i$:
 
 $$s_i(\theta)=\left(\frac{\pi_\theta(y_i|x)}{\pi_{\theta_{old}}(y_i|x)}\right)^{\frac{1}{|y_i|}}=\exp\left(\frac{1}{|y_i|}\sum_{t=1}^{|y_i|}\log\frac{\pi_\theta(y_{i,t}|x,y_{i,<t})}{\pi_{\theta_{old}}(y_{i,t}|x,y_{i,<t})}\right)$$
 
-This is the geometric mean of the whole-sequence likelihood ratio, equivalent to taking the arithmetic mean of the per-token log-ratios and then exponentiating. The length normalization $1/|y_i|$ cannot be dropped: without it, thousands of ratios get multiplied together, likelihood changes in just a few tokens can make the overall ratio swing violently, and responses of different lengths would need different clipping ranges — there would be no way to set $\varepsilon$ at all. After normalization, the numerical range of $s_i$ is decoupled from sequence length, and a single $\varepsilon$ covers everything. (The local copy of the hands-on-modern-rl textbook omits this $1/|y_i|$ from its formula when introducing GSPO in Section 16.4; go by Equation 7 in the paper — leave it out and the whole chain of argument breaks.)
+This is the geometric mean of the whole-sequence likelihood ratio, equivalent to taking the arithmetic mean of the per-token log-ratios and then exponentiating. The length normalization $1/|y_i|$ cannot be dropped: without it, thousands of ratios get multiplied together, likelihood changes in just a few tokens can make the overall ratio swing violently, and responses of different lengths would need different clipping ranges — there would be no way to set $\varepsilon$ at all. After normalization, the numerical range of $s_i$ is decoupled from sequence length, and a single $\varepsilon$ covers everything. (The hands-on-modern-rl textbook omits this $1/|y_i|$ from its formula when introducing GSPO in Section 16.4; go by Equation 7 in the paper — leave it out and the whole chain of argument breaks.)
 
 The meaning of clipping changes accordingly. In GRPO, clipping zeroes out the gradient of an individual token — the signal is chopped up, but the sample remains; in GSPO, clipping removes an entire response from the gradient estimate — a sample is either used in full or not at all. This aligns, in granularity, with "the reward is given to the whole sequence".
 
@@ -116,6 +116,6 @@ There is one more detail worth pointing out: the GSPO paper's clipping range of 
 ## References
 
 - GSPO paper: [arXiv:2507.18071v2](https://arxiv.org/abs/2507.18071); the equation numbers and experimental data in this post all come from its v2
-- RLHF Book, Chapter 6 (importance sampling background; GSPO/CISPO subsections): [rlhfbook.com](https://rlhfbook.com/); local repo `book-zh/chapters/06-policy-gradients.md`
-- hands-on-modern-rl, Section 16.4 (comparison of the GRPO family of improvements; note that its GSPO formula omits the length normalization): local repo `docs/chapter18_grpo/grpo-family.md`
+- RLHF Book, Chapter 6 (importance sampling background; GSPO/CISPO subsections): [rlhfbook.com](https://rlhfbook.com/); [`book/chapters/06-policy-gradients.md`](https://github.com/natolambert/rlhf-book/blob/main/book/chapters/06-policy-gradients.md)
+- hands-on-modern-rl, Section 16.4 (comparison of the GRPO family of improvements; note that its GSPO formula omits the length normalization): [`docs/chapter18_grpo/grpo-family.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter18_grpo/grpo-family.md)
 - Previous post: [Entropy Collapse: What DAPO's Clip-Higher Fixes](/en/posts/dapo-clip-higher-entropy-collapse/)

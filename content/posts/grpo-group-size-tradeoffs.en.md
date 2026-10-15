@@ -93,6 +93,6 @@ The first four posts in this series happen to form a single thread: Clip-Higher 
 - DAPO paper: [arXiv:2503.14476](https://arxiv.org/abs/2503.14476); the Dynamic Sampling constraint is in Equation 8, the ±1 reward in Equation 7
 - It Takes Two: Your GRPO Is Secretly DPO: [arXiv:2510.00977](https://arxiv.org/abs/2510.00977)
 - What is the Alignment Objective of GRPO?: [arXiv:2502.18548](https://arxiv.org/abs/2502.18548)
-- RLHF Book, Chapter 6 (the baseline unbiasedness condition, the RLOO leave-one-out formula): local repo `book-zh/chapters/06-policy-gradients.md`; teaching-code default `num_rollouts: 8`: `code/policy_gradients/configs/`
+- RLHF Book, Chapter 6 (the baseline unbiasedness condition, the RLOO leave-one-out formula): [`book/chapters/06-policy-gradients.md`](https://github.com/natolambert/rlhf-book/blob/main/book/chapters/06-policy-gradients.md); teaching-code default `num_rollouts: 8`: [`code/policy_gradients/configs/`](https://github.com/natolambert/rlhf-book/tree/main/code/policy_gradients/configs)
 - The zero-gradient-group probability table, the mistaken discards, and the clip-fraction chain are this post's own calculations/inferences, each flagged where it appears in the text
 - Previous post: [The Ratio's Wrong Unit: GSPO Goes Sequence-Level](/en/posts/gspo-sequence-level-importance-sampling/)
