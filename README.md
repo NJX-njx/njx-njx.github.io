@@ -143,7 +143,7 @@ You can also run the workflow manually from the GitHub Actions tab.
 ```bash
 hugo --gc --minify
 node scripts/search_quality.mjs
-python3 scripts/check_translations.py
+python3 scripts/check_posts.py
 ```
 
 ## For AI Agents

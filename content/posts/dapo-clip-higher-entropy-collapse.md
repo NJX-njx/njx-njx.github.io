@@ -4,8 +4,10 @@ date: 2026-08-26T14:30:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
 series: ["grpo"]
-summary: "naive GRPO 复现 R1 时熵快速坍缩、组内样本趋同，DAPO 的 Clip-Higher 只把裁剪上界从 0.2 抬到 0.28。这一个数背后，是 PPO-Clip 在概率轴上的结构性不对称。本文拆解失效链条、机制、证据与边界。"
+summary: "naive GRPO 训练中熵会快速坍缩。DAPO 只把裁剪上界从 0.2 抬到 0.28，背后是 PPO-Clip 在概率轴上的结构性不对称。"
 ---
+
+naive GRPO 复现 R1 时熵快速坍缩、组内样本趋同，DAPO 的 Clip-Higher 只把裁剪上界从 0.2 抬到 0.28。这一个数背后，是 PPO-Clip 在概率轴上的结构性不对称。本文拆解失效链条、机制、证据与边界。
 
 > 本文有配套的[交互报告](/reports/dapo-clip-higher-entropy-collapse/)，含可下钻的公式拆解与消融数据图表。
 

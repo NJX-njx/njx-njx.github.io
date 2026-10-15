@@ -4,8 +4,10 @@ date: 2026-08-30T12:07:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "dr-grpo"]
 series: ["grpo"]
-summary: "同一个 batch 里，500 token 的回答和 5000 token 的回答，谁对梯度的贡献大？GRPO 说一样大，DAPO 说长的大十倍，两家都能给出理由。这是损失聚合方式之争——sample-mean 每条回答一票，token-mean 每个 token 一票。DAPO 论文 §3.3 说长 CoT 场景必须换 token 级，但换完会把长度倾斜从 response 级赶到 question 级。本文拆解三个公式、两家的论证和一个少有人讲的 tradeoff。"
+summary: "500 token 和 5000 token 的回答，谁对梯度贡献更大？sample-mean 每条一票，token-mean 每个 token 一票，换法有隐藏代价。"
 ---
+
+同一个 batch 里，500 token 的回答和 5000 token 的回答，谁对梯度的贡献大？GRPO 说一样大，DAPO 说长的大十倍，两家都能给出理由。这是损失聚合方式之争——sample-mean 每条回答一票，token-mean 每个 token 一票。DAPO 论文 §3.3 说长 CoT 场景必须换 token 级，但换完会把长度倾斜从 response 级赶到 question 级。本文拆解三个公式、两家的论证和一个少有人讲的 tradeoff。
 
 > 本文有配套的[交互报告](/reports/token-mean-vs-sample-mean/)，含三种计票规则可切换的权重计算器与公式并排拆解。
 

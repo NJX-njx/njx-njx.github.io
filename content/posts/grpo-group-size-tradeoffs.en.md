@@ -4,8 +4,10 @@ date: 2026-08-29T12:00:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "rlvr", "dapo"]
 series: ["grpo"]
-summary: "DeepSeekMath samples 64 responses per question, a teaching implementation defaults to 8, and the latest paper claims even 2 is enough — a 32x spread on the same knob. G is GRPO's only source of a baseline and its biggest compute lever, so what does it actually buy? This post unpacks G's three roles: the sample size of the control variate, the coverage of groups with effective gradients, and the quality of the std-normalization denominator, plus why dynamic sampling can replace a larger G with filtering."
+summary: "64, 8 or 2 samples per prompt? G is GRPO's only baseline and its biggest compute knob. What it buys, and why dynamic sampling can stand in for a larger G."
 ---
+
+DeepSeekMath samples 64 responses per question, a teaching implementation defaults to 8, and the latest paper claims even 2 is enough — a 32x spread on the same knob. G is GRPO's only source of a baseline and its biggest compute lever, so what does it actually buy? This post unpacks G's three roles: the sample size of the control variate, the coverage of groups with effective gradients, and the quality of the std-normalization denominator, plus why dynamic sampling can replace a larger G with filtering.
 
 > This post has a companion [interactive report](/reports/grpo-group-size-tradeoffs/) (in Chinese), with a zero-gradient-group probability calculator, a dual-curve baseline chart, and a side-by-side comparison of the three camps' choices.
 

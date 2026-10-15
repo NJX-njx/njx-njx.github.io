@@ -4,8 +4,10 @@ date: 2026-08-26T14:30:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
 series: ["grpo"]
-summary: "When naive GRPO is used to reproduce R1, entropy collapses rapidly and samples within a group converge; DAPO's Clip-Higher merely raises the upper clipping bound from 0.2 to 0.28. Behind that one number lies a structural asymmetry of PPO-Clip on the probability axis. This post unpacks the failure chain, the mechanism, the evidence, and the limits."
+summary: "Naive GRPO collapses entropy fast. DAPO's Clip-Higher only lifts the upper clip bound from 0.2 to 0.28, and the reason is an asymmetry built into PPO-Clip."
 ---
+
+When naive GRPO is used to reproduce R1, entropy collapses rapidly and samples within a group converge; DAPO's Clip-Higher merely raises the upper clipping bound from 0.2 to 0.28. Behind that one number lies a structural asymmetry of PPO-Clip on the probability axis. This post unpacks the failure chain, the mechanism, the evidence, and the limits.
 
 > This post has a companion [interactive report](/reports/dapo-clip-higher-entropy-collapse/) (in Chinese), with drill-down breakdowns of the formulas and charts of the ablation data.
 

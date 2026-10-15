@@ -4,8 +4,10 @@ date: 2026-08-30T12:05:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
 series: ["grpo"]
-summary: "RL training needs a generation length cap, and truncated responses are treated as wrong by default—which misjudges 'undecidable' samples as 'wrong' ones and injects reward noise straight into the group-relative advantage. DAPO's two fixes: Overlong Filtering acknowledges that such samples are undecidable and masks their loss; Soft Overlong Punishment builds a linear buffer ramp before the cliff, turning length control into a continuous signal. This post unpacks the mechanism, the formula, and the configuration values, and fits it together with Dr.GRPO and token-mean into a complete picture of the length problem."
+summary: "Scoring truncated responses as wrong injects reward noise into the advantage. DAPO either masks their loss or adds a linear penalty ramp before the length cap."
 ---
+
+RL training needs a generation length cap, and truncated responses are treated as wrong by default—which misjudges 'undecidable' samples as 'wrong' ones and injects reward noise straight into the group-relative advantage. DAPO's two fixes: Overlong Filtering acknowledges that such samples are undecidable and masks their loss; Soft Overlong Punishment builds a linear buffer ramp before the cliff, turning length control into a continuous signal. This post unpacks the mechanism, the formula, and the configuration values, and fits it together with Dr.GRPO and token-mean into a complete picture of the length problem.
 
 > This post comes with a companion [interactive report](/reports/dapo-overlong-reward-shaping/) (in Chinese), featuring a drill-down length ruler, a three-piece breakdown of Equation 13, and a switchable comparison of the three handling approaches.
 

@@ -4,8 +4,10 @@ date: 2026-08-30T12:05:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
 series: ["grpo"]
-summary: "RL 训练必须有生成长度上限，被截断的回答默认按答错处理——这会把“无法判定”的样本错判成“错”样本，把奖励噪声直接注入组内 advantage。DAPO 的两个方案：Overlong Filtering 承认不可判定、屏蔽其 loss；Soft Overlong Punishment 在悬崖前修一段线性缓冲坡，让长度控制变成连续信号。本文拆解机制、公式、配置数值，并把它和 Dr.GRPO、token-mean 拼成完整的长度问题图景。"
+summary: "截断的回答默认按答错处理，会把奖励噪声注入 advantage。DAPO 的两个修法：屏蔽截断样本的 loss，或在长度上限前加一段线性惩罚坡。"
 ---
+
+RL 训练必须有生成长度上限，被截断的回答默认按答错处理——这会把“无法判定”的样本错判成“错”样本，把奖励噪声直接注入组内 advantage。DAPO 的两个方案：Overlong Filtering 承认不可判定、屏蔽其 loss；Soft Overlong Punishment 在悬崖前修一段线性缓冲坡，让长度控制变成连续信号。本文拆解机制、公式、配置数值，并把它和 Dr.GRPO、token-mean 拼成完整的长度问题图景。
 
 > 本文有配套的[交互报告](/reports/dapo-overlong-reward-shaping/)，含可下钻的长度标尺、Equation 13 三段拆解与三种处理方式的对比切换。
 

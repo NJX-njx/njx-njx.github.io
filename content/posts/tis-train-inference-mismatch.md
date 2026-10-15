@@ -4,8 +4,10 @@ date: 2026-08-27T13:00:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "tis", "precision"]
 series: ["grpo"]
-summary: "rollout 用推理引擎、训练用训练引擎，同一个模型在两边的数值对不上：实际采样的分布与你假设的策略存在偏差，名义上的 on-policy 悄悄变成 off-policy。本文拆解差异来源、有偏梯度与部署差距两个后果、算法补丁谱系，以及 Sea AI Lab 归到 BF16 精度上的根源结论。"
+summary: "rollout 与训练用不同引擎，同一个模型算出两个概率，on-policy 悄悄变成 off-policy。差异从哪来、代价是什么、怎么补。"
 ---
+
+rollout 用推理引擎、训练用训练引擎，同一个模型在两边的数值对不上：实际采样的分布与你假设的策略存在偏差，名义上的 on-policy 悄悄变成 off-policy。本文拆解差异来源、有偏梯度与部署差距两个后果、算法补丁谱系，以及 Sea AI Lab 归到 BF16 精度上的根源结论。
 
 > 本文有配套的[交互报告](/reports/tis-train-inference-mismatch/)，含可下钻的双引擎机制图、补丁谱系对比与精度位域拆解。
 

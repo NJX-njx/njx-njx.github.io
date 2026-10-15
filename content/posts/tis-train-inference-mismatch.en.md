@@ -4,8 +4,10 @@ date: 2026-08-27T13:00:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "tis", "precision"]
 series: ["grpo"]
-summary: "Rollouts run on an inference engine and training runs on a training engine, and the same model's numbers don't match across the two: the distribution you actually sample from deviates from the policy you assume, and nominally on-policy training quietly becomes off-policy. This post breaks down where the discrepancy comes from, its two consequences (biased gradients and a deployment gap), the lineage of algorithmic patches, and Sea AI Lab's conclusion tracing the root cause to BF16 precision."
+summary: "Rollout and training engines compute different probabilities for one model, so on-policy RL quietly turns off-policy. Where it comes from and how to fix it."
 ---
+
+Rollouts run on an inference engine and training runs on a training engine, and the same model's numbers don't match across the two: the distribution you actually sample from deviates from the policy you assume, and nominally on-policy training quietly becomes off-policy. This post breaks down where the discrepancy comes from, its two consequences (biased gradients and a deployment gap), the lineage of algorithmic patches, and Sea AI Lab's conclusion tracing the root cause to BF16 precision.
 
 > This post has a companion [interactive report](/reports/tis-train-inference-mismatch/) (in Chinese), with a drill-down diagram of the two-engine mechanism, a comparison of the patch lineage, and a bit-field breakdown of the precision formats.
 

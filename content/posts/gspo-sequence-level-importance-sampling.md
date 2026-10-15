@@ -4,8 +4,10 @@ date: 2026-08-26T17:40:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "gspo", "moe"]
 series: ["grpo"]
-summary: "GRPO 沿用 PPO 的 token 级重要性比率，Qwen 团队认定这是对重要性采样的根本误用，会在 MoE 长回答训练中导致不可逆崩溃。GSPO 把比率、裁剪、优化全部提到序列级，被裁掉的 token 多两个数量级，训练反而更高效。本文拆解这条论证链，以及论文没点破的前提与代价。"
+summary: "GRPO 沿用 token 级重要性比率，Qwen 认为这是误用，会让 MoE 长回答训练崩溃。GSPO 把比率、裁剪和优化都提到序列级。"
 ---
+
+GRPO 沿用 PPO 的 token 级重要性比率，Qwen 团队认定这是对重要性采样的根本误用，会在 MoE 长回答训练中导致不可逆崩溃。GSPO 把比率、裁剪、优化全部提到序列级，被裁掉的 token 多两个数量级，训练反而更高效。本文拆解这条论证链，以及论文没点破的前提与代价。
 
 > 本文有配套的[交互报告](/reports/gspo-sequence-level-importance-sampling/)，含可下钻的公式拆解、裁剪带对比与稀释效应计算器。
 

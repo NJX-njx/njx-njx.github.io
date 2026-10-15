@@ -51,7 +51,7 @@ assets/js/                  site-search.js (search page, bundled with js.Build),
                             toc-drawer.js, report.js (report theme helpers)
 assets/css/report.css       Report skin; published with report.js to /reports/
 scripts/                    search_quality.mjs (ranking test),
-                            check_translations.py (zh/en pairs in sync),
+                            check_posts.py (zh/en pairs in sync, summary length),
                             adapt_report.py (fits a report into the blog theme)
 static/reports/<slug>/      Standalone interactive report pages (self-contained HTML)
 static/blog-icon.png        Site logo + favicon source (avatar from cover art)
@@ -75,7 +75,7 @@ hugo server                         # production content only
 # Build & check
 hugo --gc --minify                  # output in public/
 node scripts/search_quality.mjs      # needs a fresh public/
-python3 scripts/check_translations.py
+python3 scripts/check_posts.py
 
 # Deploy = push to main; then watch
 gh run list --limit 3

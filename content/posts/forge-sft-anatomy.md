@@ -3,8 +3,10 @@ title: "解剖极简 SFT 训练器：每个决策，教科书和框架怎么说"
 date: 2026-08-28T20:12:53+08:00
 draft: false
 tags: ["sft", "post-training", "forge", "engineering", "llm"]
-summary: "TRL 的 SFTTrainer 一行就能训，为什么还有人手写 SFT 循环？我把 forge 仓库 Stage 1 的每个决策（chat template、prompt masking、collate 与 loss、bf16、LR schedule、数据、验证）逐一摆到台面上，对照两套教材（rlhf-book、hands-on-modern-rl）、四个生产框架（alignment-handbook、trl、open-instruct、OpenRLHF）和六路信息源：哪些决策有共识，哪些有真实的配方之争，哪些两本教材各自糊弄过去了。"
+summary: "TRL 一行就能训，为什么还要手写 SFT 循环？把极简训练器的 7 个工程决策逐一对照教材、生产框架和社区经验。"
 ---
+
+TRL 的 SFTTrainer 一行就能训，为什么还有人手写 SFT 循环？我把 forge 仓库 Stage 1 的每个决策（chat template、prompt masking、collate 与 loss、bf16、LR schedule、数据、验证）逐一摆到台面上，对照两套教材（rlhf-book、hands-on-modern-rl）、四个生产框架（alignment-handbook、trl、open-instruct、OpenRLHF）和六路信息源：哪些决策有共识，哪些有真实的配方之争，哪些两本教材各自糊弄过去了。
 
 > 本文有配套的[交互报告](/reports/forge-sft-anatomy/)，含决策对照矩阵与可下钻的出处索引。
 

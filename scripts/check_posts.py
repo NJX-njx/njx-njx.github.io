@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
-"""Check that every post exists in both languages and that each pair stays in sync.
+"""Check the posts in content/posts.
 
-Usage: python3 scripts/check_translations.py [content/posts]
+Usage: python3 scripts/check_posts.py [content/posts]
 
-A post is a pair of files: <slug>.md (Chinese) and <slug>.en.md (English).
-Within a pair, everything except the translated prose must match: front matter
-other than title/summary, heading levels, math, code fences and external links.
-Internal links must point at pages in the same language.
+- every post exists as a pair: <slug>.md (Chinese) and <slug>.en.md (English)
+- within a pair, everything except the translated prose matches: front matter
+  other than title/summary, heading levels, math, code fences, external links
+- internal links point at pages in the same language
+- summaries fit a search-result snippet: display width <= 160, counting CJK
+  characters as 2 (about 80 Chinese characters or 160 Latin ones)
 """
+import json
 import pathlib
 import re
 import sys
+import unicodedata
 
 TRANSLATED_KEYS = {"title", "summary"}
+SUMMARY_WIDTH = 160
 
 
 def split(path):
@@ -25,6 +30,21 @@ def split(path):
         key, _, value = line.partition(":")
         front[key.strip()] = value.strip()
     return front, m.group(2)
+
+
+def display_width(text):
+    return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
+
+
+def summary_errors(path, front):
+    raw = front.get("summary", "")
+    summary = json.loads(raw) if raw.startswith('"') else raw
+    width = display_width(summary)
+    if not summary:
+        return [f"{path.name}: missing summary"]
+    if width > SUMMARY_WIDTH:
+        return [f"{path.name}: summary width {width} > {SUMMARY_WIDTH}"]
+    return []
 
 
 def strip_code(body):
@@ -71,6 +91,7 @@ def compare(zh, en):
     eext = sorted(l for l in links(ebody) if not l.startswith("/"))
     if zext != eext:
         errors.append(f"external links differ: {sorted(set(zext) ^ set(eext))}")
+    errors += summary_errors(zh, zfront) + summary_errors(en, efront)
     errors += [f"Chinese post links to English page {l}" for l in links(zbody) if l.startswith("/en/")]
     errors += [f"English post links to Chinese post {l}" for l in links(ebody) if l.startswith("/posts/")]
     return errors
@@ -92,7 +113,7 @@ def main(root):
                 print(f"  - {error}")
     if failed:
         sys.exit(1)
-    print(f"OK   {len(slugs)} posts, both languages in sync")
+    print(f"OK   {len(slugs)} posts: both languages in sync, summaries fit")
 
 
 if __name__ == "__main__":
