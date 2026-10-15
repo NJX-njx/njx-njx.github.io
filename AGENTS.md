@@ -21,7 +21,11 @@ Production: <https://njx-njx.github.io/>
 
 - Hugo **Extended** required; config is `hugo.yaml` (never `hugo.toml`)
 - Theme is a git submodule at `themes/PaperMod/` — **never edit it**
-- Push to `main` → GitHub Actions deploys to Pages in ~1 minute
+- Pull requests → GitHub Actions builds and runs every check; push to `main`
+  → the same workflow also deploys to Pages in ~1 minute
+- The Hugo version is pinned once, as `HUGO_VERSION` in
+  `.github/workflows/hugo.yaml`; the Cloud Agent environment's install
+  script pins the same version and must be bumped with it
 - Verify deploys with `gh run list`; verify live CSS/HTML with `curl`
 
 ## Repository Layout
@@ -52,6 +56,7 @@ assets/js/                  site-search.js (search page, bundled with js.Build),
 assets/css/report.css       Report skin; published with report.js to /reports/
 scripts/                    search_quality.mjs (ranking test),
                             check_posts.py (zh/en pairs in sync, summary length),
+                            check_site.py (links, anchors, search index, reports),
                             adapt_report.py (fits a report into the blog theme)
 static/reports/<slug>/      Standalone interactive report pages (self-contained HTML)
 static/blog-icon.png        Site logo + favicon source (avatar from cover art)
@@ -72,10 +77,11 @@ git submodule update --init --recursive
 hugo server -D                      # drafts visible
 hugo server                         # production content only
 
-# Build & check
+# Build & check (CI runs the same steps on every pull request)
 hugo --gc --minify                  # output in public/
-node scripts/search_quality.mjs      # needs a fresh public/
-python3 scripts/check_posts.py
+python3 scripts/check_posts.py      # zh/en pairs in sync, summary length
+python3 scripts/check_site.py public    # links, anchors, search index, reports
+node scripts/search_quality.mjs public  # search ranking regression test
 
 # Deploy = push to main; then watch
 gh run list --limit 3
