@@ -41,8 +41,8 @@ layouts/_default/           Layout overrides:
   site-search.html          Chunk-based search UI
   index.json                Chunk-based search index (heading-section records)
   _markup/render-passthrough.html  Build-time math rendering (KaTeX)
-  baseof.html, single.html, rss.xml
-  partials/                 social_icons.html (X logo), toc.html, ...
+  single.html               Theme single page + side TOC and drawer
+  partials/                 header.html, social_icons.html (X logo), toc.html, ...
 assets/css/extended/        Auto-loaded after theme styles:
   pagination.css            Pagination button overrides
   side-toc.css              Side TOC layout + drawer (desktop/mobile)
@@ -132,7 +132,11 @@ gh run list --limit 3
 - `layouts/partials/header.html` is a copy of the theme header with one
   change: the language link targets the current page's translation (falling
   back to the other language's home) and uses `.Language.Label`. Re-apply that
-  block if the theme header is ever re-synced.
+  block if the theme header is ever re-synced. `layouts/_default/single.html`
+  is the theme's single template plus the side TOC; re-sync it the same way.
+- Builds print two deprecation warnings (`LanguageDirection`, `LanguageCode`)
+  from PaperMod's own templates. They do not change the output; do not copy
+  theme files into `layouts/` just to silence them.
 - `disableAnchoredHeadings: true` is intentional — no `#` anchor icons on
   headings.
 - Math is written as `$...$` / `$$...$$` and rendered to HTML at build time
