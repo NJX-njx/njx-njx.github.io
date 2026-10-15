@@ -6,6 +6,7 @@ defaultContentLanguageInSubdir: false
 hasCJKLanguage: true
 
 enableRobotsTXT: true
+enableGitInfo: true
 taxonomies:
   tag: tags
   series: series
@@ -112,6 +113,7 @@ params:
   ShowBreadCrumbs: true
   ShowCodeCopyButtons: true
   ShowWordCount: true
+  ShowFullTextinRSS: true
   ShowRssButtonInSectionTermList: true
   disableSpecial1stPost: false
   disableScrollToTop: false

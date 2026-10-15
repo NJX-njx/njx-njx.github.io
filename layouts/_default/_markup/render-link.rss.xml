@@ -1,0 +1,4 @@
+{{- /* Feed readers resolve relative links inconsistently, so site links are absolute in RSS. */ -}}
+{{- $href := .Destination }}
+{{- if strings.HasPrefix $href "/" }}{{ $href = absURL $href }}{{ end -}}
+<a href="{{ $href | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
