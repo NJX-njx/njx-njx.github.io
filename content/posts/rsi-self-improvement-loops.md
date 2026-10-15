@@ -65,4 +65,4 @@ summary: "RSI（递归自我改进）这个词在 2025-2026 年重新变热，�
 - WebSailor：[arXiv:2507.02592](https://arxiv.org/abs/2507.02592)、[V2 2509.13305](https://arxiv.org/abs/2509.13305)（标题与系列定位）；DeepResearcher [arXiv:2504.03160](https://arxiv.org/abs/2504.03160)
 - 递归奖励建模：Leike et al. [arXiv:1811.07871](https://arxiv.org/abs/1811.07871)；Scalable Oversight [arXiv:2211.03540](https://arxiv.org/abs/2211.03540)（教材 hands-on-modern-rl：[`docs/chapter30_alignment_failures/scaling-and-defenses.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter30_alignment_failures/scaling-and-defenses.md)）
 - Test-Time Training 经典：Sun et al. [arXiv:1909.13231](https://arxiv.org/abs/1909.13231)；test-time scaling：s1 [arXiv:2501.19393](https://arxiv.org/abs/2501.19393)
-- 前篇：[7 轮交互失败了该怪谁：多轮轨迹的奖励归因](/posts/turn-level-reward-credit-assignment/)（昨天：局内归因；今天：跨局闭环）
+- 前篇：[7 轮交互失败了该怪谁：多轮轨迹的奖励归因](/posts/turn-level-reward-credit-assignment/)（前篇：局内归因；本文：跨局闭环）

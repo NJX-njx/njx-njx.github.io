@@ -57,7 +57,7 @@ Whichever route you take, multi-turn RL has one more problem, along a purely tem
 
 ## Where the GRPO/GSPO Family Sits on This Map
 
-This post settles the loose end left by the earlier GSPO post. GSPO's principle that "the unit of optimization should match the unit of reward" runs into real tension in multi-turn settings: GSPO's objective treats the entire response as a single action, which suits outcome-level rewards; multi-turn RL wants turn-level credit assignment, which amounts to demanding a granularity finer than the sequence. The GSPO-token variant that §4.3 of the GSPO paper designs for exactly this has a very telling formula:
+This post settles the loose end left by the [GSPO post](/en/posts/gspo-sequence-level-importance-sampling/). GSPO's principle that "the unit of optimization should match the unit of reward" runs into real tension in multi-turn settings: GSPO's objective treats the entire response as a single action, which suits outcome-level rewards; multi-turn RL wants turn-level credit assignment, which amounts to demanding a granularity finer than the sequence. The GSPO-token variant that §4.3 of the GSPO paper designs for exactly this has a very telling formula:
 
 $$s_{i,t}(\theta) = \mathrm{sg}[s_i(\theta)] \cdot \frac{\pi_\theta(y_{i,t}|x,y_{i,<t})}{\mathrm{sg}[\pi_\theta(y_{i,t}|x,y_{i,<t})]}$$
 

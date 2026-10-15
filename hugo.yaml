@@ -8,6 +8,7 @@ hasCJKLanguage: true
 enableRobotsTXT: true
 taxonomies:
   tag: tags
+  series: series
 buildDrafts: false
 buildFuture: false
 buildExpired: false

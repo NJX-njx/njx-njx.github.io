@@ -1,8 +1,9 @@
 ---
 title: "One Vote or Ten: token-mean vs sample-mean"
-date: 2026-08-30T12:05:00+08:00
+date: 2026-08-30T12:07:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "dr-grpo"]
+series: ["grpo"]
 summary: "In the same batch, which contributes more to the gradient: a 500-token response or a 5000-token one? GRPO says they count equally, DAPO says the long one counts ten times as much, and both can justify their answer. This is a dispute over loss aggregation: sample-mean gives each response one vote, token-mean gives each token one vote. The DAPO paper (§3.3) says long-CoT settings must switch to token level, but the switch pushes the length skew from the response level to the question level. This post unpacks the three formulas, the two camps' arguments, and a tradeoff few people talk about."
 ---
 
@@ -14,9 +15,9 @@ The same training batch contains two responses: one is 500 tokens, the other 500
 
 - **GRPO (sample-mean)**: equally. First average over the tokens within each response, then average over the $G$ responses — every response, long or short, gets one equal vote;
 - **DAPO (token-mean)**: the long one contributes ten times as much. All tokens in the batch are flattened together and divided by the total token count — one vote per token, so the 5000-token response gets 5000 votes;
-- **Dr.GRPO**: formally also one vote per response, but the divisor changes from "each response's actual length" to a global constant, which changes what a vote means (that was the topic of the previous post).
+- **Dr.GRPO**: formally also one vote per response, but the divisor changes from "each response's actual length" to a global constant, which changes what a vote means (that is the topic of the [Dr.GRPO post](/en/posts/dr-grpo-length-and-difficulty-bias/)).
 
-All three answers are backed by papers, and all three camps are working on **the same spot in the same expression** — the loss's aggregation divisor. This knob is orthogonal to the advantage normalization (the std half) covered in the previous post: the previous post's question was "how is the advantage computed?"; this post's question is "once it is computed, by what rule are the tokens' losses added together?"
+All three answers are backed by papers, and all three camps are working on **the same spot in the same expression** — the loss's aggregation divisor. This knob is orthogonal to the advantage normalization (the std half) covered in the Dr.GRPO post: that post's question was "how is the advantage computed?"; this post's question is "once it is computed, by what rule are the tokens' losses added together?"
 
 ## Three Formulas Side by Side
 
@@ -32,7 +33,7 @@ $$\mathcal{J}_{DAPO} = \mathbb{E}\left[\frac{1}{\sum_{i=1}^{G}|o_i|}\sum_{i=1}^{
 
 The inner $\frac{1}{|o_i|}$ is gone, the two levels of summation are flattened into one, and the divisor becomes the total token count of the whole group. Every token gets exactly the same weight, $1/\sum_i|o_i|$; a response's total weight is proportional to its length.
 
-The third is Dr.GRPO: the same aggregation structure as DAPO (tokens flattened), but the divisor is a global constant (such as the length cap), and the std is removed from the advantage as well — the previous post went into that in detail; this one looks only at the divisor.
+The third is Dr.GRPO: the same aggregation structure as DAPO (tokens flattened), but the divisor is a global constant (such as the length cap), and the std is removed from the advantage as well — the Dr.GRPO post went into that in detail; this one looks only at the divisor.
 
 ## Why DAPO Insists on Switching: Two Places the Penalty Can't Reach
 
@@ -58,7 +59,7 @@ There is also a second second-order effect: DAPO's divisor $\sum_i|o_i|$ is **a 
 
 An easily overlooked historical fact: PPO's original objective was aggregated per token to begin with (summing or averaging over the tokens of the whole batch, with GAE supplying a per-token advantage). **It is GRPO's sample-mean that is the outlier** — because GRPO's advantage is "one number per response," averaging each response into one number first and then averaging across responses is semantically the tidiest.
 
-Then DAPO and Dr.GRPO both claim to have "restored the PPO objective": DAPO restores **PPO's aggregation scheme** (tokens flattened, but the advantage keeps its z-score, so the std is still there); Dr.GRPO restores **the form of PPO's objective function** (a constant divisor, the advantage reduced to $r-\text{mean}$, the std removed). The two knobs — aggregation granularity and advantage normalization — are independent and can be combined freely: in implementations such as verl, the two really are configured separately (from the implementation-level discussion in the previous post: by default, `masked_mean` in trl/verl adds back the per-response averaging that the formula doesn't have, and auditing whether each divisor "is a variable or a constant" is the cheapest check there is). This also means that "GRPO vs DAPO vs Dr.GRPO" is not three algorithms lined up side by side, but a configuration space of at least 2×2, and the good points known so far are all still being found by trial and error along its edges.
+Then DAPO and Dr.GRPO both claim to have "restored the PPO objective": DAPO restores **PPO's aggregation scheme** (tokens flattened, but the advantage keeps its z-score, so the std is still there); Dr.GRPO restores **the form of PPO's objective function** (a constant divisor, the advantage reduced to $r-\text{mean}$, the std removed). The two knobs — aggregation granularity and advantage normalization — are independent and can be combined freely: in implementations such as verl, the two really are configured separately (from the implementation-level discussion in the Dr.GRPO post: by default, `masked_mean` in trl/verl adds back the per-response averaging that the formula doesn't have, and auditing whether each divisor "is a variable or a constant" is the cheapest check there is). This also means that "GRPO vs DAPO vs Dr.GRPO" is not three algorithms lined up side by side, but a configuration space of at least 2×2, and the good points known so far are all still being found by trial and error along its edges.
 
 ## Which Vote Should Weigh More, and When
 
@@ -82,5 +83,5 @@ My take: at its core, the aggregation dispute is about "in what unit the gradien
 - DAPO paper: [arXiv:2503.14476](https://arxiv.org/abs/2503.14476); token-level loss in §3.3 (Equation 12), entropy and length curves in Figure 4
 - Dr.GRPO paper: [arXiv:2503.20783](https://arxiv.org/abs/2503.20783); the original statements of the response-level length bias and the question-level difficulty bias
 - DeepSeekMath / GRPO: [arXiv:2402.03300](https://arxiv.org/abs/2402.03300); the sample-mean objective (Equation 3)
-- Previous post (the one right before this, covering the advantage-normalization half): [Dr.GRPO: Two Normalization Terms, Two Biases](/en/posts/dr-grpo-length-and-difficulty-bias/) (it gave the token-mean section number as §3.2 by mistake; the correct one is §3.3, and that has been corrected in passing)
+- Previous post (covering the advantage-normalization half): [Dr.GRPO: Two Normalization Terms, Two Biases](/en/posts/dr-grpo-length-and-difficulty-bias/) (it gave the token-mean section number as §3.2 by mistake; the correct one is §3.3, and that has been corrected in passing)
 - The question-level length skew and the random divisor's implicit LR decay are this post's own inferences, each flagged where it appears in the text

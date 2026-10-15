@@ -3,6 +3,7 @@ title: "Entropy Collapse: What DAPO's Clip-Higher Fixes"
 date: 2026-08-26T14:30:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
+series: ["grpo"]
 summary: "When naive GRPO is used to reproduce R1, entropy collapses rapidly and samples within a group converge; DAPO's Clip-Higher merely raises the upper clipping bound from 0.2 to 0.28. Behind that one number lies a structural asymmetry of PPO-Clip on the probability axis. This post unpacks the failure chain, the mechanism, the evidence, and the limits."
 ---
 
@@ -158,7 +159,7 @@ Placed back into this post's failure chain, the division of labor between the tw
 
 1. **Entropy has no target range.** The paper's empirical conclusion is that "a slow rise in entropy is beneficial", but it also acknowledges that excessively high entropy corresponds to gibberish and repetition. So should ε_high be adjusted adaptively along with the entropy curve rather than fixed at 0.28? I haven't seen anyone study this systematically.
 2. **Order effects in the ablation.** Table 1 is a cumulative chain: Clip-Higher is tested after Overlong Filtering, so its +2 points were measured on a base that already includes earlier changes. What its clean, standalone contribution is remains unknown.
-3. **Compatibility with sequence-level clipping.** GSPO lifts the importance sampling ratio to the sequence level (to fix the numerical instability of token-level ratios in MoE models); does the logic of "raising the token-level upper bound" still hold then? A later post in this series will be dedicated to unpacking GSPO.
+3. **Compatibility with sequence-level clipping.** GSPO lifts the importance sampling ratio to the sequence level (to fix the numerical instability of token-level ratios in MoE models); does the logic of "raising the token-level upper bound" still hold then? The [GSPO post](/en/posts/gspo-sequence-level-importance-sampling/) unpacks exactly this question.
 4. **Robustness under asynchronous training.** In asynchronous RL the ratio distribution drifts further and is more skewed; whether a fixed 0.28 is appropriate across different degrees of off-policyness is not covered by the paper.
 
 ## References

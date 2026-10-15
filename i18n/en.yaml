@@ -12,3 +12,9 @@
 
 - id: open_report
   translation: "Open report"
+
+- id: series
+  translation: "Series"
+
+- id: series_position
+  translation: "Part {{ .Index }} of {{ .Count }}"

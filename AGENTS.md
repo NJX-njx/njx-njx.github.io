@@ -95,7 +95,13 @@ gh run list --limit 3
    translate `title` and `summary`. Links to other posts point at the same
    language (`/posts/...` in Chinese, `/en/posts/...` in English); report
    links stay `/reports/<slug>/` because reports are Chinese-only.
-5. Build locally and confirm the card renders correctly in both languages.
+5. Refer to other posts by name and link, never by time ("昨天那篇", "this
+   week", "today's post"); posts outlive their publishing week.
+6. Multi-part series: add `series: ["<key>"]` to every part (both
+   languages). The series title lives in `content/series/<key>/_index.md` and
+   `_index.en.md`; the series box at the end of each part
+   (`layouts/partials/extend_post_content.html`) lists the parts by date.
+7. Build locally and confirm the card renders correctly in both languages.
 
 ### Adding an interactive report
 
