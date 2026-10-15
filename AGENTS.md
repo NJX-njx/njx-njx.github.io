@@ -48,9 +48,11 @@ assets/css/extended/        Auto-loaded after theme styles:
   side-toc.css              Side TOC layout + drawer (desktop/mobile)
 assets/js/                  site-search.js (search page, bundled with js.Build),
                             search-core.js (ranking, shared with the test),
-                            toc-drawer.js
+                            toc-drawer.js, report.js (report theme helpers)
+assets/css/report.css       Report skin; published with report.js to /reports/
 scripts/                    search_quality.mjs (ranking test),
-                            check_translations.py (zh/en pairs in sync)
+                            check_translations.py (zh/en pairs in sync),
+                            adapt_report.py (fits a report into the blog theme)
 static/reports/<slug>/      Standalone interactive report pages (self-contained HTML)
 static/blog-icon.png        Site logo + favicon source (avatar from cover art)
 static/favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png
@@ -100,9 +102,17 @@ gh run list --limit 3
 1. Place the self-contained report at `static/reports/<slug>/index.html`,
    where `<slug>` is the companion post's file name
    (`content/posts/<slug>.md`).
-2. That is the whole registration: `/reports/` lists every post whose report
+2. Run `python3 scripts/adapt_report.py static/reports/<slug>/index.html`
+   (idempotent). It removes the report's own font, links
+   `/reports/report.css` + `/reports/report.js`, adds the site header and OG
+   tags, and routes every color in the report's scripts through the blog's
+   light/dark theme: `RC("--token")` for neutral tokens, `RD("#hex")` for
+   fixed colors (lightened on dark paper), `RA(color, alpha)` for rgba().
+3. That is the whole registration: `/reports/` lists every post whose report
    folder exists, using the post's own title, summary and date (newest
    first). There is no separate registry to keep in sync.
+4. Check the report in both themes. Charts read their colors once at load,
+   so the header's theme toggle reloads the page.
 
 ### Styling changes
 

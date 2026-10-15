@@ -1,0 +1,215 @@
+/* Shared skin for the standalone reports in static/reports/. Published as
+   /reports/report.css after PaperMod's theme-vars.css, so every color below
+   resolves to the blog's own light/dark tokens. Report charts get their
+   colors through report.js (RC/RD), not through these variables. */
+
+:root {
+    --paper: var(--theme);
+    --paper-hi: var(--code-bg);
+    --ink: var(--primary);
+    --ink-md: rgb(69, 69, 69);
+    --ink-lo: var(--secondary);
+    --line: var(--tertiary);
+    --line-lo: var(--border);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .05), 0 8px 28px rgba(0, 0, 0, .07);
+
+    /* The blog's text is monochrome; report UI accents follow it. */
+    --red: var(--primary);
+    --red-hi: var(--primary);
+    --blue: var(--primary);
+
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    --serif: var(--sans);
+    --math: "Times New Roman", "Noto Serif", Georgia, "Songti SC", serif;
+}
+
+:root[data-theme="dark"] {
+    --paper-hi: var(--entry);
+    --ink-md: rgb(186, 187, 188);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .35);
+}
+
+::selection {
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-decoration-color: var(--tertiary);
+    text-underline-offset: 3px;
+}
+
+a:hover {
+    text-decoration-color: currentColor;
+}
+
+em {
+    color: inherit;
+}
+
+/* Formulas keep a math face; everything else uses the blog's sans stack. */
+.formula,
+.formula-xl,
+.eq13-formula {
+    font-family: var(--math);
+}
+
+/* Italic CJK is synthesized and hard to read. */
+.dek,
+.quote-card .q-text {
+    font-style: normal;
+}
+
+.cover-kicker,
+.sec-no,
+.era-tag {
+    color: var(--secondary);
+}
+
+.sec-no::before,
+.era-tag::before {
+    background: var(--tertiary);
+}
+
+/* Chips look like the blog's tag buttons. */
+.chip {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--code-bg);
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.chip:hover {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+.cover-mode button {
+    background: var(--entry);
+}
+
+/* Inverse surfaces: primary background with theme-colored text flips cleanly in both modes. */
+.chip:hover,
+.mask-seg.model .seg-bit,
+.df-layer.l4 .df-slab {
+    color: var(--theme);
+}
+
+/* Tooltips and drill cards are dark in both modes; their inner text colors assume that. */
+#drill-card,
+.tip {
+    background: var(--code-block-bg);
+}
+
+#cover {
+    min-height: calc(100vh - var(--header-height));
+    background: transparent;
+}
+
+#cover::after {
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--theme) 94%, transparent) 0%,
+        color-mix(in srgb, var(--theme) 78%, transparent) 42%,
+        transparent 100%);
+}
+
+#chap-nav {
+    background: color-mix(in srgb, var(--theme) 92%, transparent);
+}
+
+/* Site header, matching the blog's PaperMod header. */
+#njx-bar {
+    height: var(--header-height);
+    background: var(--theme);
+    font-family: var(--sans);
+    line-height: var(--header-height);
+}
+
+#njx-bar nav {
+    display: flex;
+    justify-content: space-between;
+    max-width: calc(var(--nav-width) + var(--gap) * 2);
+    margin: 0 auto;
+}
+
+#njx-bar .njx-left,
+#njx-bar ul {
+    display: flex;
+    align-items: center;
+    margin: auto var(--gap);
+}
+
+#njx-bar a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+#njx-bar .njx-logo {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+#njx-bar .njx-logo img {
+    height: 35px;
+    margin-inline-end: 8px;
+    border-radius: 6px;
+}
+
+#njx-bar button {
+    margin: auto 4px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--primary);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+[data-theme="dark"] #njx-bar .njx-moon,
+[data-theme="light"] #njx-bar .njx-sun {
+    display: none;
+}
+
+#njx-bar .njx-lang {
+    margin-inline-start: 4px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+#njx-bar .njx-lang::before {
+    content: "|";
+    margin-inline-end: 7px;
+    color: var(--primary);
+    font-weight: 400;
+}
+
+#njx-bar ul {
+    gap: var(--gap);
+    padding: 0;
+    list-style: none;
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    #njx-bar {
+        height: auto;
+    }
+
+    #njx-bar nav {
+        flex-wrap: wrap;
+    }
+}
+
+/* Wide data tables scroll inside their column instead of widening the page. */
+@media (max-width: 760px) {
+    table.dt {
+        display: block;
+        overflow-x: auto;
+    }
+}
