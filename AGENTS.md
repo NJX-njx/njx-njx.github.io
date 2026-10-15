@@ -40,6 +40,7 @@ layouts/_default/           Layout overrides:
   reports.html              Reports cards: posts that have static/reports/<slug>/
   site-search.html          Chunk-based search UI
   index.json                Chunk-based search index (heading-section records)
+  _markup/render-passthrough.html  Build-time math rendering (KaTeX)
   baseof.html, single.html, rss.xml
   partials/                 social_icons.html (X logo), toc.html, ...
 assets/css/extended/        Auto-loaded after theme styles:
@@ -120,6 +121,11 @@ gh run list --limit 3
   block if the theme header is ever re-synced.
 - `disableAnchoredHeadings: true` is intentional — no `#` anchor icons on
   headings.
+- Math is written as `$...$` / `$$...$$` and rendered to HTML at build time
+  (Goldmark passthrough + `transform.ToMath`), so Markdown never touches the
+  TeX. Invalid TeX fails the build with its file position. Pages with math
+  load the KaTeX stylesheet automatically; there is no `math:` front matter
+  and no client-side KaTeX script.
 - The Search page must keep `layout: "site-search"` (not `search`) so
   PaperMod's built-in fastsearch script does not double-bind the input.
 - Social icons are customized in `layouts/partials/social_icons.html`;
