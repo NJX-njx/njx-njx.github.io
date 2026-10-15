@@ -1,8 +1,7 @@
 {{- define "main" }}
 
 {{ $css := resources.Get "css/site-search.css" | minify | fingerprint }}
-{{ $fuse := resources.Get "js/fuse.basic.min.js" | fingerprint }}
-{{ $js := resources.Get "js/site-search.js" | minify | fingerprint }}
+{{ $js := resources.Get "js/site-search.js" | js.Build (dict "minify" true) | fingerprint }}
 
 <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
 
@@ -27,7 +26,6 @@
     <ul id="searchResults" aria-label="{{ i18n "search_results_label" }}"></ul>
 </div>
 
-<script src="{{ $fuse.RelPermalink }}" integrity="{{ $fuse.Data.Integrity }}" defer></script>
 <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>
 
 {{- end }}{{/* end main */}}

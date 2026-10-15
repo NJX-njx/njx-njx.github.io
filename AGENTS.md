@@ -46,7 +46,11 @@ layouts/_default/           Layout overrides:
 assets/css/extended/        Auto-loaded after theme styles:
   pagination.css            Pagination button overrides
   side-toc.css              Side TOC layout + drawer (desktop/mobile)
-assets/js/                  site-search.js, toc-drawer.js
+assets/js/                  site-search.js (search page, bundled with js.Build),
+                            search-core.js (ranking, shared with the test),
+                            toc-drawer.js
+scripts/                    search_quality.mjs (ranking test),
+                            check_translations.py (zh/en pairs in sync)
 static/reports/<slug>/      Standalone interactive report pages (self-contained HTML)
 static/blog-icon.png        Site logo + favicon source (avatar from cover art)
 static/favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png
@@ -68,8 +72,8 @@ hugo server                         # production content only
 
 # Build & check
 hugo --gc --minify                  # output in public/
-node --check assets/js/site-search.js
-node scripts/search_quality.js public/en/index.json
+node scripts/search_quality.mjs      # needs a fresh public/
+python3 scripts/check_translations.py
 
 # Deploy = push to main; then watch
 gh run list --limit 3

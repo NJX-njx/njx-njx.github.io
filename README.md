@@ -142,10 +142,9 @@ You can also run the workflow manually from the GitHub Actions tab.
 ## Quick Checks
 
 ```bash
-node --check assets/js/site-search.js
-node --check scripts/search_quality.js
 hugo --gc --minify
-node scripts/search_quality.js public/en/index.json
+node scripts/search_quality.mjs
+python3 scripts/check_translations.py
 ```
 
 ## For AI Agents
