@@ -9,11 +9,10 @@ engineering side of LLM training: harness and rollout systems, model
 architecture, mid-training and post-training, evals and benchmarks,
 reasoning RL and agentic RL, RSI, and data synthesis.
 
-The site is bilingual: Chinese is the default language and lives at `/`;
-English lives under `/en/`. Every page exists in both languages as a pair of
-files with the same base name: `<name>.md` (Chinese) and `<name>.en.md`
-(English). The header's language link jumps to the current page's
-translation.
+站点支持双语：中文默认位于 `/`，英文位于 `/en/`。
+Hugo 内容页使用成对文件：`<name>.md` 为中文、`<name>.en.md` 为英文；
+header 的语言入口跳转到当前页面的译文。`static/reports/` 下的交互报告是例外：
+正文保持中文，不创建英文副本，双语报告目录指向同一报告。
 
 Production: <https://njx-njx.github.io/>
 
@@ -47,7 +46,11 @@ assets/css/extended/        Auto-loaded after theme styles:
   pagination.css            Pagination button overrides
   side-toc.css              Side TOC layout + drawer (desktop/mobile)
 assets/js/                  site-search.js, toc-drawer.js
-static/reports/<slug>/      Standalone interactive report pages (self-contained HTML)
+static/reports/<slug>/      交互报告 HTML（中文，依赖共享站点层）
+static/reports/report-shell.css  报告导航、主题和样式适配
+static/reports/report-shell.js   主题切换与章节导航偏移
+scripts/harmonize_reports.py     幂等接入共享站点层
+scripts/check_translations.py    检查中英文文章配对
 static/blog-icon.png        Site logo + favicon source (avatar from cover art)
 static/favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png
 static/blog-cover.jpg       OG share image
@@ -69,6 +72,8 @@ hugo server                         # production content only
 # Build & check
 hugo --gc --minify                  # output in public/
 node --check assets/js/site-search.js
+node --check static/reports/report-shell.js
+python3 scripts/check_translations.py
 node scripts/search_quality.js public/en/index.json
 
 # Deploy = push to main; then watch
@@ -93,17 +98,23 @@ gh run list --limit 3
 
 ### Adding an interactive report
 
-1. Place the self-contained report at `static/reports/<slug>/index.html`,
-   where `<slug>` is the companion post's file name
-   (`content/posts/<slug>.md`).
-2. That is the whole registration: `/reports/` lists every post whose report
-   folder exists, using the post's own title, summary and date (newest
-   first). There is no separate registry to keep in sync.
+1. 将报告放在 `static/reports/<slug>/index.html`，`<slug>` 与
+   `content/posts/<slug>.md` 对应；报告正文保持中文，不翻译。
+2. 运行 `python3 scripts/harmonize_reports.py`，接入共享头部、favicon、主题初始化，
+   移除内嵌 ET Book 并使用博客字体栈。脚本应幂等：连续运行两次，第二次不应产生差异。
+3. 报告依赖 `static/reports/report-shell.css` 和 `report-shell.js`，不是完全自包含文件。
+   共享层使用 `html[data-theme]` 和 `pref-theme`，与博客主题一致；存储不可用时仍能切换。
+   Canvas/SVG 使用共享暗色滤镜，正文布局和图表数据由报告自己维护。
+4. 共享样式与行为直接改 CSS/JS；修改头部或早期主题模板后重新运行接入脚本。
+   不要给报告加载整套 PaperMod 样式，避免与原有图表类名冲突。
+5. `/reports/` 与 `/en/reports/` 自动列出有对应报告目录的文章，使用各自语言的
+   标题、摘要和日期，无需额外注册；卡片均打开中文报告。
+6. 构建后核验桌面和窄屏、两种主题、导航跳转避让、主题持久化及滑杆、提示框和下钻卡。
 
 ### Styling changes
 
-- Put all CSS overrides in `assets/css/extended/*.css`; PaperMod loads them
-  after theme styles. Do not edit theme CSS.
+- 博客样式放在 `assets/css/extended/*.css`，报告共享样式放在
+  `static/reports/report-shell.css`；不要修改主题子模块。
 - Match the established visual language: translucent dark surfaces
   (`rgba(255,255,255,0.06)`), 1px `var(--border)` borders, small radii
   (10–12px), `--secondary` text / `--primary` on hover.
@@ -144,3 +155,4 @@ gh run list --limit 3
    force-add it).
 5. After any change: `hugo --gc --minify` must succeed, and any HTML/CSS
    claims must be verified against `public/` output before committing.
+6. 未获用户明确授权不得推送；本地提交也不得携带构建产物或凭据。
