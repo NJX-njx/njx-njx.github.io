@@ -1,7 +1,7 @@
 /* Shared skin for the standalone reports in static/reports/. Published as
-   /reports/report.css after PaperMod's theme-vars.css, so every color below
-   resolves to the blog's own light/dark tokens. Report charts get their
-   colors through report.js (RC/RD), not through these variables. */
+   /reports/report.css after PaperMod's theme-vars.css and header.css, so every
+   color below resolves to the blog's own light/dark tokens. Report charts get
+   their colors through report.js (RC/RD/RA), not through these variables. */
 
 :root {
     --paper: var(--theme);
@@ -119,26 +119,13 @@ em {
     background: color-mix(in srgb, var(--theme) 92%, transparent);
 }
 
-/* Site header, matching the blog's PaperMod header. */
+/* Site header: report.js renders the PaperMod header markup, styled by the
+   theme's header.css (bundled ahead of this file). These are the bits of
+   PaperMod's global reset that header relies on. */
 #njx-bar {
-    height: var(--header-height);
+    min-height: var(--header-height);
     background: var(--theme);
     font-family: var(--sans);
-    line-height: var(--header-height);
-}
-
-#njx-bar nav {
-    display: flex;
-    justify-content: space-between;
-    max-width: calc(var(--nav-width) + var(--gap) * 2);
-    margin: 0 auto;
-}
-
-#njx-bar .njx-left,
-#njx-bar ul {
-    display: flex;
-    align-items: center;
-    margin: auto var(--gap);
 }
 
 #njx-bar a {
@@ -146,64 +133,17 @@ em {
     text-decoration: none;
 }
 
-#njx-bar .njx-logo {
-    display: flex;
-    align-items: center;
-    font-size: 24px;
-    font-weight: 700;
-}
-
-#njx-bar .njx-logo img {
-    height: 35px;
-    margin-inline-end: 8px;
-    border-radius: 6px;
+#njx-bar ul {
+    margin: 0;
+    padding: 0;
 }
 
 #njx-bar button {
-    margin: auto 4px;
-    padding: 0;
     border: 0;
     background: none;
     color: var(--primary);
-    font-size: 26px;
-    line-height: 1;
+    font: inherit;
     cursor: pointer;
-}
-
-[data-theme="dark"] #njx-bar .njx-moon,
-[data-theme="light"] #njx-bar .njx-sun {
-    display: none;
-}
-
-#njx-bar .njx-lang {
-    margin-inline-start: 4px;
-    font-size: 16px;
-    font-weight: 500;
-}
-
-#njx-bar .njx-lang::before {
-    content: "|";
-    margin-inline-end: 7px;
-    color: var(--primary);
-    font-weight: 400;
-}
-
-#njx-bar ul {
-    gap: var(--gap);
-    padding: 0;
-    list-style: none;
-    font-size: 16px;
-    white-space: nowrap;
-}
-
-@media (max-width: 640px) {
-    #njx-bar {
-        height: auto;
-    }
-
-    #njx-bar nav {
-        flex-wrap: wrap;
-    }
 }
 
 /* Wide data tables scroll inside their column instead of widening the page. */
