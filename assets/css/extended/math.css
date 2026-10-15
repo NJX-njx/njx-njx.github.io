@@ -1,0 +1,6 @@
+/* Display formulas never wrap; on narrow screens they scroll inside their own block. */
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.2em 0;
+}
