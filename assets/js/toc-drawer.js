@@ -1,88 +1,58 @@
 (function () {
     const body = document.body;
-    const drawer = document.getElementById('toc-drawer');
-    const toggle = document.querySelector('.toc-drawer-toggle');
-    const tocLinks = Array.from(document.querySelectorAll('.toc a[href^="#"]'));
+    const toc = document.getElementById('post-toc');
+    const toggle = document.querySelector('.toc-toggle');
+    const closeButton = toc.querySelector('.toc-close');
+    const links = Array.from(toc.querySelectorAll('a[href^="#"]'));
+    const drawerMode = matchMedia('(max-width: 1040px)');
 
-    function setActiveTocLink(id) {
-        if (!id) return;
-        tocLinks.forEach((link) => {
+    function setActive(id) {
+        links.forEach((link) => {
             link.classList.toggle('is-active', decodeURIComponent(link.hash.slice(1)) === id);
         });
     }
 
-    function bindActiveSections() {
-        if (!tocLinks.length) return;
+    const headings = links
+        .map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))))
+        .filter(Boolean);
 
-        const headings = tocLinks
-            .map((link) => {
-                const id = decodeURIComponent(link.hash.slice(1));
-                return id ? document.getElementById(id) : null;
-            })
-            .filter(Boolean);
+    // The active section is the last heading that has scrolled past the top band.
+    function updateActive() {
+        const current = headings.filter((heading) => heading.getBoundingClientRect().top <= 140).pop() || headings[0];
+        setActive(current.id);
+    }
 
-        if (!headings.length) return;
-
-        setActiveTocLink(headings[0].id);
-
-        if (!('IntersectionObserver' in window)) {
-            window.addEventListener('scroll', () => {
-                const current = headings
-                    .filter((heading) => heading.getBoundingClientRect().top <= 140)
-                    .pop();
-                setActiveTocLink((current || headings[0]).id);
-            }, { passive: true });
-            return;
-        }
-
-        const visibleHeadings = new Map();
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    visibleHeadings.set(entry.target.id, entry.boundingClientRect.top);
-                } else {
-                    visibleHeadings.delete(entry.target.id);
-                }
-            });
-
-            if (visibleHeadings.size) {
-                const activeId = Array.from(visibleHeadings.entries())
-                    .sort((a, b) => a[1] - b[1])[0][0];
-                setActiveTocLink(activeId);
-                return;
-            }
-
-            const current = headings
-                .filter((heading) => heading.getBoundingClientRect().top <= 140)
-                .pop();
-            setActiveTocLink((current || headings[0]).id);
-        }, {
-            rootMargin: '-120px 0px -65% 0px',
-            threshold: 0.01
+    let pending = false;
+    window.addEventListener('scroll', () => {
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(() => {
+            pending = false;
+            updateActive();
         });
+    }, { passive: true });
+    updateActive();
 
-        headings.forEach((heading) => observer.observe(heading));
+    // In drawer mode a closed TOC is off screen; inert keeps its links out of the tab order.
+    function setOpen(open, restoreFocus) {
+        const wasOpen = body.classList.contains('toc-open');
+        body.classList.toggle('toc-open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        toc.inert = drawerMode.matches && !open;
+        if (open) closeButton.focus();
+        else if (wasOpen && restoreFocus) toggle.focus();
     }
 
-    bindActiveSections();
-
-    if (!drawer || !toggle) return;
-
-    function setOpen(isOpen) {
-        body.classList.toggle('toc-drawer-open', isOpen);
-        toggle.setAttribute('aria-expanded', String(isOpen));
-        drawer.setAttribute('aria-hidden', String(!isOpen));
-    }
-
-    toggle.addEventListener('click', () => {
-        setOpen(!body.classList.contains('toc-drawer-open'));
+    toggle.addEventListener('click', () => setOpen(!body.classList.contains('toc-open')));
+    document.querySelectorAll('[data-toc-close]').forEach((element) => {
+        element.addEventListener('click', () => setOpen(false, true));
     });
-
-    document.querySelectorAll('[data-toc-close], .toc-drawer a').forEach((element) => {
-        element.addEventListener('click', () => setOpen(false));
-    });
-
+    links.forEach((link) => link.addEventListener('click', () => {
+        if (drawerMode.matches) setOpen(false);
+    }));
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') setOpen(false);
+        if (event.key === 'Escape' && body.classList.contains('toc-open')) setOpen(false, true);
     });
+    drawerMode.addEventListener('change', () => setOpen(false));
+    setOpen(false);
 })();
