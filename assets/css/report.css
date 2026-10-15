@@ -1,0 +1,202 @@
+/* Shared skin for the standalone reports in static/reports/. Published as
+   /reports/report.css after PaperMod's theme-vars.css and header.css, so every
+   color below resolves to the blog's own light/dark tokens. Report charts get
+   their colors through report.js (RC/RD/RA), not through these variables. */
+
+:root {
+    --report-header-height: var(--header-height);
+    --report-subnav-height: 0px;
+    color-scheme: light;
+    --paper: var(--theme);
+    --paper-hi: var(--code-bg);
+    --ink: var(--primary);
+    --ink-md: rgb(69, 69, 69);
+    --ink-lo: var(--secondary);
+    --line: var(--tertiary);
+    --line-lo: var(--border);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .05), 0 8px 28px rgba(0, 0, 0, .07);
+
+    /* The blog's text is monochrome; report UI accents follow it. */
+    --red: var(--primary);
+    --red-hi: var(--primary);
+    --blue: var(--primary);
+
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    --serif: var(--sans);
+    --math: "Times New Roman", "Noto Serif", Georgia, "Songti SC", serif;
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper-hi: var(--entry);
+    --ink-md: rgb(186, 187, 188);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .35);
+}
+
+::selection {
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-decoration-color: var(--tertiary);
+    text-underline-offset: 3px;
+}
+
+a:hover {
+    text-decoration-color: currentColor;
+}
+
+em {
+    color: inherit;
+}
+
+/* Formulas keep a math face; everything else uses the blog's sans stack. */
+.formula,
+.formula-xl,
+.eq13-formula {
+    font-family: var(--math);
+}
+
+/* Italic CJK is synthesized and hard to read. */
+.dek,
+.quote-card .q-text {
+    font-style: normal;
+}
+
+.cover-kicker,
+.sec-no,
+.era-tag {
+    color: var(--secondary);
+}
+
+.sec-no::before,
+.era-tag::before {
+    background: var(--tertiary);
+}
+
+/* Chips look like the blog's tag buttons. */
+.chip {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--code-bg);
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.chip:hover {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+.cover-mode button {
+    background: var(--entry);
+}
+
+/* Inverse surfaces: primary background with theme-colored text flips cleanly in both modes. */
+.chip:hover,
+.mask-seg.model .seg-bit,
+.df-layer.l4 .df-slab {
+    color: var(--theme);
+}
+
+/* Tooltips and drill cards are dark in both modes; their inner text colors assume that. */
+#drill-card,
+.tip {
+    background: var(--code-block-bg);
+}
+
+#cover {
+    min-height: calc(100vh - var(--header-height));
+    background: transparent;
+}
+
+#cover::after {
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--theme) 94%, transparent) 0%,
+        color-mix(in srgb, var(--theme) 78%, transparent) 42%,
+        transparent 100%);
+}
+
+#chap-nav {
+    background: color-mix(in srgb, var(--theme) 92%, transparent);
+}
+
+/* Site header: report.js renders the PaperMod header markup, styled by the
+   theme's header.css (bundled ahead of this file). These are the bits of
+   PaperMod's global reset that header relies on. */
+#njx-bar {
+    position: sticky;
+    top: 0;
+    z-index: 120;
+    min-height: var(--header-height);
+    background: var(--theme);
+    font-family: var(--sans);
+}
+
+#njx-bar a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+#njx-bar ul {
+    margin: 0;
+    padding: 0;
+}
+
+#njx-bar button {
+    border: 0;
+    background: none;
+    color: var(--primary);
+    font: inherit;
+    cursor: pointer;
+}
+
+/* 章节条始终位于站点头部之下，实际章节目标负责滚动避让。 */
+#era-rail,
+#chap-nav,
+#dash-rail {
+    top: var(--report-header-height);
+}
+
+main [id],
+footer#sec-sources {
+    scroll-margin-top: calc(var(--report-header-height) + var(--report-subnav-height) + 12px);
+}
+
+/* 表格与矩阵局部横滚，保留完整数据而不撑宽整个页面。 */
+@media (max-width: 760px) {
+    main table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    main .tok,
+    main .chain {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .cfg-mx {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    #njx-bar .header-nav {
+        padding-inline: 12px;
+        column-gap: 12px;
+    }
+
+    #njx-bar .logo {
+        column-gap: 6px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #era-rail,
+    #chap-nav {
+        transition: none !important;
+    }
+}

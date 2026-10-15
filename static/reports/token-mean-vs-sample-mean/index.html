@@ -3,22 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-(function () {
-  var saved;
-  try {
-    saved = localStorage.getItem('pref-theme');
-  } catch (_) {
-    // 禁用站点存储时回退到系统主题。
-  }
-  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.dataset.theme =
-    saved === 'dark' || (saved !== 'light' && prefersDark) ? 'dark' : 'light';
-})();
-</script>
 <title>一票还是十票 · token-mean 与 sample-mean 交互研报</title>
 <meta name="description" content="同一个 batch 里，500 token 的回答和 5000 token 的回答，谁对梯度的贡献大？GRPO 说一样大，DAPO 说长的大十倍。损失聚合方式之争：sample-mean 每条回答一票，token-mean 每个 token 一票。">
-<!-- Inlined ET Book removed; reports use the shared blog font stack. -->
 <style>
 /* ═══════════════════════════════════════════════════════════
    Sixty-Six Years of Inference Silicon · Professional English Edition
@@ -42,8 +28,8 @@
   --green: #008a6d;
   --gold: #b07a10;
   --neg: #c22f4e;           /* semantic negative — declines, risk, missing */
-  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --mono: Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
   --shadow: 0 1px 2px rgba(5,28,44,.05), 0 8px 28px rgba(5,28,44,.07);
 }
@@ -663,31 +649,23 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
 }
 
 </style>
-
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<!-- njx-report-theme -->
+<style>:root[data-theme="dark"]{--blue-soft:#b1c3ff;--copper:#d0af70;--gold:#d0af70;--green:#66b9a7;--neg:#da8295;}</style>
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Njx&#x27;Log">
+<meta property="og:title" content="一票还是十票 · token-mean 与 sample-mean 交互研报">
+<meta property="og:url" content="https://njx-njx.github.io/reports/token-mean-vs-sample-mean/">
+<meta property="og:image" content="https://njx-njx.github.io/blog-cover.jpg">
+<meta property="og:description" content="同一个 batch 里，500 token 的回答和 5000 token 的回答，谁对梯度的贡献大？GRPO 说一样大，DAPO 说长的大十倍。损失聚合方式之争：sample-mean 每条回答一票，token-mean 每个 token 一票。">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon-32x32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="../report-shell.css">
+<link rel="stylesheet" href="/reports/report.css">
+<script src="/reports/report.js"></script>
+<!-- njx-report-theme -->
 </head>
-<body class="rpt-shell">
-<header class="rpt-site-header" data-report-shell>
-  <a class="rpt-home" href="/" aria-label="返回 Njx'Log 首页">
-    <img src="/blog-icon.png" alt="" width="28" height="28">
-    <span>Njx'Log</span>
-  </a>
-  <nav class="rpt-nav" aria-label="站点导航">
-    <a href="/posts/">文章</a>
-    <a href="/reports/" aria-current="page">报告</a>
-    <a href="/archives/">归档</a>
-    <a href="/search/">搜索</a>
-    <a href="/about/">关于</a>
-  </nav>
-  <div class="rpt-actions">
-    <button class="rpt-theme" type="button" data-report-theme-toggle aria-label="切换浅色或深色主题" title="切换主题">
-      <svg class="rpt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      <svg class="rpt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-    </button>
-  </div>
-</header>
+<body>
+<header id="njx-bar"></header>
 
 <!-- ═══ 封面 · 交互式计票图（四态封面的等价物）：同一 batch 的两条回答，三种计票规则 ═══
      点击画布依次切换 GRPO / DAPO / Dr.GRPO 三种聚合规则；
@@ -985,10 +963,10 @@ window.U = (() => {
   // accent usages recolor automatically; true negatives (declines/crashes/missing)
   // must use PAL.neg — audited per chart.
   const PAL = {
-    paper: "#ffffff", hi: "#f7f9fc", ink: "#051c2c", inkMd: "#42566a", inkLo: "#8595a6",
-    line: "#dbe2ea", lineLo: "#eef1f6", red: "#2251ff", redHi: "#1233b8",
-    blue: "#7a45c9", copper: "#b07a10", green: "#008a6d", gold: "#b07a10",
-    neg: "#c22f4e", accent: "#2251ff", navy: "#051c2c",
+    paper: RC("--paper"), hi: RC("--paper-hi"), ink: RC("--ink"), inkMd: RC("--ink-md"), inkLo: RC("--ink-lo"),
+    line: RC("--line"), lineLo: RC("--line-lo"), red: RD("#2251ff"), redHi: RD("#1233b8"),
+    blue: RD("#7a45c9"), copper: RD("#b07a10"), green: RD("#008a6d"), gold: RD("#b07a10"),
+    neg: RD("#c22f4e"), accent: RD("#2251ff"), navy: RC("--ink"),
   };
   const SERIES = [PAL.red, PAL.blue, PAL.copper, PAL.green];
 
@@ -1176,9 +1154,9 @@ window.RPT_SOURCES = [
   const ctx = canvas.getContext("2d");
   const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const MONO = 'Menlo, Consolas, monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
-  const INK = "#051c2c", INK_M = "#42566a", INK_L = "#8595a6";
-  const BLUE = "#2251ff", BLUE_S = "#7d9bff", NEG = "#c22f4e", PAPER = "#ffffff";
+  const SERIF = RS("--serif");
+  const INK = RC("--ink"), INK_M = RC("--ink-md"), INK_L = RC("--ink-lo");
+  const BLUE = RD("#2251ff"), BLUE_S = RD("#7d9bff"), NEG = RD("#c22f4e"), PAPER = RC("--paper");
 
   const LEN_A = 500, LEN_B = 5000;              // 开场算例（博客原文）
   let W = 0, H = 0;
@@ -1229,10 +1207,10 @@ window.RPT_SOURCES = [
   // ── 蓝图底纹：十字网格 + 四角对位标 ──
   function grid() {
     ctx.save();
-    ctx.strokeStyle = "rgba(5,28,44,.05)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = RA("--ink", .05); ctx.lineWidth = 1;
     for (let x = 26; x < W; x += 52) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
     for (let y = 26; y < H; y += 52) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-    ctx.strokeStyle = "rgba(34,81,255,.55)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = RA("#2251ff", .55); ctx.lineWidth = 1;
     const m = 22, l = 12;
     [[m, m, 1, 1], [W - m, m, -1, 1], [m, H - m, 1, -1], [W - m, H - m, -1, -1]].forEach(([x, y, sx, sy]) => {
       ctx.beginPath(); ctx.moveTo(x, y + sy * l); ctx.lineTo(x, y); ctx.lineTo(x + sx * l, y); ctx.stroke();
@@ -1242,9 +1220,9 @@ window.RPT_SOURCES = [
   function wash(lay) {
     if (!lay || !lay.wide) return;
     const g = ctx.createLinearGradient(0, 0, lay.L + 24, 0);
-    g.addColorStop(0, "rgba(255,255,255,.96)");
-    g.addColorStop(0.72, "rgba(255,255,255,.84)");
-    g.addColorStop(1, "rgba(255,255,255,0)");
+    g.addColorStop(0, RA("--paper", .96));
+    g.addColorStop(0.72, RA("--paper", .84));
+    g.addColorStop(1, RA("--paper", 0));
     ctx.fillStyle = g; ctx.fillRect(0, 0, lay.L + 24, H);
   }
   function halo(text, x, y, align = "left") {
@@ -1463,11 +1441,11 @@ window.RPT_SOURCES = [
 (() => {
 const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const SVGNS = "http://www.w3.org/2000/svg";
-const INK = "#051c2c", INK_M = "#42566a", INK_L = "#8595a6";
-const BLUE = "#2251ff", BLUE_S = "#7d9bff", NEG = "#c22f4e";
-const LINE = "#dbe2ea", LINE_LO = "#eef1f6", PAPER = "#ffffff";
+const INK = RC("--ink"), INK_M = RC("--ink-md"), INK_L = RC("--ink-lo");
+const BLUE = RD("#2251ff"), BLUE_S = RD("#7d9bff"), NEG = RD("#c22f4e");
+const LINE = RC("--line"), LINE_LO = RC("--line-lo"), PAPER = RC("--paper");
 const MONO = "Menlo, Consolas, monospace";
-const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+const SERIF = RS("--serif");
 
 function el(tag, attrs, parent) {
   const n = document.createElementNS(SVGNS, tag);
@@ -1695,7 +1673,7 @@ function factOf(kid) {
 
   // 红区：长样本坏 token 罚不到（L > 3000）
   const zx = xOf(3000);
-  el("rect", { x: zx, y: top, width: W - mR - zx, height: bot - top, fill: "rgba(194,47,78,.05)" }, svg);
+  el("rect", { x: zx, y: top, width: W - mR - zx, height: bot - top, fill: RA("#c22f4e", .05) }, svg);
   const zl = txt(svg, zx + 10, top + 14, "超长样本区 · 坏 token 罚不到（K3②）", { size: 9, fill: NEG, bold: true });
   drillOn(zl, {
     title: "adverse effect ② · 坏模式罚不掉", value: "罚不到",
@@ -2039,7 +2017,5 @@ function factOf(kid) {
 })();
 
 </script>
-
-<script src="../report-shell.js" defer></script>
 </body>
 </html>

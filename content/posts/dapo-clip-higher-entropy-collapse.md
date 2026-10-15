@@ -3,9 +3,11 @@ title: "熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么"
 date: 2026-08-26T14:30:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
-categories: ["AI"]
-summary: "naive GRPO 复现 R1 时熵快速坍缩、组内样本趋同，DAPO 的 Clip-Higher 只把裁剪上界从 0.2 抬到 0.28。这一个数背后，是 PPO-Clip 在概率轴上的结构性不对称。本文拆解失效链条、机制、证据与边界。"
+series: ["grpo"]
+summary: "naive GRPO 训练中熵会快速坍缩。DAPO 只把裁剪上界从 0.2 抬到 0.28，背后是 PPO-Clip 在概率轴上的结构性不对称。"
 ---
+
+naive GRPO 复现 R1 时熵快速坍缩、组内样本趋同，DAPO 的 Clip-Higher 只把裁剪上界从 0.2 抬到 0.28。这一个数背后，是 PPO-Clip 在概率轴上的结构性不对称。本文拆解失效链条、机制、证据与边界。
 
 > 本文有配套的[交互报告](/reports/dapo-clip-higher-entropy-collapse/)，含可下钻的公式拆解与消融数据图表。
 
@@ -159,7 +161,7 @@ DAPO 把它整个去掉了（$\beta=0$，参考模型不用加载），论文 §
 
 1. **熵没有目标区间。** 论文的经验结论是"熵缓慢上升有利"，但同样承认熵过高对应 gibberish 和重复。那么 ε_high 是否应该跟着熵曲线自适应调整，而不是固定 0.28？我没看到有人系统做过。
 2. **消融的顺序效应。** 表 1 是累加链，Clip-Higher 排在 Overlong Filtering 之后测，+2 分是在已有改动的底座上量的。它干净的独立贡献是多少，未知。
-3. **和序列级裁剪的兼容性。** GSPO 把重要性采样比率提到序列级（解决 MoE 模型 token 级比率的数值不稳），那时"抬 token 级上界"的逻辑还成不成立？本周后续选题会专门拆 GSPO。
+3. **和序列级裁剪的兼容性。** GSPO 把重要性采样比率提到序列级（解决 MoE 模型 token 级比率的数值不稳），那时"抬 token 级上界"的逻辑还成不成立？[GSPO 那篇](/posts/gspo-sequence-level-importance-sampling/)专门拆了这个问题。
 4. **异步训练下的稳健性。** 异步 RL 的比率分布漂移更大、更偏，固定 0.28 在不同 off-policy 程度下是否都合适，论文没有覆盖。
 
 ## 参考来源

@@ -4,8 +4,13 @@ theme: "PaperMod"
 defaultContentLanguage: "zh"
 defaultContentLanguageInSubdir: false
 hasCJKLanguage: true
+capitalizeListTitles: false
 
 enableRobotsTXT: true
+enableGitInfo: true
+taxonomies:
+  tag: tags
+  series: series
 buildDrafts: false
 buildFuture: false
 buildExpired: false
@@ -55,18 +60,10 @@ languages:
           name: 搜索
           url: /search/
           weight: 30
-        - identifier: tags
-          name: 标签
-          url: /tags/
-          weight: 40
         - identifier: about
           name: 关于
           url: /about/
           weight: 50
-        - identifier: faq
-          name: 问答
-          url: /faq/
-          weight: 60
   en:
     label: "English"
     locale: "en"
@@ -98,22 +95,13 @@ languages:
           name: Search
           url: /search/
           weight: 30
-        - identifier: tags
-          name: Tags
-          url: /tags/
-          weight: 40
         - identifier: about
           name: About
           url: /about/
           weight: 50
-        - identifier: faq
-          name: FAQ
-          url: /faq/
-          weight: 60
 
 params:
   env: production
-  title: Njx's Blog
   keywords: [Harness, Model Architecture, Mid-training, Post-training, Evals, Benchmarks, Reasoning RL, Agentic RL, RSI, Rollout System, Data Synthesis]
   author: njx
   defaultTheme: auto
@@ -126,8 +114,8 @@ params:
   ShowBreadCrumbs: true
   ShowCodeCopyButtons: true
   ShowWordCount: true
+  ShowFullTextinRSS: true
   ShowRssButtonInSectionTermList: true
-  UseHugoToc: true
   disableSpecial1stPost: false
   disableScrollToTop: false
   disableAnchoredHeadings: true
@@ -135,7 +123,6 @@ params:
   hidemeta: false
   hideSummary: false
   showtoc: true
-  tocopen: true
 
   assets:
     favicon: "/blog-icon.png"

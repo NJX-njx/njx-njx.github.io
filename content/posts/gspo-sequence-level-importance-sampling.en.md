@@ -3,9 +3,11 @@ title: "The Ratio's Wrong Unit: GSPO Goes Sequence-Level"
 date: 2026-08-26T17:40:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "gspo", "moe"]
-categories: ["AI"]
-summary: "GRPO carries over PPO's token-level importance ratio, which the Qwen team deems a fundamental misuse of importance sampling that leads to irreversible collapse in long-response MoE training. GSPO lifts the ratio, clipping, and optimization all to the sequence level: it clips two orders of magnitude more tokens, yet trains more efficiently. This post unpacks that chain of argument, along with the premises and costs the paper leaves unstated."
+series: ["grpo"]
+summary: "Qwen says GRPO's token-level importance ratio misuses importance sampling and breaks MoE training. GSPO lifts ratio, clipping and updates to sequence level."
 ---
+
+GRPO carries over PPO's token-level importance ratio, which the Qwen team deems a fundamental misuse of importance sampling that leads to irreversible collapse in long-response MoE training. GSPO lifts the ratio, clipping, and optimization all to the sequence level: it clips two orders of magnitude more tokens, yet trains more efficiently. This post unpacks that chain of argument, along with the premises and costs the paper leaves unstated.
 
 > This post has a companion [interactive report](/reports/gspo-sequence-level-importance-sampling/) (in Chinese), with drill-down formula breakdowns, a clipping-band comparison, and a dilution-effect calculator.
 

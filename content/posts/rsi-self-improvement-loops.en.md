@@ -3,9 +3,10 @@ title: "“The Model Trains Itself”: RSI and Three Loops"
 date: 2026-09-01T12:30:00+08:00
 draft: false
 tags: ["rl", "post-training", "agentic-rl", "rsi", "self-improvement"]
-categories: ["AI"]
-summary: "The term RSI (recursive self-improvement) became hot again in 2025-2026, but the things it refers to often get lumped together. Starting from a practitioner's dichotomy (change the harness but not the weights vs. change the weights directly), this post breaks “self-improvement” into three levels—the data loop, the reward loop, and the system loop—which differ in their preconditions, how far they have actually paid off, and their failure modes."
+summary: "RSI means different things to different people. Self-improvement splits into data, reward and system loops, each with its own conditions and failure modes."
 ---
+
+The term RSI (recursive self-improvement) became hot again in 2025-2026, but the things it refers to often get lumped together. Starting from a practitioner's dichotomy (change the harness but not the weights vs. change the weights directly), this post breaks “self-improvement” into three levels—the data loop, the reward loop, and the system loop—which differ in their preconditions, how far they have actually paid off, and their failure modes.
 
 > This post has a companion [interactive report](/reports/rsi-self-improvement-loops/) (in Chinese), with an interactive diagram of the three nested loops, a three-level exam matrix, and a scissors-gap diagram.
 

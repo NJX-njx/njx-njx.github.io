@@ -12,3 +12,9 @@
 
 - id: open_report
   translation: "打开报告"
+
+- id: series
+  translation: "系列"
+
+- id: series_position
+  translation: "第 {{ .Index }} 篇，共 {{ .Count }} 篇"

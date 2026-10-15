@@ -3,22 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-(function () {
-  var saved;
-  try {
-    saved = localStorage.getItem('pref-theme');
-  } catch (_) {
-    // 禁用站点存储时回退到系统主题。
-  }
-  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.dataset.theme =
-    saved === 'dark' || (saved !== 'light' && prefersDark) ? 'dark' : 'light';
-})();
-</script>
 <title>同一个模型，两个概率 · 训练推理不一致 TIS 交互研报</title>
 <meta name="description" content="rollout 用推理引擎、训练用训练引擎，同一个模型在两边算出两个概率：名义上的 on-policy 悄悄变成 off-policy。本报告拆解差异来源、有偏梯度与部署差距两个后果、算法补丁谱系，以及归到 BF16 精度上的根源结论。">
-<!-- Inlined ET Book removed; reports use the shared blog font stack. -->
 <style>
 /* ═══════════════════════════════════════════════════════════
    TIS · 训练推理不一致 交互研报（双引擎主题）
@@ -46,8 +32,8 @@
   --green: #007a63;
   --gold: #a07a10;
   --neg: #b42318;           /* semantic negative — collapse, gaps, missing */
-  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --mono: Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
   --shadow: 0 1px 2px rgba(23,29,36,.05), 0 8px 28px rgba(23,29,36,.07);
 }
@@ -741,31 +727,23 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
 }
 
 </style>
-
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<!-- njx-report-theme -->
+<style>:root[data-theme="dark"]{--blue-soft:#a9dbd5;--copper:#d29878;--gold:#c6af70;--green:#66afa1;--mu:#d29878;--mu-hi:#bc8c71;--mu-soft:#ecc8b0;--neg:#d27b74;--pi:#6fada8;--pi-soft:#a9dbd5;}</style>
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Njx&#x27;Log">
+<meta property="og:title" content="同一个模型，两个概率 · 训练推理不一致 TIS 交互研报">
+<meta property="og:url" content="https://njx-njx.github.io/reports/tis-train-inference-mismatch/">
+<meta property="og:image" content="https://njx-njx.github.io/blog-cover.jpg">
+<meta property="og:description" content="rollout 用推理引擎、训练用训练引擎，同一个模型在两边算出两个概率：名义上的 on-policy 悄悄变成 off-policy。本报告拆解差异来源、有偏梯度与部署差距两个后果、算法补丁谱系，以及归到 BF16 精度上的根源结论。">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon-32x32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="../report-shell.css">
+<link rel="stylesheet" href="/reports/report.css">
+<script src="/reports/report.js"></script>
+<!-- njx-report-theme -->
 </head>
-<body class="rpt-shell">
-<header class="rpt-site-header" data-report-shell>
-  <a class="rpt-home" href="/" aria-label="返回 Njx'Log 首页">
-    <img src="/blog-icon.png" alt="" width="28" height="28">
-    <span>Njx'Log</span>
-  </a>
-  <nav class="rpt-nav" aria-label="站点导航">
-    <a href="/posts/">文章</a>
-    <a href="/reports/" aria-current="page">报告</a>
-    <a href="/archives/">归档</a>
-    <a href="/search/">搜索</a>
-    <a href="/about/">关于</a>
-  </nav>
-  <div class="rpt-actions">
-    <button class="rpt-theme" type="button" data-report-theme-toggle aria-label="切换浅色或深色主题" title="切换主题">
-      <svg class="rpt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      <svg class="rpt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-    </button>
-  </div>
-</header>
+<body>
+<header id="njx-bar"></header>
 
 <!-- ═══ 封面 · 双引擎分路图：同一份权重，两条前向路径，两条渐渐错开的概率带 ═══
      画布根据文字分栏实际占用宽度来定位，避免与 cover 文本重叠；
@@ -1146,11 +1124,11 @@ window.U = (() => {
   // NOTE key semantics: `red` is the LEGACY ACCENT SLOT (now teal, also the π series
   // color); true negatives (collapse / gaps / missing) must use PAL.neg — audited per chart.
   const PAL = {
-    paper: "#fcfbf8", hi: "#f3f1ea", ink: "#171d24", inkMd: "#48505b", inkLo: "#8b919b",
-    line: "#dcdad4", lineLo: "#efede6", red: "#0f766e", redHi: "#0b5c56",
-    blue: "#6fc3b9", copper: "#b4541e", green: "#007a63", gold: "#a07a10",
-    pi: "#0f766e", piSoft: "#6fc3b9", mu: "#b4541e", muHi: "#8f3f12", muSoft: "#e0a37c",
-    neg: "#b42318", accent: "#0f766e", navy: "#171d24",
+    paper: RC("--paper"), hi: RC("--paper-hi"), ink: RC("--ink"), inkMd: RC("--ink-md"), inkLo: RC("--ink-lo"),
+    line: RC("--line"), lineLo: RC("--line-lo"), red: RD("#0f766e"), redHi: RD("#0b5c56"),
+    blue: RD("#6fc3b9"), copper: RD("#b4541e"), green: RD("#007a63"), gold: RD("#a07a10"),
+    pi: RD("#0f766e"), piSoft: RD("#6fc3b9"), mu: RD("#b4541e"), muHi: RD("#8f3f12"), muSoft: RD("#e0a37c"),
+    neg: RD("#b42318"), accent: RD("#0f766e"), navy: RC("--ink"),
   };
   const SERIES = [PAL.pi, PAL.mu, PAL.inkMd, PAL.blue];
 
@@ -1352,7 +1330,7 @@ window.RPT_SOURCES = [
   let view = C.fit();
 
   const MONO = 'Menlo, Consolas, monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
   const rng = U.makeRng(0x71515);
 
   const TOKENS = ["the"," model"," gives"," two"," probs"," μ"," ≠"," π"," same"," weights"," diff"," kernels"," BF","16"," gap"," grows"," the"," on","-policy"," grad"," drifts"," →0"];
@@ -1435,14 +1413,14 @@ window.RPT_SOURCES = [
     haloText(ctx, mode === "bf16" ? "DUAL READOUT · 同一份权重，两个概率读数（BF16）" : "DUAL READOUT · FP16：两带重合，回到近似 on-policy",
       cx0, y0 + 12, { font: `700 9.5px ${MONO}`, color: mode === "bf16" ? U.PAL.inkLo : U.PAL.pi, align: "left" });
     const bwz = 158, bx = W - bwz - 16, by = y0 + 1;
-    if (mode === "bf16") pill(ctx, bx, by, bwz, 24, U.PAL.mu, "rgba(180,84,30,.07)", "BF16 · μ≠π · 点击切换", U.PAL.mu);
-    else pill(ctx, bx, by, bwz, 24, U.PAL.pi, "rgba(15,118,110,.07)", "FP16 · μ≈π · 点击切换", U.PAL.pi);
+    if (mode === "bf16") pill(ctx, bx, by, bwz, 24, U.PAL.mu, RA("#b4541e", .07), "BF16 · μ≠π · 点击切换", U.PAL.mu);
+    else pill(ctx, bx, by, bwz, 24, U.PAL.pi, RA("#0f766e", .07), "FP16 · μ≈π · 点击切换", U.PAL.pi);
     hits.push({ x: bx, y: by, w: bwz, h: 24, act: "toggle" });
 
     // 中缝 token 纽带
     for (let i = 0; i < n; i++) {
       const x = cx0 + i * gapX + gapX / 2;
-      ctx.fillStyle = i === FLIP ? "rgba(180,35,24,.10)" : (i % 2 ? U.PAL.hi : U.PAL.paper);
+      ctx.fillStyle = i === FLIP ? RA("#b42318", .10) : (i % 2 ? U.PAL.hi : U.PAL.paper);
       ctx.fillRect(x - gapX / 2, tokY - 7, gapX, 14);
       haloText(ctx, TOKENS[i].trim(), x, tokY + 3, { font: `9px ${MONO}`, color: U.PAL.inkLo, halo: false });
     }
@@ -1493,7 +1471,7 @@ window.RPT_SOURCES = [
     haloText(ctx, "μ · 推理引擎", px + pw / 2, laneBot - 21, { font: `700 9.5px ${MONO}`, color: U.PAL.mu });
     haloText(ctx, "逐 token", px + pw / 2, laneBot - 9, { font: `9px ${MONO}`, color: U.PAL.inkLo });
     ctx.fillStyle = U.PAL.ink; ctx.fillRect(px, tokY - 11, 26, 22);
-    haloText(ctx, "W", px + 13, tokY + 4, { font: `700 11px ${MONO}`, color: "#fff", halo: false });
+    haloText(ctx, "W", px + 13, tokY + 4, { font: `700 11px ${MONO}`, color: RC("--paper"), halo: false });
     ctx.strokeStyle = U.PAL.line; ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(px + 26, tokY - 4); ctx.lineTo(cx0, tokY - 8 - barMax * 0.55);
@@ -1590,7 +1568,7 @@ window.RPT_SOURCES = [
   const C = U.bindCanvas(canvas);
   let view = C.fit();
   const MONO = 'Menlo, Consolas, monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
 
   const rng = U.makeRng(0x7151);
   // 示意监控曲线：训推差随步数缓慢发散（定性重建，非实测 —— rail 内显著标注）
@@ -1816,7 +1794,7 @@ window.RPT_SOURCES = [
 (() => {
   const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const MONO = 'Menlo, Consolas, monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
   const SRC = {};
   (window.RPT_SOURCES || []).forEach(s => { SRC[s.id] = s; });
   const CAT_LABEL = { paper: "论文一手", eng: "工程博客一手", secondary: "二手转述", textbook: "本地教材", derived: "推算/作者判断" };
@@ -1973,12 +1951,12 @@ window.RPT_SOURCES = [
       // 权重块
       ctx.fillStyle = U.PAL.ink;
       ctx.fillRect(wx, wy - 30, 56, 60);
-      halo(ctx, "W", wx + 28, wy + 5, { font: `700 20px ${MONO}`, color: "#fff", align: "center", halo: false });
+      halo(ctx, "W", wx + 28, wy + 5, { font: `700 20px ${MONO}`, color: RC("--paper"), align: "center", halo: false });
       halo(ctx, "同一份权重", wx + 28, wy + 50, { font: `9px ${MONO}`, color: U.PAL.inkLo, align: "center" });
       hits.push({ x: wx - 8, y: wy - 38, w: 72, h: 104, k: "K7", t: "双引擎", v: "μ ≠ π",
         sub: "两边加载同一份权重，理论上应该是同一个策略 π；工程实现使推理引擎实际对应数值不同的策略 μ。" });
       // 分路连线
-      const lanes = [["a", "#0f766e"], ["b", "#b4541e"]];
+      const lanes = [["a", RD("#0f766e")], ["b", RD("#b4541e")]];
       lanes.forEach(([ln]) => {
         const y0 = laneY[ln] + 26;
         ctx.strokeStyle = U.PAL.line; ctx.lineWidth = 1;
@@ -2092,7 +2070,7 @@ window.RPT_SOURCES = [
       const n = Math.max(2, Math.floor(N * p));
       // 崩溃阈区（右端红 tint）
       const crashX = X(N * 0.82);
-      ctx.fillStyle = "rgba(180,35,24,.06)";
+      ctx.fillStyle = RA("#b42318", .06);
       ctx.fillRect(crashX, mT - 18, W - mR - crashX + 20, H - mT - mB + 36);
       halo(ctx, "崩溃区（示意）", W - mR, mT - 24, { font: `9px ${MONO}`, color: U.PAL.neg, align: "right" });
       // 轴线
@@ -2228,7 +2206,7 @@ window.RPT_SOURCES = [
           ctx.strokeStyle = U.PAL.ink; ctx.lineWidth = 1;
           ctx.strokeRect(x, y, n * cellW, cellH);
           halo(ctx, `${n} ${lab}`, x + (n * cellW) / 2, y + cellH + 15, { font: `9px ${MONO}`, color: fill === U.PAL.ink ? U.PAL.inkLo : fill, align: "center" });
-          if (letter) halo(ctx, letter, x + (n * cellW) / 2, y + 17, { font: `700 10px ${MONO}`, color: fill === U.PAL.ink ? "#fff" : fill, align: "center", halo: false });
+          if (letter) halo(ctx, letter, x + (n * cellW) / 2, y + 17, { font: `700 10px ${MONO}`, color: fill === U.PAL.ink ? RC("--paper") : fill, align: "center", halo: false });
           x += n * cellW;
         };
         seg(f.sign, U.PAL.ink, "", "±");
@@ -2511,7 +2489,5 @@ window.RPT_SOURCES = [
 })();
 
 </script>
-
-<script src="../report-shell.js" defer></script>
 </body>
 </html>

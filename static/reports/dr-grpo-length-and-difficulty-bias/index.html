@@ -3,22 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-(function () {
-  var saved;
-  try {
-    saved = localStorage.getItem('pref-theme');
-  } catch (_) {
-    // 禁用站点存储时回退到系统主题。
-  }
-  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.dataset.theme =
-    saved === 'dark' || (saved !== 'light' && prefersDark) ? 'dark' : 'light';
-})();
-</script>
 <title>答错就写长一点 · GRPO 归一化偏差（Dr.GRPO）交互研报</title>
 <meta name="description" content="R1-Zero 的「长度与奖励齐涨」被当成推理涌现的标志性曲线，Dr.GRPO 论文指出其中一半涨幅可能是优化器自己的偏好：1/|y| 让模型答错时倾向写长，逐题 std 让极端难度的题拿走更多权重。两个归一化项、两种偏差的机制拆解，外加一个藏在 masked_mean 里的实现层偏差。">
-<!-- Inlined ET Book removed; reports use the shared blog font stack. -->
 <style>
 /* ═══════════════════════════════════════════════════════════
    Dr.GRPO · 长度与难度偏差 交互研报（除数审计主题）
@@ -41,8 +27,8 @@
   --green: #008a6d;
   --gold: #b07a10;
   --neg: #b42318;           /* semantic negative — declines, risk, missing */
-  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --mono: Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
   --shadow: 0 1px 2px rgba(29,26,48,.05), 0 8px 28px rgba(29,26,48,.07);
 }
@@ -681,31 +667,23 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
 }
 
 </style>
-
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<!-- njx-report-theme -->
+<style>:root[data-theme="dark"]{--blue-soft:#cabcf1;--copper:#d0af70;--dif:#8b99df;--dif-soft:#bcc6f1;--gold:#d0af70;--green:#66b9a7;--len:#a78ce5;--len-soft:#cabcf1;--neg:#d27b74;}</style>
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Njx&#x27;Log">
+<meta property="og:title" content="答错就写长一点 · GRPO 归一化偏差（Dr.GRPO）交互研报">
+<meta property="og:url" content="https://njx-njx.github.io/reports/dr-grpo-length-and-difficulty-bias/">
+<meta property="og:image" content="https://njx-njx.github.io/blog-cover.jpg">
+<meta property="og:description" content="R1-Zero 的「长度与奖励齐涨」被当成推理涌现的标志性曲线，Dr.GRPO 论文指出其中一半涨幅可能是优化器自己的偏好：1/|y| 让模型答错时倾向写长，逐题 std 让极端难度的题拿走更多权重。两个归一化项、两种偏差的机制拆解，外加一个藏在 masked_mean 里的实现层偏差。">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon-32x32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="../report-shell.css">
+<link rel="stylesheet" href="/reports/report.css">
+<script src="/reports/report.js"></script>
+<!-- njx-report-theme -->
 </head>
-<body class="rpt-shell">
-<header class="rpt-site-header" data-report-shell>
-  <a class="rpt-home" href="/" aria-label="返回 Njx'Log 首页">
-    <img src="/blog-icon.png" alt="" width="28" height="28">
-    <span>Njx'Log</span>
-  </a>
-  <nav class="rpt-nav" aria-label="站点导航">
-    <a href="/posts/">文章</a>
-    <a href="/reports/" aria-current="page">报告</a>
-    <a href="/archives/">归档</a>
-    <a href="/search/">搜索</a>
-    <a href="/about/">关于</a>
-  </nav>
-  <div class="rpt-actions">
-    <button class="rpt-theme" type="button" data-report-theme-toggle aria-label="切换浅色或深色主题" title="切换主题">
-      <svg class="rpt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      <svg class="rpt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-    </button>
-  </div>
-</header>
+<body>
+<header id="njx-bar"></header>
 
 <!-- ═══ 封面 · 梯度摊薄槽：同一份 advantage 墨量，倒进 100 与 1000 token 两条槽，
      墨高 = 每 token 权重（0.01 vs 0.001）。点击画布切换 Â=+1（强化）/ Â=−1（惩罚）。
@@ -1100,13 +1078,13 @@ window.U = (() => {
   // NOTE key semantics: `red` is the LEGACY ACCENT SLOT (now violet); true negatives
   // (penalty / bias / correction) must use PAL.neg — audited per chart.
   const PAL = {
-    paper: "#fbfafc", hi: "#f3f1f8", ink: "#1d1a30", inkMd: "#4b4765", inkLo: "#8d89a6",
-    line: "#dedae9", lineLo: "#f0edf6", red: "#6c3fd4", redHi: "#4d28a8",
-    blue: "#4d28a8", blueSoft: "#a78fe8", neg: "#b42318",
-    len: "#6c3fd4", lenSoft: "#a78fe8",       // 长度偏差（1/|y|）
-    dif: "#3d55c9", difSoft: "#8fa0e8",       // 难度偏差（逐题 std）
-    negSoft: "#d98a80", gold: "#a07a10", green: "#007a63",
-    accent: "#6c3fd4", navy: "#1d1a30",
+    paper: RC("--paper"), hi: RC("--paper-hi"), ink: RC("--ink"), inkMd: RC("--ink-md"), inkLo: RC("--ink-lo"),
+    line: RC("--line"), lineLo: RC("--line-lo"), red: RD("#6c3fd4"), redHi: RD("#4d28a8"),
+    blue: RD("#4d28a8"), blueSoft: RD("#a78fe8"), neg: RD("#b42318"),
+    len: RD("#6c3fd4"), lenSoft: RD("#a78fe8"),       // 长度偏差（1/|y|）
+    dif: RD("#3d55c9"), difSoft: RD("#8fa0e8"),       // 难度偏差（逐题 std）
+    negSoft: RD("#d98a80"), gold: RD("#a07a10"), green: RD("#007a63"),
+    accent: RD("#6c3fd4"), navy: RC("--ink"),
   };
   const SERIES = [PAL.len, PAL.dif, PAL.inkMd, PAL.blueSoft];
 
@@ -1270,7 +1248,7 @@ window.RPT_SOURCES = [
   let view = C.fit();
 
   const MONO = 'Menlo, Consolas, monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
 
   let sign = 1;              // Â=+1 强化 / −1 惩罚
   let pour = 0;              // 0..1 灌注进度
@@ -1279,7 +1257,7 @@ window.RPT_SOURCES = [
   let hits = [];
 
   const inkColor = () => sign > 0 ? U.PAL.len : U.PAL.neg;
-  const inkSoft = () => sign > 0 ? "rgba(108,63,212,.16)" : "rgba(180,35,24,.16)";
+  const inkSoft = () => sign > 0 ? RA("#6c3fd4", .16) : RA("#b42318", .16);
 
   function textBottom() {
     const cvRect = canvas.getBoundingClientRect();
@@ -1382,8 +1360,8 @@ window.RPT_SOURCES = [
     haloText(ctx, "GRADIENT DILUTION · 同一份 advantage，摊进不同长度的回答",
       44, y0 + 12, { font: `700 9.5px ${MONO}`, color: U.PAL.inkLo, align: "left" });
     const bwz = 172, bx0 = W - bwz - 16, by = y0 + 1;
-    if (sign > 0) pill(ctx, bx0, by, bwz, 24, U.PAL.len, "rgba(108,63,212,.07)", "Â=+1 · 答对被强化 · 点击切换", U.PAL.len);
-    else pill(ctx, bx0, by, bwz, 24, U.PAL.neg, "rgba(180,35,24,.07)", "Â=−1 · 答错被惩罚 · 点击切换", U.PAL.neg);
+    if (sign > 0) pill(ctx, bx0, by, bwz, 24, U.PAL.len, RA("#6c3fd4", .07), "Â=+1 · 答对被强化 · 点击切换", U.PAL.len);
+    else pill(ctx, bx0, by, bwz, 24, U.PAL.neg, RA("#b42318", .07), "Â=−1 · 答错被惩罚 · 点击切换", U.PAL.neg);
     hits.push({ x: bx0, y: by, w: bwz, h: 24, act: "toggle" });
 
     // 等墨量声明（顶部中央；与左标题/右胶囊测宽避让，无空间则不画）
@@ -1489,7 +1467,7 @@ window.RPT_SOURCES = [
   const C = U.bindCanvas(canvas);
   let view = C.fit();
   const MONO = 'Menlo, Consolas, monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
 
   const rng = U.makeRng(0xD26);
   const STEPS = 72, PLAT = 40;
@@ -1668,7 +1646,7 @@ window.RPT_SOURCES = [
 // 图表模块群：每图一个 IIFE + 宿主 div；数据一律取自 window.RPT，下钻经 U.showDrill。
 // ① metric-strip ② dilution-chart ③ diff-chart ④ audit-chart ⑤ dynamics-chart ⑥ setup-chart ⑦ division-chart
 const MONO = 'Menlo, Consolas, monospace';
-const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+const SERIF = RS("--serif");
 const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function halo(ctx, txt, x, y, opt = {}) {
@@ -1850,7 +1828,7 @@ function enterDraw(el, drawFn) {
       b.textContent = sign > 0 ? "Â=+1 · 强化模式" : "Â=−1 · 惩罚模式";
       b.style.borderColor = sign > 0 ? U.PAL.len : U.PAL.neg;
       b.style.color = sign > 0 ? U.PAL.len : U.PAL.neg;
-      b.style.background = sign > 0 ? "rgba(108,63,212,.06)" : "rgba(180,35,24,.06)";
+      b.style.background = sign > 0 ? RA("#6c3fd4", .06) : RA("#b42318", .06);
     }
   }
 
@@ -1908,7 +1886,7 @@ function enterDraw(el, drawFn) {
     hits.length = 0;
 
     // 极端题 tint 区（std < 0.35）
-    ctx.fillStyle = "rgba(61,85,201,.05)";
+    ctx.fillStyle = RA("#3d55c9", .05);
     ctx.fillRect(xOf(S0), Y0, xOf(0.35) - xOf(S0), Y1 - Y0);
     halo(ctx, "极端题区 · std 小", xOf(0.225), Y0 + 14, { font: `8.5px ${MONO}`, color: U.PAL.dif });
 
@@ -2328,7 +2306,5 @@ function enterDraw(el, drawFn) {
 })();
 
 </script>
-
-<script src="../report-shell.js" defer></script>
 </body>
 </html>

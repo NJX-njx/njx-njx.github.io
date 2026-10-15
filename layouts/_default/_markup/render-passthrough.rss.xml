@@ -1,0 +1,3 @@
+{{- with try (transform.ToMath .Inner (dict "output" "mathml" "displayMode" (eq .Type "block"))) }}
+  {{- with .Err }}{{ errorf "Unable to render math at %s: %s" $.Position . }}{{ else }}{{ .Value }}{{ end }}
+{{- end -}}

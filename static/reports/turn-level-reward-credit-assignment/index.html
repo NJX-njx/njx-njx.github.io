@@ -3,22 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-(function () {
-  var saved;
-  try {
-    saved = localStorage.getItem('pref-theme');
-  } catch (_) {
-    // 禁用站点存储时回退到系统主题。
-  }
-  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.dataset.theme =
-    saved === 'dark' || (saved !== 'light' && prefersDark) ? 'dark' : 'light';
-})();
-</script>
 <title>7 轮交互失败了，该怪谁 · 交互研报</title>
 <meta name="description" content="多轮 agentic RL 的奖励归因：轨迹概率、三层信号、ORM/PRM 对照实验、三条中间路线、turn-level 反向折扣，以及 GSPO-token 为多轮留的那个口子。">
-<!-- Inlined ET Book removed; reports use the shared blog font stack. -->
 <style>
 /* ═══════════════════════════════════════════════════════════
    Sixty-Six Years of Inference Silicon · Professional English Edition
@@ -42,8 +28,8 @@
   --green: #008a6d;
   --gold: #b07a10;
   --neg: #c22f4e;           /* semantic negative — declines, risk, missing */
-  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --mono: Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
   --shadow: 0 1px 2px rgba(5,28,44,.05), 0 8px 28px rgba(5,28,44,.07);
 }
@@ -499,8 +485,8 @@ hr.sep { border: 0; height: 1px; background: var(--line); margin: 0 auto; max-wi
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "et-book", "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+  --sans: "et-book", "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "Iowan Old Style", Palatino, Georgia, serif;
   --mono: Menlo, Consolas, "SF Mono", "Liberation Mono", "PingFang SC", "Songti SC", monospace;
   --pos: #008a6d;   /* 正 credit（封面/对照实验的语义绿，用户指定） */
 }
@@ -705,31 +691,23 @@ main, footer#sec-sources { margin-right: 0; }
 .mark-h { color: var(--copper); font-weight: 700; }
 
 </style>
-
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<!-- njx-report-theme -->
+<style>:root[data-theme="dark"]{--blue-soft:#b1c3ff;--copper:#d0af70;--gold:#d0af70;--green:#66b9a7;--neg:#da8295;--pos:#66b9a7;}</style>
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Njx&#x27;Log">
+<meta property="og:title" content="7 轮交互失败了，该怪谁 · 交互研报">
+<meta property="og:url" content="https://njx-njx.github.io/reports/turn-level-reward-credit-assignment/">
+<meta property="og:image" content="https://njx-njx.github.io/blog-cover.jpg">
+<meta property="og:description" content="多轮 agentic RL 的奖励归因：轨迹概率、三层信号、ORM/PRM 对照实验、三条中间路线、turn-level 反向折扣，以及 GSPO-token 为多轮留的那个口子。">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon-32x32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="../report-shell.css">
+<link rel="stylesheet" href="/reports/report.css">
+<script src="/reports/report.js"></script>
+<!-- njx-report-theme -->
 </head>
-<body class="rpt-shell">
-<header class="rpt-site-header" data-report-shell>
-  <a class="rpt-home" href="/" aria-label="返回 Njx'Log 首页">
-    <img src="/blog-icon.png" alt="" width="28" height="28">
-    <span>Njx'Log</span>
-  </a>
-  <nav class="rpt-nav" aria-label="站点导航">
-    <a href="/posts/">文章</a>
-    <a href="/reports/" aria-current="page">报告</a>
-    <a href="/archives/">归档</a>
-    <a href="/search/">搜索</a>
-    <a href="/about/">关于</a>
-  </nav>
-  <div class="rpt-actions">
-    <button class="rpt-theme" type="button" data-report-theme-toggle aria-label="切换浅色或深色主题" title="切换主题">
-      <svg class="rpt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      <svg class="rpt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-    </button>
-  </div>
-</header>
+<body>
+<header id="njx-bar"></header>
 
 <!-- 章节导航 -->
 <nav id="chap-nav" aria-label="章节导航">
@@ -1249,10 +1227,10 @@ window.U = (() => {
   // accent usages recolor automatically; true negatives (declines/crashes/missing)
   // must use PAL.neg — audited per chart.
   const PAL = {
-    paper: "#ffffff", hi: "#f7f9fc", ink: "#051c2c", inkMd: "#42566a", inkLo: "#8595a6",
-    line: "#dbe2ea", lineLo: "#eef1f6", red: "#2251ff", redHi: "#1233b8",
-    blue: "#7a45c9", copper: "#b07a10", green: "#008a6d", gold: "#b07a10",
-    neg: "#c22f4e", accent: "#2251ff", navy: "#051c2c",
+    paper: RC("--paper"), hi: RC("--paper-hi"), ink: RC("--ink"), inkMd: RC("--ink-md"), inkLo: RC("--ink-lo"),
+    line: RC("--line"), lineLo: RC("--line-lo"), red: RD("#2251ff"), redHi: RD("#1233b8"),
+    blue: RD("#7a45c9"), copper: RD("#b07a10"), green: RD("#008a6d"), gold: RD("#b07a10"),
+    neg: RD("#c22f4e"), accent: RD("#2251ff"), navy: RC("--ink"),
   };
   const SERIES = [PAL.red, PAL.blue, PAL.copper, PAL.green];
 
@@ -1392,15 +1370,15 @@ window.U = (() => {
   const hintline = document.getElementById("cover-hintline");
   const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
   const MONO = 'Menlo,"PingFang SC",monospace';
   const D = window.RPT.coverTrajectory;
   const TAPE_MIN = 208, TAPE_PAD = 26;
 
   const COL = {
-    pos: "#008a6d", neg: "#c22f4e", zero: "#8595a6", half: "#b07a10",
-    ink: "#051c2c", inkMd: "#42566a", inkLo: "#8595a6",
-    line: "#dbe2ea", env: "#c3ccd6", accent: "#2251ff",
+    pos: RD("#008a6d"), neg: RD("#c22f4e"), zero: RC("--ink-lo"), half: RD("#b07a10"),
+    ink: RC("--ink"), inkMd: RC("--ink-md"), inkLo: RC("--ink-lo"),
+    line: RC("--line"), env: RD("#c3ccd6"), accent: RD("#2251ff"),
   };
 
   const MODES = {
@@ -1594,7 +1572,7 @@ window.U = (() => {
       ctx.save();
       ctx.globalAlpha = stampA;
       const ry = top - 9;
-      ctx.fillStyle = "#fff";
+      ctx.fillStyle = RC("--paper");
       ctx.strokeStyle = COL.neg; ctx.lineWidth = 1.5;
       roundRect(stampX, ry, stampW, stampH, 4); ctx.fill(); ctx.stroke();
       ctx.fillStyle = COL.neg;
@@ -1762,9 +1740,9 @@ window.U = (() => {
     if (st) e.textContent = st;
     return e;
   };
-  const txt = (x, y, s, { size = 11, w = 400, fill = "#42566a", anchor = "middle", mono = true, italic = false } = {}) => {
-    const t = el("text", { x, y, "font-size": size, "font-weight": w, fill, "text-anchor": anchor, "paint-order": "stroke", stroke: "#fff", "stroke-width": 3 });
-    t.style.fontFamily = mono ? 'Menlo,"PingFang SC",monospace' : '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const txt = (x, y, s, { size = 11, w = 400, fill = RC("--ink-md"), anchor = "middle", mono = true, italic = false } = {}) => {
+    const t = el("text", { x, y, "font-size": size, "font-weight": w, fill, "text-anchor": anchor, "paint-order": "stroke", stroke: RC("--paper"), "stroke-width": 3 });
+    t.style.fontFamily = mono ? 'Menlo,"PingFang SC",monospace' : RS("--serif");
     if (italic) t.style.fontStyle = "italic";
     t.textContent = s;
     return t;
@@ -1776,7 +1754,7 @@ window.U = (() => {
   const unit = ph * 0.42; // 1.0 credit 的像素高
   const yOf = v => zeroY - v * unit;
 
-  const C = { pos: "#008a6d", neg: "#c22f4e", zero: "#8595a6", ink: "#051c2c", inkLo: "#8595a6", line: "#dbe2ea", grid: "#eef1f6" };
+  const C = { pos: RD("#008a6d"), neg: RD("#c22f4e"), zero: RC("--ink-lo"), ink: RC("--ink"), inkLo: RC("--ink-lo"), line: RC("--line"), grid: RC("--line-lo") };
 
   // 网格与零轴
   [-1, -0.5, 0.5, 1].forEach(v => {
@@ -1818,7 +1796,7 @@ window.U = (() => {
     bars.push({ rect: prm, valEl: prmV, step: i, series: "prm", x: gx + bw / 2 + 5, anim: true });
     // 步骤标签
     svg.appendChild(txt(gx, H - 44, `STEP ${s.n}`, { size: 10, w: 700, fill: C.ink }));
-    svg.appendChild(txt(gx, H - 28, s.name, { size: 11.5, w: 700, mono: false, fill: "#051c2c" }));
+    svg.appendChild(txt(gx, H - 28, s.name, { size: 11.5, w: 700, mono: false, fill: RC("--ink") }));
     const mark = s.correct ? ["✓", C.pos] : ["✗", C.neg];
     svg.appendChild(txt(gx, H - 12, mark[0], { size: 12, w: 700, fill: mark[1] }));
     svg.appendChild(el("line", { x1: gx, y1: H - 58, x2: gx, y2: H - 50, stroke: C.line, "stroke-width": 1 }));
@@ -1827,11 +1805,11 @@ window.U = (() => {
   // 图例
   const lgY = 18;
   svg.appendChild(el("rect", { x: mL, y: lgY - 8, width: 12, height: 12, fill: C.zero }));
-  svg.appendChild(txt(mL + 18, lgY + 2, "ORM（单一 trajectory 信号）", { size: 10.5, anchor: "start", fill: "#42566a" }));
+  svg.appendChild(txt(mL + 18, lgY + 2, "ORM（单一 trajectory 信号）", { size: 10.5, anchor: "start", fill: RC("--ink-md") }));
   svg.appendChild(el("rect", { x: mL + 218, y: lgY - 8, width: 12, height: 12, fill: C.pos }));
-  svg.appendChild(txt(mL + 234, lgY + 2, "PRM 正分", { size: 10.5, anchor: "start", fill: "#42566a" }));
+  svg.appendChild(txt(mL + 234, lgY + 2, "PRM 正分", { size: 10.5, anchor: "start", fill: RC("--ink-md") }));
   svg.appendChild(el("rect", { x: mL + 312, y: lgY - 8, width: 12, height: 12, fill: C.neg }));
-  svg.appendChild(txt(mL + 328, lgY + 2, "PRM 负分", { size: 10.5, anchor: "start", fill: "#42566a" }));
+  svg.appendChild(txt(mL + 328, lgY + 2, "PRM 负分", { size: 10.5, anchor: "start", fill: RC("--ink-md") }));
 
   // 右侧读数栏
   const rx = mL + pw + 30;
@@ -1840,7 +1818,7 @@ window.U = (() => {
     const g = el("g", { cursor: "pointer" });
     g.setAttribute("data-drill-keep", "");
     g.appendChild(txt(rx, y, val, { size: 26, w: 700, fill: col, anchor: "start" }));
-    g.appendChild(txt(rx, y + 20, lab, { size: 10.5, anchor: "start", fill: "#42566a" }));
+    g.appendChild(txt(rx, y + 20, lab, { size: 10.5, anchor: "start", fill: RC("--ink-md") }));
     g.addEventListener("click", e => {
       const msgs = {
         gap: { title: "PRM 区分度 = 19 × ORM", value: "19×", sub: "同一坏轨迹上 PRM 逐步评分的正负区分度是 ORM 的 19 倍（实验读数）。", source: "教材实验（K1）" },
@@ -1852,9 +1830,9 @@ window.U = (() => {
     });
     svg.appendChild(g);
   };
-  ro(mT + 40, "19×", "#2251ff", "PRM 区分度 / ORM", "gap");
-  ro(mT + 118, "+30pp", "#008a6d", "PRM 成功率高出约 30 个百分点", "pp");
-  ro(mT + 196, "每步评估", "#c22f4e", "PRM 的代价：标注或再训打分模型", "cost");
+  ro(mT + 40, "19×", RD("#2251ff"), "PRM 区分度 / ORM", "gap");
+  ro(mT + 118, "+30pp", RD("#008a6d"), "PRM 成功率高出约 30 个百分点", "pp");
+  ro(mT + 196, "每步评估", RD("#c22f4e"), "PRM 的代价：标注或再训打分模型", "cost");
 
   // ORM 口径切换动画
   function ormVal() { return ormMode === "zero" ? D.ormZero : D.ormBlame; }
@@ -1973,22 +1951,22 @@ window.U = (() => {
 
   // 轴
   [ -5, -4, -3, -2, -1, 0 ].forEach(v => {
-    svg.appendChild(el("line", { x1: X(v), y1: 30, x2: X(v), y2: 108, stroke: "#eef1f6", "stroke-width": 1 }));
-    const t = el("text", { x: X(v), y: 122, "font-size": 9, fill: "#8595a6", "text-anchor": "middle", "font-family": mono });
+    svg.appendChild(el("line", { x1: X(v), y1: 30, x2: X(v), y2: 108, stroke: RC("--line-lo"), "stroke-width": 1 }));
+    const t = el("text", { x: X(v), y: 122, "font-size": 9, fill: RC("--ink-lo"), "text-anchor": "middle", "font-family": mono });
     t.textContent = v.toFixed(0) + ".0";
     svg.appendChild(t);
   });
-  svg.appendChild(el("line", { x1: x0, y1: 108, x2: x1, y2: 108, stroke: "#dbe2ea", "stroke-width": 1 }));
+  svg.appendChild(el("line", { x1: x0, y1: 108, x2: x1, y2: 108, stroke: RC("--line"), "stroke-width": 1 }));
 
   const rows = [
-    { y: 48, d: G.good, col: "#008a6d", tag: "找回证据", lab: "更确信 → rᴵᴳ = +2.5" },
-    { y: 84, d: G.bad, col: "#c22f4e", tag: "被带偏", lab: "更糊涂 → rᴵᴳ = −1.2" },
+    { y: 48, d: G.good, col: RD("#008a6d"), tag: "找回证据", lab: "更确信 → rᴵᴳ = +2.5" },
+    { y: 84, d: G.bad, col: RD("#c22f4e"), tag: "被带偏", lab: "更糊涂 → rᴵᴳ = −1.2" },
   ];
   rows.forEach(r => {
     const g = el("g", { cursor: "pointer" });
     g.setAttribute("data-drill-keep", "");
     // 行标签
-    const tag = el("text", { x: 2, y: r.y + 4, "font-size": 11.5, fill: "#051c2c", "font-weight": 700, "font-family": '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif' });
+    const tag = el("text", { x: 2, y: r.y + 4, "font-size": 11.5, fill: RC("--ink"), "font-weight": 700, "font-family": RS("--serif") });
     tag.textContent = r.tag;
     g.appendChild(tag);
     // before → after 箭头带
@@ -1997,10 +1975,10 @@ window.U = (() => {
     // 箭头方向取决于增减
     const dir = xb > xa ? 1 : -1;
     g.appendChild(el("path", { d: `M ${xb} ${r.y} l ${-6 * dir} -4 v 8 z`, fill: r.col }));
-    g.appendChild(el("circle", { cx: xa, cy: r.y, r: 3.4, fill: "#fff", stroke: "#42566a", "stroke-width": 1.6 }));
+    g.appendChild(el("circle", { cx: xa, cy: r.y, r: 3.4, fill: RC("--paper"), stroke: RC("--ink-md"), "stroke-width": 1.6 }));
     g.appendChild(el("circle", { cx: xb, cy: r.y, r: 4, fill: r.col }));
     // 数值标
-    const b4 = el("text", { x: xa, y: r.y - 9, "font-size": 9, fill: "#42566a", "text-anchor": "middle", "font-family": mono });
+    const b4 = el("text", { x: xa, y: r.y - 9, "font-size": 9, fill: RC("--ink-md"), "text-anchor": "middle", "font-family": mono });
     b4.textContent = r.d.before.toFixed(1);
     g.appendChild(b4);
     const af = el("text", { x: xb, y: r.y - 9, "font-size": 9.5, "font-weight": 700, fill: r.col, "text-anchor": "middle", "font-family": mono });
@@ -2020,7 +1998,7 @@ window.U = (() => {
     });
     svg.appendChild(g);
   });
-  const cap = el("text", { x: 2, y: 14, "font-size": 10, fill: "#42566a", "font-family": mono });
+  const cap = el("text", { x: 2, y: 14, "font-size": 10, fill: RC("--ink-md"), "font-family": mono });
   cap.textContent = "模型对标准答案的 log-prob · 交互前 → 交互后";
   svg.appendChild(cap);
 })();
@@ -2080,21 +2058,21 @@ window.U = (() => {
     const r = el("rect", { x: cx - bw / 2, y: baseY, width: bw, height: 0, rx: 2, cursor: "pointer" });
     r.setAttribute("data-drill-keep", "");
     svg.appendChild(r);
-    const v = el("text", { x: cx, y: baseY, "font-size": 11, "font-weight": 700, fill: "#051c2c", "text-anchor": "middle", "font-family": mono, "paint-order": "stroke", stroke: "#fff", "stroke-width": 3 });
+    const v = el("text", { x: cx, y: baseY, "font-size": 11, "font-weight": 700, fill: RC("--ink"), "text-anchor": "middle", "font-family": mono, "paint-order": "stroke", stroke: RC("--paper"), "stroke-width": 3 });
     svg.appendChild(v);
-    const tk = el("text", { x: cx, y: baseY + 22, "font-size": 10, fill: "#42566a", "text-anchor": "middle", "font-family": mono });
+    const tk = el("text", { x: cx, y: baseY + 22, "font-size": 10, fill: RC("--ink-md"), "text-anchor": "middle", "font-family": mono });
     tk.textContent = `TURN ${i + 1}`;
     svg.appendChild(tk);
     bars.push({ rect: r, valEl: v, cx, i });
     vals.push({ cur: 0 });
   }
   // 顶端锚线：第 7 轮全额位
-  svg.appendChild(el("line", { x1: mL, y1: mT + 8, x2: mL + pw, y2: mT + 8, stroke: "#eef1f6", "stroke-width": 1 }));
-  const full = el("text", { x: mL + pw, y: mT + 2, "font-size": 9.5, fill: "#8595a6", "text-anchor": "end", "font-family": mono });
+  svg.appendChild(el("line", { x1: mL, y1: mT + 8, x2: mL + pw, y2: mT + 8, stroke: RC("--line-lo"), "stroke-width": 1 }));
+  const full = el("text", { x: mL + pw, y: mT + 2, "font-size": 9.5, fill: RC("--ink-lo"), "text-anchor": "end", "font-family": mono });
   full.textContent = "reward 1.0 全额位（只有第 7 轮拿得到）";
   svg.appendChild(full);
   // 轴
-  svg.appendChild(el("line", { x1: mL, y1: baseY + 0.5, x2: mL + pw, y2: baseY + 0.5, stroke: "#051c2c", "stroke-width": 1.2 }));
+  svg.appendChild(el("line", { x1: mL, y1: baseY + 0.5, x2: mL + pw, y2: baseY + 0.5, stroke: RC("--ink"), "stroke-width": 1.2 }));
 
   const seqLine = document.createElement("p");
   seqLine.className = "gamma-seq";
@@ -2223,18 +2201,18 @@ window.U = (() => {
     return e;
   };
   const mono = 'Menlo,"PingFang SC",monospace';
-  const serif = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const serif = RS("--serif");
 
   const mL = 118, mT = 54, cellW = 56, cellH = 46, gap = 7;
   const rCol = 690; // 右侧读数栏
 
-  svg.appendChild(el("line", { x1: rCol - 22, y1: 20, x2: rCol - 22, y2: H - 24, stroke: "#dbe2ea", "stroke-width": 1 }));
+  svg.appendChild(el("line", { x1: rCol - 22, y1: 20, x2: rCol - 22, y2: H - 24, stroke: RC("--line"), "stroke-width": 1 }));
 
   const cells = [];
   TURNS.forEach((T, ti) => {
     const y = mT + ti * (cellH + 44);
     // turn 标签
-    const tlab = el("text", { x: 4, y: y + cellH / 2 + 4, "font-size": 12, "font-weight": 700, fill: "#051c2c", "font-family": serif });
+    const tlab = el("text", { x: 4, y: y + cellH / 2 + 4, "font-size": 12, "font-weight": 700, fill: RC("--ink"), "font-family": serif });
     tlab.textContent = `TURN ${T.t}`;
     svg.appendChild(tlab);
     for (let k = 0; k < T.tokens; k++) {
@@ -2243,31 +2221,31 @@ window.U = (() => {
       g.setAttribute("data-drill-keep", "");
       const r = el("rect", { x, y, width: cellW, height: cellH, rx: 3 });
       g.appendChild(r);
-      const v = el("text", { x: x + cellW / 2, y: y + cellH / 2 + 4.5, "font-size": 11.5, "font-weight": 700, "text-anchor": "middle", "font-family": mono, "paint-order": "stroke", stroke: "#fff", "stroke-width": 3 });
+      const v = el("text", { x: x + cellW / 2, y: y + cellH / 2 + 4.5, "font-size": 11.5, "font-weight": 700, "text-anchor": "middle", "font-family": mono, "paint-order": "stroke", stroke: RC("--paper"), "stroke-width": 3 });
       g.appendChild(v);
-      const sub = el("text", { x: x + cellW / 2, y: y + cellH + 14, "font-size": 8.5, fill: "#8595a6", "text-anchor": "middle", "font-family": mono });
+      const sub = el("text", { x: x + cellW / 2, y: y + cellH + 14, "font-size": 8.5, fill: RC("--ink-lo"), "text-anchor": "middle", "font-family": mono });
       sub.textContent = `y${T.t},${k + 1}`;
       g.appendChild(sub);
       svg.appendChild(g);
       cells.push({ g, rect: r, valEl: v, ti, k, x, y });
     }
     const tw = TURNS[ti].tokens * (cellW + gap);
-    const brace = el("path", { d: `M ${mL} ${y - 8} h ${tw - gap}`, stroke: "#dbe2ea", "stroke-width": 1.5, fill: "none" });
+    const brace = el("path", { d: `M ${mL} ${y - 8} h ${tw - gap}`, stroke: RC("--line"), "stroke-width": 1.5, fill: "none" });
     svg.appendChild(brace);
-    const bl = el("text", { x: mL + tw - gap, y: y - 14, "font-size": 9.5, "font-weight": 700, fill: "#42566a", "text-anchor": "end", "font-family": mono });
+    const bl = el("text", { x: mL + tw - gap, y: y - 14, "font-size": 9.5, "font-weight": 700, fill: RC("--ink-md"), "text-anchor": "end", "font-family": mono });
     bl.textContent = `${T.tokens} token`;
     svg.appendChild(bl);
   });
 
   // 右侧模式读数
-  const rTitle = el("text", { x: rCol, y: 66, "font-size": 15, "font-weight": 700, fill: "#2251ff", "font-family": serif });
+  const rTitle = el("text", { x: rCol, y: 66, "font-size": 15, "font-weight": 700, fill: RD("#2251ff"), "font-family": serif });
   svg.appendChild(rTitle);
-  const rBody = el("text", { x: rCol, y: 92, "font-size": 12, fill: "#42566a", "font-family": serif });
+  const rBody = el("text", { x: rCol, y: 92, "font-size": 12, fill: RC("--ink-md"), "font-family": serif });
   rBody.style.lineHeight = "1.7";
   svg.appendChild(rBody);
 
   let cur = "seq";
-  const colOf = v => v > 0 ? "#008a6d" : v < 0 ? "#c22f4e" : "#8595a6";
+  const colOf = v => v > 0 ? RD("#008a6d") : v < 0 ? RD("#c22f4e") : RC("--ink-lo");
 
   function fillText(text, maxChars) {
     // 简易折行：按字符数切
@@ -2285,11 +2263,11 @@ window.U = (() => {
     ctl.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.m === mode));
     cells.forEach(c => {
       let v, col, tcol;
-      if (mode === "seq") { v = SEQ_A; col = "rgba(34,81,255,.82)"; tcol = "#fff"; }
-      else if (mode === "tok") { v = TOK_A[c.ti === 0 ? c.k : c.ti === 1 ? 4 + c.k : 7 + c.k]; col = colOf(v); tcol = "#fff"; }
-      else { v = TURNS[c.ti].A; col = colOf(v); tcol = "#fff"; }
+      if (mode === "seq") { v = SEQ_A; col = RA("#2251ff", .82); tcol = RC("--paper"); }
+      else if (mode === "tok") { v = TOK_A[c.ti === 0 ? c.k : c.ti === 1 ? 4 + c.k : 7 + c.k]; col = colOf(v); tcol = RC("--paper"); }
+      else { v = TURNS[c.ti].A; col = colOf(v); tcol = RC("--paper"); }
       c.rect.setAttribute("fill", col);
-      c.rect.setAttribute("stroke", mode === "seq" ? "#1233b8" : "none");
+      c.rect.setAttribute("stroke", mode === "seq" ? RD("#1233b8") : "none");
       c.rect.setAttribute("stroke-width", mode === "seq" ? 1.2 : 0);
       c.valEl.setAttribute("fill", tcol);
       c.valEl.textContent = (v > 0 ? "+" : "") + v.toFixed(2);
@@ -2298,7 +2276,7 @@ window.U = (() => {
     // 折行绘制模式说明
     svg.querySelectorAll(".rline").forEach(x => x.remove());
     fillText(MODES[mode].desc, 17).forEach((ln, i) => {
-      const t = el("text", { x: rCol, y: 96 + i * 21, "font-size": 12, fill: "#42566a", "font-family": serif, class: "rline" });
+      const t = el("text", { x: rCol, y: 96 + i * 21, "font-size": 12, fill: RC("--ink-md"), "font-family": serif, class: "rline" });
       t.textContent = ln;
       svg.appendChild(t);
     });
@@ -2411,7 +2389,5 @@ window.U = (() => {
 })();
 
 </script>
-
-<script src="../report-shell.js" defer></script>
 </body>
 </html>

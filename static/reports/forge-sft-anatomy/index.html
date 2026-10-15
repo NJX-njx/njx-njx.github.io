@@ -3,22 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-(function () {
-  var saved;
-  try {
-    saved = localStorage.getItem('pref-theme');
-  } catch (_) {
-    // 禁用站点存储时回退到系统主题。
-  }
-  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.dataset.theme =
-    saved === 'dark' || (saved !== 'light' && prefersDark) ? 'dark' : 'light';
-})();
-</script>
 <title>解剖一个极简 SFT 训练器 · Interactive Research Edition</title>
 <meta name="description" content="一个极简 SFT 训练器的 7 个工程决策，对照两套教材、四个生产框架与六路信息源。">
-<!-- Inlined ET Book removed; reports use the shared blog font stack. -->
 <style>
 /* ═══════════════════════════════════════════════════════════
    Sixty-Six Years of Inference Silicon · Professional English Edition
@@ -42,8 +28,8 @@
   --green: #008a6d;
   --gold: #b07a10;
   --neg: #c22f4e;           /* semantic negative — declines, risk, missing */
-  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --mono: Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
   --shadow: 0 1px 2px rgba(5,28,44,.05), 0 8px 28px rgba(5,28,44,.07);
 }
@@ -470,36 +456,28 @@ hr.sep { border: 0; height: 1px; background: var(--line); margin: 0 auto; max-wi
 
 /* ── 中文衬线回退 + 本站微调 ── */
 :root{
-  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "et-book", "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "Iowan Old Style", Palatino, Georgia, serif;
 }
 html{ scroll-behavior:smooth; }
 
 </style>
-
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<!-- njx-report-theme -->
+<style>:root[data-theme="dark"]{--blue-soft:#b1c3ff;--copper:#d0af70;--gold:#d0af70;--green:#66b9a7;--neg:#da8295;}</style>
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Njx&#x27;Log">
+<meta property="og:title" content="解剖一个极简 SFT 训练器 · Interactive Research Edition">
+<meta property="og:url" content="https://njx-njx.github.io/reports/forge-sft-anatomy/">
+<meta property="og:image" content="https://njx-njx.github.io/blog-cover.jpg">
+<meta property="og:description" content="一个极简 SFT 训练器的 7 个工程决策，对照两套教材、四个生产框架与六路信息源。">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon-32x32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="../report-shell.css">
+<link rel="stylesheet" href="/reports/report.css">
+<script src="/reports/report.js"></script>
+<!-- njx-report-theme -->
 </head>
-<body class="rpt-shell">
-<header class="rpt-site-header" data-report-shell>
-  <a class="rpt-home" href="/" aria-label="返回 Njx'Log 首页">
-    <img src="/blog-icon.png" alt="" width="28" height="28">
-    <span>Njx'Log</span>
-  </a>
-  <nav class="rpt-nav" aria-label="站点导航">
-    <a href="/posts/">文章</a>
-    <a href="/reports/" aria-current="page">报告</a>
-    <a href="/archives/">归档</a>
-    <a href="/search/">搜索</a>
-    <a href="/about/">关于</a>
-  </nav>
-  <div class="rpt-actions">
-    <button class="rpt-theme" type="button" data-report-theme-toggle aria-label="切换浅色或深色主题" title="切换主题">
-      <svg class="rpt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      <svg class="rpt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-    </button>
-  </div>
-</header>
+<body>
+<header id="njx-bar"></header>
 
 <header id="cover">
   <canvas id="cover-canvas"></canvas>
@@ -980,10 +958,10 @@ window.U = (() => {
   // accent usages recolor automatically; true negatives (declines/crashes/missing)
   // must use PAL.neg — audited per chart.
   const PAL = {
-    paper: "#ffffff", hi: "#f7f9fc", ink: "#051c2c", inkMd: "#42566a", inkLo: "#8595a6",
-    line: "#dbe2ea", lineLo: "#eef1f6", red: "#2251ff", redHi: "#1233b8",
-    blue: "#7a45c9", copper: "#b07a10", green: "#008a6d", gold: "#b07a10",
-    neg: "#c22f4e", accent: "#2251ff", navy: "#051c2c",
+    paper: RC("--paper"), hi: RC("--paper-hi"), ink: RC("--ink"), inkMd: RC("--ink-md"), inkLo: RC("--ink-lo"),
+    line: RC("--line"), lineLo: RC("--line-lo"), red: RD("#2251ff"), redHi: RD("#1233b8"),
+    blue: RD("#7a45c9"), copper: RD("#b07a10"), green: RD("#008a6d"), gold: RD("#b07a10"),
+    neg: RD("#c22f4e"), accent: RD("#2251ff"), navy: RC("--ink"),
   };
   const SERIES = [PAL.red, PAL.blue, PAL.copper, PAL.green];
 
@@ -1128,7 +1106,7 @@ window.U = (() => {
   const coverEl = document.getElementById("cover") || host;
 
   const MONO = 'Menlo, Consolas, "SF Mono", "Liberation Mono", monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
 
   const G = 9, C = (G - 1) / 2, TILE = 288, T = 12, RHO = 0.78; // R = grid/0.78
   // 第 L 层：网格瓷砖 = TYPE[(L+1)%4]，中心格 = 上一层整图（TYPE[L%4] 的递归实物）
@@ -1142,8 +1120,8 @@ window.U = (() => {
   ];
   const SRC = ["K1", "K9 · K1", "K1", "K1"];
 
-  const ink = a => `rgba(5,28,44,${a})`;
-  const blu = a => `rgba(34,81,255,${a})`;
+  const ink = a => RA("--ink", (a));
+  const blu = a => RA("#2251ff", (a));
   const eob = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
 
   // ── 文字：一律纸底 halo ──
@@ -1229,7 +1207,7 @@ window.U = (() => {
       g.save(); g.translate(178, 92); g.rotate(-0.6);
       g.fillStyle = ink(0.55); g.fillRect(-4, 0, 8, 66);
       const gr = g.createLinearGradient(-26, -18, 26, 18);
-      gr.addColorStop(0, "rgba(66,86,106,1)"); gr.addColorStop(1, "rgba(5,28,44,1)"); // 墨阶锤头
+      gr.addColorStop(0, RA("--ink-md", 1)); gr.addColorStop(1, RA("--ink", 1)); // 墨阶锤头
       g.fillStyle = gr; rr(g, -26, -20, 52, 26, 5); g.fill();
       g.restore();
       spark(g, 152, 148, 26 + rng() * 8, 0.9);
@@ -1384,7 +1362,7 @@ window.U = (() => {
     }
     // 左晕 wash 保标题可读
     const wg = ctx.createLinearGradient(0, 0, w * 0.62, 0);
-    wg.addColorStop(0, "rgba(255,255,255,0.94)"); wg.addColorStop(1, "rgba(255,255,255,0)");
+    wg.addColorStop(0, RA("--paper", 0.94)); wg.addColorStop(1, RA("--paper", 0));
     ctx.fillStyle = wg; ctx.fillRect(0, 0, w * 0.62, h);
     // 层级意义 caption（点破递归的那层意义）
     txt(ctx, `${NAME[li]} → ${NAME[(li + 1) % 4]}`, w - 28, h - 70, `italic 700 17px ${SERIF}`, ink(0.88), "right");
@@ -1445,7 +1423,7 @@ window.U = (() => {
   const coverEl = document.getElementById("cover") || host;
 
   const MONO = 'Menlo, Consolas, "SF Mono", "Liberation Mono", monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
 
   const RPT = window.RPT || {};
   const ev = n => ((RPT.evidence && RPT.evidence.items) || []).find(x => x.part === n) || {};
@@ -1454,19 +1432,19 @@ window.U = (() => {
   const LAYERS = [
     { key: "anvil", name: "砧", role: "数据底座", arg: "数据决定上限",
       sub: (ev("原料签").sub || "smoltalk 日常对话切片") + " · 零过滤",
-      w: 23, d: 17, h: 3.6, mat: { top: "#48535f", side: "#39434e", kind: "steel" },
+      w: 23, d: 17, h: 3.6, mat: { top: RD("#48535f"), side: RD("#39434e"), kind: "steel" },
       drill: { title: "砧 · 数据底座", value: ev("原料签").value || "10,000 条", sub: ev("原料签").sub || "", source: "K8 · K9" } },
     { key: "furnace", name: "炉", role: "算法与调度", arg: "默认即决策",
       sub: "lr 1e-5 · cosine + 3% warmup · wd 0 · clip 1.0",
-      w: 16, d: 13, h: 8.5, mat: { top: "#7a4c39", side: "#67402f", kind: "brick" },
+      w: 16, d: 13, h: 8.5, mat: { top: RD("#7a4c39"), side: RD("#67402f"), kind: "brick" },
       drill: { title: "炉 · 算法与调度", value: "lr 1e-5 · cosine", sub: ev("火印").sub || "与 tulu3/OpenRLHF 逐项吻合", source: "K4 · K2" } },
     { key: "hammer", name: "锤", role: "训练循环", arg: "全篇最大分歧", hard: true,
       sub: "masking · 全 assistant 段计 loss · end token 必计",
-      w: 11.5, d: 11.5, h: 4.2, mat: { top: "#55606d", side: "#434d59", kind: "steel" },
+      w: 11.5, d: 11.5, h: 4.2, mat: { top: RD("#55606d"), side: RD("#434d59"), kind: "steel" },
       drill: { title: "锤 · 训练循环（最硬约束）", value: "全 assistant 段", sub: "trl 警告：end token 不计 loss，模型永远学不会停止——全篇最大分歧点", source: "K1 · K3" } },
     { key: "tank", name: "淬火槽", role: "验证", arg: "淬火定刃口",
       sub: "val loss + 8 条生成 · 3 项单测全过",
-      w: 15.5, d: 11.5, h: 4.2, mat: { top: "#46525f", side: "#37424d", kind: "steel" },
+      w: 15.5, d: 11.5, h: 4.2, mat: { top: RD("#46525f"), side: RD("#37424d"), kind: "steel" },
       drill: { title: "淬火槽 · 验证", value: "val loss + 8 条生成", sub: "单测 3 项全过：模板渲染 / 多轮 masking / collate padding", source: "K9 · K1" } },
     { key: "knife", name: "刀", role: "产出", arg: (ev("铭牌").value || "7 个决策") + " · 全篇解剖",
       sub: "5 项配方与生产框架逐项互证",
@@ -1525,21 +1503,21 @@ window.U = (() => {
     const g = c.getContext("2d"), rng = U.makeRng(seed);
     g.fillStyle = base; g.fillRect(0, 0, 128, 128);
     for (let i = 0; i < 340; i++) { // 拉丝
-      g.strokeStyle = warm ? `rgba(255,235,210,${0.02 + rng() * 0.07})` : `rgba(255,255,255,${0.02 + rng() * 0.07})`;
+      g.strokeStyle = warm ? RA("#ffebd2", (0.02 + rng() * 0.07)) : RA("--paper", (0.02 + rng() * 0.07));
       g.lineWidth = 0.7 + rng();
       const y = rng() * 128, x = rng() * 128, l = 8 + rng() * 30;
       g.beginPath(); g.moveTo(x, y); g.lineTo(x + l, y + (rng() - 0.5) * 2); g.stroke();
     }
     for (let i = 0; i < 90; i++) { // 散斑
-      g.fillStyle = `rgba(5,28,44,${0.03 + rng() * 0.08})`;
+      g.fillStyle = RA("--ink", (0.03 + rng() * 0.08));
       g.fillRect(rng() * 128, rng() * 128, 1.3, 1.3);
     }
     return c;
   }
   const TEX = {
-    dark: ctx.createPattern(texBrushed("#3a444f", 23), "repeat"),
-    brick: ctx.createPattern(texBrushed("#6d4534", 37, true), "repeat"),
-    wood: ctx.createPattern(texBrushed("#8a6a45", 51, true), "repeat"),
+    dark: ctx.createPattern(texBrushed(RD("#3a444f"), 23), "repeat"),
+    brick: ctx.createPattern(texBrushed(RD("#6d4534"), 37, true), "repeat"),
+    wood: ctx.createPattern(texBrushed(RD("#8a6a45"), 51, true), "repeat"),
   };
 
   // ── 运行状态 ──
@@ -1568,7 +1546,7 @@ window.U = (() => {
     if (kind === "top") {
       ctx.fillStyle = L.mat.top; ctx.fill();
       const g2 = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[2].x, pts[2].y);
-      g2.addColorStop(0, "rgba(255,255,255,0.26)"); g2.addColorStop(0.5, "rgba(255,255,255,0.02)"); g2.addColorStop(1, "rgba(5,28,44,0.08)");
+      g2.addColorStop(0, RA("--paper", 0.26)); g2.addColorStop(0.5, RA("--paper", 0.02)); g2.addColorStop(1, RA("--ink", 0.08));
       ctx.fillStyle = g2; ctx.fill();
       if (L.mat.kind === "steel") { // sheen 高光扫带
         ctx.save(); ctx.clip();
@@ -1576,26 +1554,26 @@ window.U = (() => {
         const ph = ((t * 34 + L.i * 53) % 180) / 180 - 0.5;
         ctx.translate(cx + ph * v.u * 26, cy + ph * v.u * 13); ctx.rotate(-0.45);
         const sg = ctx.createLinearGradient(-v.u * 3, 0, v.u * 3, 0);
-        sg.addColorStop(0, "rgba(255,255,255,0)"); sg.addColorStop(0.5, "rgba(255,255,255,0.17)"); sg.addColorStop(1, "rgba(255,255,255,0)");
+        sg.addColorStop(0, RA("--paper", 0)); sg.addColorStop(0.5, RA("--paper", 0.17)); sg.addColorStop(1, RA("--paper", 0));
         ctx.fillStyle = sg; ctx.fillRect(-v.u * 3, -v.u * 30, v.u * 6, v.u * 60);
         ctx.restore();
       }
-      ctx.strokeStyle = "rgba(255,255,255,0.5)"; ctx.lineWidth = 1.1; ctx.stroke(); // 顶缘亮边 bevel
-      poly(pts); ctx.strokeStyle = "rgba(5,28,44,0.2)"; ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.strokeStyle = RA("--paper", 0.5); ctx.lineWidth = 1.1; ctx.stroke(); // 顶缘亮边 bevel
+      poly(pts); ctx.strokeStyle = RA("--ink", 0.2); ctx.lineWidth = 0.8; ctx.stroke();
     } else {
       ctx.fillStyle = L.mat.side; ctx.fill();
       const pat = L.mat.kind === "brick" ? TEX.brick : (L.mat.kind === "wood" ? TEX.wood : TEX.dark);
       ctx.save(); ctx.clip(); ctx.globalAlpha = 0.16; ctx.fillStyle = pat; ctx.fill(); ctx.restore();
       const y0 = Math.min(...pts.map(p => p.y)), y1 = Math.max(...pts.map(p => p.y));
       const gg = ctx.createLinearGradient(0, y0, 0, y1);
-      gg.addColorStop(0, "rgba(255,255,255,0.30)"); gg.addColorStop(0.45, "rgba(255,255,255,0)"); gg.addColorStop(1, "rgba(5,28,44,0.10)");
+      gg.addColorStop(0, RA("--paper", 0.30)); gg.addColorStop(0.45, RA("--paper", 0)); gg.addColorStop(1, RA("--ink", 0.10));
       poly(pts); ctx.fillStyle = gg; ctx.fill();
-      ctx.strokeStyle = "rgba(5,28,44,0.18)"; ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.strokeStyle = RA("--ink", 0.18); ctx.lineWidth = 0.8; ctx.stroke();
     }
   }
   const lerp3 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
   function brickCourses(wpts, z0, h, v) { // 砖缝课程线（世界坐标插值）
-    ctx.strokeStyle = "rgba(28,14,8,0.28)"; ctx.lineWidth = 0.8;
+    ctx.strokeStyle = RA("#1c0e08", 0.28); ctx.lineWidth = 0.8;
     for (let zz = z0 + 2.2; zz < z0 + h - 0.8; zz += 2.2) {
       const a = lerp3(wpts[0], wpts[3], (zz - z0) / h), b = lerp3(wpts[1], wpts[2], (zz - z0) / h);
       const pa = pt(a[0], a[1], a[2], v), pb = pt(b[0], b[1], b[2], v);
@@ -1604,10 +1582,10 @@ window.U = (() => {
   }
 
   // ── 层身份细节（让人认出是锻造工位，而非通用方块）──
-  const blu = a => `rgba(34,81,255,${a})`;
+  const blu = a => RA("#2251ff", (a));
   function anvilSil(cx, cy, u) { // 砧层顶面：钢砧 + pad 环 + 角铆球
     const g = ctx.createRadialGradient(cx - u * 6, cy - u * 5, u, cx, cy, u * 26);
-    g.addColorStop(0, "#8b96a3"); g.addColorStop(1, "#39424c");
+    g.addColorStop(0, RD("#8b96a3")); g.addColorStop(1, RD("#39424c"));
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.moveTo(cx + 11 * u, cy - 4 * u);
@@ -1619,30 +1597,30 @@ window.U = (() => {
     ctx.lineTo(cx + 5 * u, cy + 2.6 * u);
     ctx.lineTo(cx + 11 * u, cy + 2 * u);
     ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = "rgba(5,28,44,0.3)"; ctx.lineWidth = 1; ctx.stroke();
-    ctx.fillStyle = "rgba(5,28,44,0.4)";
+    ctx.strokeStyle = RA("--ink", 0.3); ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = RA("--ink", 0.4);
     ctx.fillRect(cx - 6 * u, cy + 5 * u, 12 * u, 2.6 * u);
-    ctx.strokeStyle = "rgba(5,28,44,0.5)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = RA("--ink", 0.5); ctx.lineWidth = 1;
     [-8, 0].forEach(dx => { ctx.beginPath(); ctx.arc(cx + dx * u, cy - 1.5 * u, 0.9 * u, 0, U.TAU); ctx.stroke(); });
     for (let i = 0; i < 4; i++) { // ball 铆钉
       const bx = cx + (i % 2 ? 9.6 : -9.6) * u, by = cy + (i < 2 ? -6.4 : 6.4) * u;
       const bg = ctx.createRadialGradient(bx - 1, by - 1, 0.2, bx, by, 1.5 * u);
-      bg.addColorStop(0, "#e8edf2"); bg.addColorStop(1, "#4b5663");
+      bg.addColorStop(0, RD("#e8edf2")); bg.addColorStop(1, RD("#4b5663"));
       ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(bx, by, 1.1 * u, 0, U.TAU); ctx.fill();
     }
   }
   function hammerDetail(z1, v, t) { // 锤层顶面：卧锤 + 电蓝火花
     const u = v.u;
     const p0 = pt(-4, 1.6, z1, v), p1 = pt(4.4, -1.6, z1, v);
-    ctx.strokeStyle = "#7a5b3a"; ctx.lineWidth = 1.15 * u; ctx.lineCap = "round";
+    ctx.strokeStyle = RD("#7a5b3a"); ctx.lineWidth = 1.15 * u; ctx.lineCap = "round";
     ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
     const hpts = [[2.4, -3.4], [6.2, -2.2], [6.2, -0.6], [2.4, -1.8]].map(([x, y]) => pt(x, y, z1, v));
     const hg = ctx.createLinearGradient(hpts[0].x, hpts[0].y, hpts[2].x, hpts[2].y);
-    hg.addColorStop(0, "#93a0ad"); hg.addColorStop(1, "#434d59");
-    poly(hpts); ctx.fillStyle = hg; ctx.fill(); ctx.strokeStyle = "rgba(5,28,44,0.35)"; ctx.lineWidth = 1; ctx.stroke();
+    hg.addColorStop(0, RD("#93a0ad")); hg.addColorStop(1, RD("#434d59"));
+    poly(hpts); ctx.fillStyle = hg; ctx.fill(); ctx.strokeStyle = RA("--ink", 0.35); ctx.lineWidth = 1; ctx.stroke();
     const fc = pt(6.2, -1.4, z1, v); // 锤面
     const fg = ctx.createRadialGradient(fc.x - 2, fc.y - 2, 1, fc.x, fc.y, 1.6 * u);
-    fg.addColorStop(0, "#dfe6ec"); fg.addColorStop(1, "#5d6875");
+    fg.addColorStop(0, RD("#dfe6ec")); fg.addColorStop(1, RD("#5d6875"));
     ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(fc.x, fc.y, 1.3 * u, 0, U.TAU); ctx.fill();
     const pulse = 0.75 + 0.25 * Math.sin(t * 7);
     ctx.strokeStyle = blu(0.9 * pulse); ctx.fillStyle = blu(0.9 * pulse); ctx.lineWidth = 1.6; // 落点火花
@@ -1658,15 +1636,15 @@ window.U = (() => {
   function tankDetail(z1, v, t) { // 淬火槽顶面：液面 + 涟漪 + 蒸汽
     const u = v.u, iw = 6.2, id = 4.4;
     const q = [[-iw, -id], [iw, -id], [iw, id], [-iw, id]].map(([x, y]) => pt(x, y, z1, v));
-    poly(q); ctx.fillStyle = "#1e3d4b"; ctx.fill();
+    poly(q); ctx.fillStyle = RD("#1e3d4b"); ctx.fill();
     const cx = (q[0].x + q[1].x + q[2].x + q[3].x) / 4, cy = (q[0].y + q[1].y + q[2].y + q[3].y) / 4;
-    ctx.strokeStyle = "rgba(159,198,221,0.55)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = RA("#9fc6dd", 0.55); ctx.lineWidth = 1;
     for (let r2 = 1; r2 <= 3; r2++) {
       ctx.beginPath();
       ctx.ellipse(cx, cy, iw * u * r2 / 3.4, id * u * 0.5 * r2 / 3.4, 0, 0.15 * Math.PI, 0.85 * Math.PI);
       ctx.stroke();
     }
-    ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 1.2;
+    ctx.strokeStyle = RA("--paper", 0.3); ctx.lineWidth = 1.2;
     for (let i = -1; i <= 1; i++) {
       const sx = i * 3.4 * u, sway = Math.sin(t * 1.4 + i) * 1.1 * u;
       ctx.beginPath();
@@ -1677,9 +1655,9 @@ window.U = (() => {
   }
   function furnaceDetail(z1, v, t) { // 炉顶：烟囱 + 火星
     const ch = [[-7.4, -4.2, z1], [-4.6, -4.2, z1], [-4.6, -1.4, z1], [-7.4, -1.4, z1]].map(p => pt(p[0], p[1], p[2], v));
-    poly(ch); ctx.fillStyle = "#5d3a2b"; ctx.fill(); ctx.strokeStyle = "rgba(5,28,44,0.35)"; ctx.lineWidth = 1; ctx.stroke();
+    poly(ch); ctx.fillStyle = RD("#5d3a2b"); ctx.fill(); ctx.strokeStyle = RA("--ink", 0.35); ctx.lineWidth = 1; ctx.stroke();
     const cap = [[-7.7, -4.5, z1 + 2.8], [-4.3, -4.5, z1 + 2.8], [-4.3, -1.1, z1 + 2.8], [-7.7, -1.1, z1 + 2.8]].map(p => pt(p[0], p[1], p[2], v));
-    poly(cap); ctx.fillStyle = "#3f2a1f"; ctx.fill(); ctx.stroke();
+    poly(cap); ctx.fillStyle = RD("#3f2a1f"); ctx.fill(); ctx.stroke();
     ctx.fillStyle = blu(0.5 + 0.3 * Math.sin(t * 5));
     const sp = pt(-6, 3.4, z1, v);
     ctx.beginPath(); ctx.arc(sp.x, sp.y - Math.sin(t * 3) * 3, 1.4, 0, U.TAU); ctx.fill();
@@ -1688,10 +1666,10 @@ window.U = (() => {
   function fireArch(v, z0, hd) { // 炉门拱口 + 炉火（真实材质色豁免）
     const aa = pt(-2.2, hd, z0, v), ab = pt(2.2, hd, z0, v), a1 = pt(2.2, hd, z0 + 3.1, v), ac = pt(0, hd, z0 + 5.2, v), a0 = pt(-2.2, hd, z0 + 3.1, v);
     ctx.beginPath(); ctx.moveTo(aa.x, aa.y); ctx.lineTo(ab.x, ab.y); ctx.lineTo(a1.x, a1.y); ctx.quadraticCurveTo(ac.x, ac.y, a0.x, a0.y); ctx.closePath();
-    ctx.fillStyle = "#1d120c"; ctx.fill();
+    ctx.fillStyle = RD("#1d120c"); ctx.fill();
     const fc = pt(0, hd, z0 + 1, v);
     const fg = ctx.createRadialGradient(fc.x, fc.y, 1, fc.x, fc.y, 4.4 * v.u);
-    fg.addColorStop(0, "rgba(240,146,63,0.9)"); fg.addColorStop(1, "rgba(240,146,63,0)");
+    fg.addColorStop(0, RA("#f0923f", 0.9)); fg.addColorStop(1, RA("#f0923f", 0));
     ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(fc.x, fc.y, 4.4 * v.u, 0, U.TAU); ctx.fill();
     ctx.fillStyle = blu(0.85);
     ctx.beginPath(); ctx.arc(fc.x, fc.y - 0.8 * v.u, 0.9 * v.u, 0, U.TAU); ctx.fill();
@@ -1699,11 +1677,11 @@ window.U = (() => {
   function knifeDetail(zk, shadowZ, v) { // 顶层：成品刀（抛光钢 + 淬火线 + 投影）
     const u = v.u, cx = v.cx, cy = v.cy;
     const sh = pt(0, 0, shadowZ, v);
-    ctx.fillStyle = "rgba(5,28,44,0.13)";
+    ctx.fillStyle = RA("--ink", 0.13);
     ctx.beginPath(); ctx.ellipse(sh.x, sh.y + u * 0.6, 10.5 * u, 2.9 * u, 0, 0, U.TAU); ctx.fill();
     const L = 10.5 * u, y = cy;
     const bg = ctx.createLinearGradient(cx - L, y, cx + L, y);
-    bg.addColorStop(0, "#dfe6ec"); bg.addColorStop(0.55, "#aeb9c4"); bg.addColorStop(1, "#8f9ba7");
+    bg.addColorStop(0, RD("#dfe6ec")); bg.addColorStop(0.55, RD("#aeb9c4")); bg.addColorStop(1, RD("#8f9ba7"));
     ctx.fillStyle = bg; // 刃
     ctx.beginPath();
     ctx.moveTo(cx - L * 0.62, y - 1.7 * u);
@@ -1712,23 +1690,23 @@ window.U = (() => {
     ctx.quadraticCurveTo(cx + L, y + 1.1 * u, cx + L * 0.78, y + 1.5 * u);
     ctx.lineTo(cx - L * 0.62, y + 1.7 * u);
     ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineWidth = 1; // 开刃亮线
+    ctx.strokeStyle = RA("--paper", 0.75); ctx.lineWidth = 1; // 开刃亮线
     ctx.beginPath(); ctx.moveTo(cx - L * 0.6, y + 1.55 * u); ctx.lineTo(cx + L * 0.8, y + 1.35 * u); ctx.stroke();
-    ctx.strokeStyle = "rgba(34,81,255,0.6)"; ctx.lineWidth = 1.2; // 淬火线
+    ctx.strokeStyle = RA("#2251ff", 0.6); ctx.lineWidth = 1.2; // 淬火线
     ctx.beginPath();
     for (let i = 0; i <= 16; i++) {
       const x = cx - L * 0.58 + L * 1.3 * i / 16, yy = y - 0.7 * u + Math.sin(i * 1.2) * 0.28 * u;
       i ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy);
     }
     ctx.stroke();
-    ctx.fillStyle = "#453728"; // 柄
+    ctx.fillStyle = RD("#453728"); // 柄
     ctx.beginPath();
     ctx.moveTo(cx - L * 0.62, y - 1.45 * u); ctx.lineTo(cx - L * 1.42, y - 1.15 * u);
     ctx.quadraticCurveTo(cx - L * 1.52, y, cx - L * 1.42, y + 1.15 * u);
     ctx.lineTo(cx - L * 0.62, y + 1.45 * u); ctx.closePath(); ctx.fill();
     [-1.05, -1.32].forEach(f2 => { // 柄钉
       const bg2 = ctx.createRadialGradient(cx + L * f2 - 1, y - 1, 0.3, cx + L * f2, y, 1.5 * u);
-      bg2.addColorStop(0, "#e8edf2"); bg2.addColorStop(1, "#4b5663");
+      bg2.addColorStop(0, RD("#e8edf2")); bg2.addColorStop(1, RD("#4b5663"));
       ctx.fillStyle = bg2; ctx.beginPath(); ctx.arc(cx + L * f2, y, 1 * u, 0, U.TAU); ctx.fill();
     });
   }
@@ -1738,23 +1716,23 @@ window.U = (() => {
     if (alpha <= 0.01) return;
     const a = pt(x0, y0, 1.2, v), b = pt(x1, y1, 1.2, v), c = pt(x1, y1, CRATE_H, v), d = pt(x0, y0, CRATE_H, v);
     ctx.globalAlpha = alpha;
-    poly([a, b, c, d]); ctx.fillStyle = "#8a6a45"; ctx.fill();
+    poly([a, b, c, d]); ctx.fillStyle = RD("#8a6a45"); ctx.fill();
     ctx.save(); ctx.clip(); ctx.globalAlpha = alpha * 0.3; ctx.fillStyle = TEX.wood; ctx.fill(); ctx.restore();
     ctx.globalAlpha = alpha;
     for (let zz = 3.4; zz < CRATE_H; zz += 3.2) { // 板缝
       const p1 = pt(x0, y0, zz, v), p2 = pt(x1, y1, zz, v);
-      ctx.strokeStyle = "rgba(40,24,10,0.5)"; ctx.lineWidth = 1;
+      ctx.strokeStyle = RA("#28180a", 0.5); ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
     }
-    ctx.strokeStyle = "rgba(30,30,34,0.85)"; ctx.lineWidth = Math.max(2, v.u * 0.5); // 竖棱角铁
+    ctx.strokeStyle = RA("#1e1e22", 0.85); ctx.lineWidth = Math.max(2, v.u * 0.5); // 竖棱角铁
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(d.x, d.y); ctx.stroke();
-    ctx.strokeStyle = "rgba(5,28,44,0.35)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = RA("--ink", 0.35); ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.stroke();
     ctx.globalAlpha = 1;
     if (near && alpha > 0.35) { // 前壁 upright 刷唛（不随面斜切，正体 mono）
       const mx = (a.x + b.x + c.x + d.x) / 4, my = (a.y + b.y + c.y + d.y) / 4;
-      txt(ctx, "易碎 FRAGILE", mx, my - v.u * 1.3, `700 ${Math.max(8, v.u * 1.05)}px ${MONO}`, "#2c1d10", "center", Math.min(1, alpha * 1.4), "0.12em");
-      txt(ctx, "THIS SIDE UP · FORGE STAGE 1", mx, my + v.u * 0.4, `${Math.max(7, v.u * 0.82)}px ${MONO}`, "#2c1d10", "center", Math.min(1, alpha * 1.4), "0.1em");
+      txt(ctx, "易碎 FRAGILE", mx, my - v.u * 1.3, `700 ${Math.max(8, v.u * 1.05)}px ${MONO}`, RD("#2c1d10"), "center", Math.min(1, alpha * 1.4), "0.12em");
+      txt(ctx, "THIS SIDE UP · FORGE STAGE 1", mx, my + v.u * 0.4, `${Math.max(7, v.u * 0.82)}px ${MONO}`, RD("#2c1d10"), "center", Math.min(1, alpha * 1.4), "0.1em");
     }
   }
   function drawLid(v) { // 盖子独立件：z 抬升 + 屏幕空间漂移翻滚 + 淡出
@@ -1767,14 +1745,14 @@ window.U = (() => {
     const A = { x: -rx, y: -ry * 0.55 }, B = { x: 0, y: -ry }, C = { x: rx, y: -ry * 0.55 }, D = { x: 0, y: 0 };
     ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.lineTo(D.x, D.y); ctx.closePath();
     const wg = ctx.createLinearGradient(A.x, A.y, C.x, C.y);
-    wg.addColorStop(0, "#96754e"); wg.addColorStop(1, "#6d5233");
+    wg.addColorStop(0, RD("#96754e")); wg.addColorStop(1, RD("#6d5233"));
     ctx.fillStyle = wg; ctx.fill();
-    ctx.strokeStyle = "rgba(5,28,44,0.35)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.strokeStyle = RA("--ink", 0.35); ctx.lineWidth = 1; ctx.stroke();
     ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(D.x, D.y); ctx.lineTo(D.x, D.y + th); ctx.lineTo(A.x, A.y + th); ctx.closePath();
-    ctx.fillStyle = "#5d4630"; ctx.fill();
+    ctx.fillStyle = RD("#5d4630"); ctx.fill();
     ctx.beginPath(); ctx.moveTo(D.x, D.y); ctx.lineTo(C.x, C.y); ctx.lineTo(C.x, C.y + th); ctx.lineTo(D.x, D.y + th); ctx.closePath();
-    ctx.fillStyle = "#4f3c28"; ctx.fill();
-    ctx.strokeStyle = "rgba(30,30,34,0.8)"; ctx.lineWidth = th * 0.7; // 对角封条钉带
+    ctx.fillStyle = RD("#4f3c28"); ctx.fill();
+    ctx.strokeStyle = RA("#1e1e22", 0.8); ctx.lineWidth = th * 0.7; // 对角封条钉带
     ctx.beginPath(); ctx.moveTo(A.x * 0.94, A.y * 0.94); ctx.lineTo(C.x * 0.94, C.y * 0.94); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(B.x, B.y + 2); ctx.lineTo(D.x, D.y - 2); ctx.stroke();
     ctx.restore();
@@ -1784,14 +1762,14 @@ window.U = (() => {
     const q = [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]];
     const base = q.map(([x, y]) => pt(x, y, 0, v)), top = q.map(([x, y]) => pt(x, y, h, v));
     ctx.globalAlpha = alpha;
-    poly([base[1], base[2], top[2], top[1]]); ctx.fillStyle = "#5d4630"; ctx.fill();
-    poly([base[2], base[3], top[3], top[2]]); ctx.fillStyle = "#4f3c28"; ctx.fill();
-    poly(top); ctx.fillStyle = "#96754e"; ctx.fill();
+    poly([base[1], base[2], top[2], top[1]]); ctx.fillStyle = RD("#5d4630"); ctx.fill();
+    poly([base[2], base[3], top[3], top[2]]); ctx.fillStyle = RD("#4f3c28"); ctx.fill();
+    poly(top); ctx.fillStyle = RD("#96754e"); ctx.fill();
     ctx.save(); ctx.clip(); ctx.globalAlpha = 0.25 * alpha; ctx.fillStyle = TEX.wood; ctx.fill(); ctx.restore();
     ctx.globalAlpha = alpha;
     for (let i = -1; i <= 1; i++) {
       const p1 = pt(-hw, i * hd * 0.66, h, v), p2 = pt(hw, i * hd * 0.66, h, v);
-      ctx.strokeStyle = "rgba(40,24,10,0.5)"; ctx.lineWidth = 1;
+      ctx.strokeStyle = RA("#28180a", 0.5); ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
     }
     ctx.globalAlpha = 1;
@@ -1865,7 +1843,7 @@ window.U = (() => {
       const L = LAYERS[r.i], yT = Math.max(r.ay, prevY + 34); prevY = yT;
       const col = L.hard ? P.neg : P.red;
       ctx.save(); ctx.globalAlpha = la;
-      ctx.strokeStyle = hoverI === r.i ? col : "rgba(133,149,166,0.9)";
+      ctx.strokeStyle = hoverI === r.i ? col : RA("--ink-lo", 0.9);
       ctx.lineWidth = hoverI === r.i ? 1.6 : 1;
       ctx.beginPath(); ctx.moveTo(r.ax, r.ay); ctx.lineTo(colX - 14, yT); ctx.stroke();
       ctx.fillStyle = col; ctx.beginPath(); ctx.arc(r.ax, r.ay, 2.4, 0, U.TAU); ctx.fill();
@@ -1887,7 +1865,7 @@ window.U = (() => {
     ctx.translate(Math.sin(t * 96) * shakeAmp, Math.cos(t * 81) * shakeAmp * 0.7); // 屏幕震动：只震 3D 内容
     const gc = pt(0, 0, 0, v); // 地面投影
     const gg = ctx.createRadialGradient(gc.x, gc.y + v.u * 2, 2, gc.x, gc.y + v.u * 2, 21 * v.u);
-    gg.addColorStop(0, "rgba(5,28,44,0.15)"); gg.addColorStop(1, "rgba(5,28,44,0)");
+    gg.addColorStop(0, RA("--ink", 0.15)); gg.addColorStop(1, RA("--ink", 0));
     ctx.fillStyle = gg;
     ctx.beginPath(); ctx.ellipse(gc.x, gc.y + v.u * 2, 21 * v.u, 6.6 * v.u, 0, 0, U.TAU); ctx.fill();
     LAYERS.forEach((L, i) => { // 层间椭圆柔影
@@ -1895,7 +1873,7 @@ window.U = (() => {
       const lift = zOf(i) - ZA[i];
       const a = clamp(0.2 - lift * 0.007, 0.03, 0.2);
       const p = pt(0, L.d * 0.3, 0.1, v);
-      ctx.fillStyle = `rgba(5,28,44,${a})`;
+      ctx.fillStyle = RA("--ink", (a));
       ctx.beginPath(); ctx.ellipse(p.x, p.y, L.w * v.u * 0.58, L.w * v.u * 0.2, 0, 0, U.TAU); ctx.fill();
     });
     if (IT.on) { drawCrate(v); drawLid(v); } // D：木箱 + 盖 + 箱内五层
@@ -1909,12 +1887,12 @@ window.U = (() => {
       const rp = pt(0, 0, r.wz, v);
       ctx.strokeStyle = blu(0.5 * r.a); ctx.lineWidth = 2;
       ctx.beginPath(); ctx.ellipse(rp.x, rp.y, r.r, r.r * 0.5, 0, 0, U.TAU); ctx.stroke();
-      ctx.strokeStyle = `rgba(5,28,44,${0.25 * r.a})`; ctx.lineWidth = 1;
+      ctx.strokeStyle = RA("--ink", (0.25 * r.a)); ctx.lineWidth = 1;
       ctx.beginPath(); ctx.ellipse(rp.x, rp.y, r.r * 0.7, r.r * 0.35, 0, 0, U.TAU); ctx.stroke();
     });
     ctx.restore();
     const wg = ctx.createLinearGradient(0, 0, w * 0.62, 0); // 左晕 wash 保标题可读
-    wg.addColorStop(0, "rgba(255,255,255,0.94)"); wg.addColorStop(1, "rgba(255,255,255,0)");
+    wg.addColorStop(0, RA("--paper", 0.94)); wg.addColorStop(1, RA("--paper", 0));
     ctx.fillStyle = wg; ctx.fillRect(0, 0, w * 0.62, h);
     labels(v, IT.on ? clamp((k - 0.45) * 2.4, 0, 1) : clamp(k * 2.2, 0, 1));
     const state = IT.on ? "UNBOXING · 开箱中" : (k > 0.5 ? "EXPLODED · 点击收拢 ASSEMBLE" : "ASSEMBLED · 点击爆炸 EXPLODE");
@@ -2076,7 +2054,7 @@ window.U = (() => {
   const { LAYERS, ZA, SEP, ZKNIFE, pt, layout, eob } = G;
 
   const MONO = 'Menlo, Consolas, "SF Mono", "Liberation Mono", monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
 
   let view = null, active = false, raf = 0, last = 0, tG = 0;
   let k = 0, kTarget = 1, anim = null, mouseNX = 0, hoverI = -1, labRects = [];
@@ -2118,7 +2096,7 @@ window.U = (() => {
 
   // ── 制图底：十字网格 52px + 图幅边框 + 四角对位标（电蓝）──
   function drafting(w, h, L) {
-    ctx.strokeStyle = "rgba(5,28,44,0.05)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = RA("--ink", 0.05); ctx.lineWidth = 1;
     for (let x = 0; x <= w; x += 52) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
     for (let y = 0; y <= h; y += 52) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
     const R = { x: L.leftBound - 26, y: 30, w: w - L.leftBound - 2, h: h - 60 };
@@ -2141,7 +2119,7 @@ window.U = (() => {
     const q = c.map(p => p.x * v.s + p.y * v.c); // 近程度
     const qMin = Math.min(...q), qMax = Math.max(...q);
     poly([c[4], c[5], c[6], c[7]]); // 顶面白纱 veil（先铺，制造前后层次）
-    ctx.fillStyle = "rgba(255,255,255,0.66)"; ctx.fill();
+    ctx.fillStyle = RA("--paper", 0.66); ctx.fill();
     const EDGES = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
     const col = layerCol(L);
     EDGES.forEach(([a, b]) => {
@@ -2246,7 +2224,7 @@ window.U = (() => {
       const L = LAYERS[r.i], yT = Math.max(r.ay, prevY + 34); prevY = yT;
       const col = layerCol(L);
       ctx.save(); ctx.globalAlpha = la;
-      ctx.strokeStyle = hoverI === r.i ? col : "rgba(133,149,166,0.9)";
+      ctx.strokeStyle = hoverI === r.i ? col : RA("--ink-lo", 0.9);
       ctx.lineWidth = hoverI === r.i ? 1.6 : 1;
       ctx.beginPath(); ctx.moveTo(r.ax, r.ay); ctx.lineTo(colX - 14, yT); ctx.stroke();
       ctx.beginPath(); ctx.arc(r.ax, r.ay, 3.2, 0, U.TAU); // 空心圆端点
@@ -2272,7 +2250,7 @@ window.U = (() => {
       else wireDetail(L, i, v, wireBox(L, i, v));
     });
     const wg = ctx.createLinearGradient(0, 0, w * 0.62, 0); // 左晕 wash
-    wg.addColorStop(0, "rgba(255,255,255,0.94)"); wg.addColorStop(1, "rgba(255,255,255,0)");
+    wg.addColorStop(0, RA("--paper", 0.94)); wg.addColorStop(1, RA("--paper", 0));
     ctx.fillStyle = wg; ctx.fillRect(0, 0, w * 0.62, h);
     labels(v, clamp(k * 2.2, 0, 1));
     // 右下签栏（制图字法，随状态切换）
@@ -2400,7 +2378,7 @@ window.U = (() => {
   const { PAL, makeRng, bindCanvas, frame, showDrill, dotField, clamp, smooth } = U;
   const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
   const MONO = 'Menlo,Consolas,"SF Mono","Liberation Mono","DejaVu Sans Mono",ui-monospace,monospace';
 
   const body = frame(host, {
@@ -2551,9 +2529,9 @@ window.U = (() => {
       ctx.beginPath(); ctx.moveTo(x, 232); ctx.lineTo(x + 34, 342); ctx.stroke();
     }
     const gl = ctx.createLinearGradient(360, 0, 560, 0);
-    gl.addColorStop(0, "rgba(34,81,255,0)");
-    gl.addColorStop(0.5, "rgba(34,81,255,0.13)");
-    gl.addColorStop(1, "rgba(34,81,255,0)");
+    gl.addColorStop(0, RA("#2251ff", 0));
+    gl.addColorStop(0.5, RA("#2251ff", 0.13));
+    gl.addColorStop(1, RA("#2251ff", 0));
     ctx.globalAlpha = 0.25 + 0.75 * k;
     ctx.fillStyle = gl; ctx.fillRect(360, 220, 200, 140);
     ctx.restore();
@@ -3174,15 +3152,15 @@ window.U = (() => {
     ctx.save();
     ctx.fillStyle = PAL.neg; ctx.fillRect(0, sealY, W, sealH);
     ctx.beginPath(); ctx.rect(0, sealY, W, sealH); ctx.clip();
-    ctx.strokeStyle = "rgba(255,255,255,.32)"; ctx.lineWidth = 6;
+    ctx.strokeStyle = RA("--paper", .32); ctx.lineWidth = 6;
     for (let x = -sealH; x < W + sealH; x += 15) {
       ctx.beginPath(); ctx.moveTo(x, sealY + sealH + 4); ctx.lineTo(x + sealH + 8, sealY - 4); ctx.stroke();
     }
     ctx.restore();
     const wideSeal = W >= 640;
     const sealLbl = "共同证伪线 · FALSIFY";
-    if (!wideSeal) txt(sealLbl, 14, sealY + 9, { f: `8.5px ${MONO}`, c: "#fff", a: "left", halo: PAL.neg, alpha: a0 });
-    else txt(sealLbl, 16, sealY + sealH / 2, { f: `9.5px ${MONO}`, c: "#fff", a: "left", halo: PAL.neg, alpha: a0 });
+    if (!wideSeal) txt(sealLbl, 14, sealY + 9, { f: `8.5px ${MONO}`, c: RC("--paper"), a: "left", halo: PAL.neg, alpha: a0 });
+    else txt(sealLbl, 16, sealY + sealH / 2, { f: `9.5px ${MONO}`, c: RC("--paper"), a: "left", halo: PAL.neg, alpha: a0 });
     const fb = wideSeal
       ? { x: 200, y: sealY + 8, w: W - 216, h: sealH - 16 }
       : { x: 12, y: sealY + 17, w: W - 24, h: sealH - 23 };
@@ -3209,7 +3187,7 @@ window.U = (() => {
     ctx.fillStyle = PAL.paper; ctx.fill();
     ctx.beginPath(); ctx.moveTo(dial.x, dial.y);
     ctx.arc(dial.x, dial.y, dial.r, zc0, zc1); ctx.closePath();
-    ctx.fillStyle = "rgba(34,81,255,.14)"; ctx.fill();
+    ctx.fillStyle = RA("#2251ff", .14); ctx.fill();
     ctx.strokeStyle = PAL.ink; ctx.lineWidth = 1.1;
     ctx.beginPath(); ctx.arc(dial.x, dial.y, dial.r, Math.PI, TAU); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(dial.x - dial.r, dial.y); ctx.lineTo(dial.x + dial.r, dial.y); ctx.stroke();
@@ -3258,7 +3236,7 @@ window.U = (() => {
 
     // ⑤ 吊挂组件（不随梁旋转，按梁端高度平移）：链 + 盘
     for (const e of ends) {
-      ctx.strokeStyle = "rgba(5,28,44,.75)"; ctx.lineWidth = 1;
+      ctx.strokeStyle = RA("--ink", .75); ctx.lineWidth = 1;
       for (const off of [-0.4, 0.4]) {
         ctx.beginPath(); ctx.moveTo(e.ex, e.ey);
         ctx.lineTo(e.panX + off * panW, e.panY); ctx.stroke();
@@ -3294,8 +3272,8 @@ window.U = (() => {
         ctx.closePath(); ctx.fill();
         ctx.fillRect(x - 5, top - 4, 10, 4);
         const fit = fitSize(w.lbl, tw - 8, 10.5, 8.5);
-        txt(fit.text, x, top + h / 2 + 0.5, { f: `${fit.size}px ${SERIF}`, c: "#fff", alpha: p >= 1 ? 1 : 0.96 });
-        txt(`W${w.w}`, x - wW / 2 + 8, top + 8, { f: `700 7.5px ${MONO}`, c: "rgba(255,255,255,.85)", a: "left" });
+        txt(fit.text, x, top + h / 2 + 0.5, { f: `${fit.size}px ${SERIF}`, c: RC("--paper"), alpha: p >= 1 ? 1 : 0.96 });
+        txt(`W${w.w}`, x - wW / 2 + 8, top + 8, { f: `700 7.5px ${MONO}`, c: RA("--paper", .85), a: "left" });
         hits.push({ x: x - wW / 2, y: top - 4, w: wW, h: h + 4, d: {
           title: `证据砝码 · ${e.tag} ${i + 1}`, value: `W×${w.w}`,
           sub: `${w.t}（本方：${e.name}）`, source: w.src } });
@@ -3333,7 +3311,7 @@ window.U = (() => {
       ctx.beginPath(); ctx.arc(px + wW / 2 - 4, py - 7, 6, 0, TAU);
       ctx.fillStyle = PAL.neg; ctx.fill();
       ctx.restore();
-      txt("?", px + wW / 2 - 4, py - 6.5, { f: `700 8px ${MONO}`, c: "#fff", halo: null });
+      txt("?", px + wW / 2 - 4, py - 6.5, { f: `700 8px ${MONO}`, c: RC("--paper"), halo: null });
       const fit = fitSize(LBL_P[si] || p0.t, tw - 6, 10, 8.5);
       txt(fit.text, px, py + h / 2 + 0.5, { f: `${fit.size}px ${SERIF}`, c: PAL.inkMd, alpha: a0 });
       hits.push({ x: px - wW / 2, y: py - 12, w: wW, h: h + 16, d: {
@@ -4206,7 +4184,5 @@ window.U = (() => {
 })();
 
 </script>
-
-<script src="../report-shell.js" defer></script>
 </body>
 </html>

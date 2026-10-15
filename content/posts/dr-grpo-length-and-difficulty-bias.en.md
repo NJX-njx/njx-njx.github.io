@@ -3,9 +3,11 @@ title: "“Wrong? Write Longer”: What GRPO Normalizers Skew"
 date: 2026-08-29T12:05:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dr-grpo", "normalization"]
-categories: ["AI"]
-summary: "R1-Zero's “length and reward rising together” has been treated as the signature curve of emergent reasoning, but Sea AI Lab's Dr.GRPO paper points out that half of that rise may be the optimizer's own preference: 1/|y| makes the model lean toward writing longer when it answers wrong, and dividing by std lets questions at the difficulty extremes take more of the weight. A mechanistic breakdown of two normalization terms and two biases, plus an implementation-level bias hidden in masked_mean."
+series: ["grpo"]
+summary: "Part of R1-Zero's growing length may be the optimizer's own bias: 1/|y| favors long wrong answers and dividing by std overweights extreme questions."
 ---
+
+R1-Zero's “length and reward rising together” has been treated as the signature curve of emergent reasoning, but Sea AI Lab's Dr.GRPO paper points out that half of that rise may be the optimizer's own preference: 1/|y| makes the model lean toward writing longer when it answers wrong, and dividing by std lets questions at the difficulty extremes take more of the weight. A mechanistic breakdown of two normalization terms and two biases, plus an implementation-level bias hidden in masked_mean.
 
 > This post has a companion [interactive report](/reports/dr-grpo-length-and-difficulty-bias/) (in Chinese), with drill-down worked examples of the biases, a side-by-side comparison of masked_mean implementations, and a decision matrix for choosing a fix.
 

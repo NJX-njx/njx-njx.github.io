@@ -3,22 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-(function () {
-  var saved;
-  try {
-    saved = localStorage.getItem('pref-theme');
-  } catch (_) {
-    // 禁用站点存储时回退到系统主题。
-  }
-  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.dataset.theme =
-    saved === 'dark' || (saved !== 'light' && prefersDark) ? 'dark' : 'light';
-})();
-</script>
 <title>模型自己把自己练强，拆开看是三个闭环 · 交互研报版</title>
 <meta name="description" content="RSI 与自我改进的层次：数据闭环、奖励闭环、系统闭环——各自的成立条件、兑现程度和失效模式并不相同。">
-<!-- Inlined ET Book removed; reports use the shared blog font stack. -->
 <style>
 /* ═══════════════════════════════════════════════════════════
    Sixty-Six Years of Inference Silicon · Professional English Edition
@@ -42,8 +28,8 @@
   --green: #008a6d;
   --gold: #b07a10;
   --neg: #c22f4e;           /* semantic negative — declines, risk, missing */
-  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --mono: Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
   --shadow: 0 1px 2px rgba(5,28,44,.05), 0 8px 28px rgba(5,28,44,.07);
 }
@@ -628,31 +614,23 @@ table.dt.cmp tr.row-rlsvr td { background: rgba(34,81,255,.05); }
 .chart-frame canvas { display: block; width: 100%; }
 
 </style>
-
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<!-- njx-report-theme -->
+<style>:root[data-theme="dark"]{--blue-soft:#b1c3ff;--copper:#d0af70;--gold:#d0af70;--green:#66b9a7;--neg:#da8295;}</style>
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Njx&#x27;Log">
+<meta property="og:title" content="模型自己把自己练强，拆开看是三个闭环 · 交互研报版">
+<meta property="og:url" content="https://njx-njx.github.io/reports/rsi-self-improvement-loops/">
+<meta property="og:image" content="https://njx-njx.github.io/blog-cover.jpg">
+<meta property="og:description" content="RSI 与自我改进的层次：数据闭环、奖励闭环、系统闭环——各自的成立条件、兑现程度和失效模式并不相同。">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon-32x32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="../report-shell.css">
+<link rel="stylesheet" href="/reports/report.css">
+<script src="/reports/report.js"></script>
+<!-- njx-report-theme -->
 </head>
-<body class="rpt-shell">
-<header class="rpt-site-header" data-report-shell>
-  <a class="rpt-home" href="/" aria-label="返回 Njx'Log 首页">
-    <img src="/blog-icon.png" alt="" width="28" height="28">
-    <span>Njx'Log</span>
-  </a>
-  <nav class="rpt-nav" aria-label="站点导航">
-    <a href="/posts/">文章</a>
-    <a href="/reports/" aria-current="page">报告</a>
-    <a href="/archives/">归档</a>
-    <a href="/search/">搜索</a>
-    <a href="/about/">关于</a>
-  </nav>
-  <div class="rpt-actions">
-    <button class="rpt-theme" type="button" data-report-theme-toggle aria-label="切换浅色或深色主题" title="切换主题">
-      <svg class="rpt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      <svg class="rpt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-    </button>
-  </div>
-</header>
+<body>
+<header id="njx-bar"></header>
 
 <!-- 章节导航 rail -->
 <nav id="era-rail" aria-label="章节导航">
@@ -977,7 +955,7 @@ window.RPT = {
     {
       id: "L1", label: "数据闭环", sub: "rollout → 筛选 → 再训练",
       status: "已工业化 · 最不像 RSI",
-      color: "#2251ff", speed: 1.0,
+      color: RD("#2251ff"), speed: 1.0,
       sec: "#sec-l1",
       drill: {
         title: "L1 · 数据闭环",
@@ -989,7 +967,7 @@ window.RPT = {
     {
       id: "L2", label: "奖励闭环", sub: "任务变换 → 自验证 → 奖励",
       status: "范式刚提出 · 对 RSI 最关键",
-      color: "#1233b8", speed: 0.55,
+      color: RD("#1233b8"), speed: 0.55,
       sec: "#sec-l2",
       drill: {
         title: "L2 · 奖励闭环",
@@ -1001,7 +979,7 @@ window.RPT = {
     {
       id: "L3", label: "系统闭环", sub: "改进「改进机制本身」",
       status: "RSI 的本体 · 卡在监督缺口",
-      color: "#42566a", speed: 0.3,
+      color: RC("--ink-md"), speed: 0.3,
       sec: "#sec-l3", gap: true,
       drill: {
         title: "L3 · 系统闭环",
@@ -1131,10 +1109,10 @@ window.U = (() => {
   // accent usages recolor automatically; true negatives (declines/crashes/missing)
   // must use PAL.neg — audited per chart.
   const PAL = {
-    paper: "#ffffff", hi: "#f7f9fc", ink: "#051c2c", inkMd: "#42566a", inkLo: "#8595a6",
-    line: "#dbe2ea", lineLo: "#eef1f6", red: "#2251ff", redHi: "#1233b8",
-    blue: "#7a45c9", copper: "#b07a10", green: "#008a6d", gold: "#b07a10",
-    neg: "#c22f4e", accent: "#2251ff", navy: "#051c2c",
+    paper: RC("--paper"), hi: RC("--paper-hi"), ink: RC("--ink"), inkMd: RC("--ink-md"), inkLo: RC("--ink-lo"),
+    line: RC("--line"), lineLo: RC("--line-lo"), red: RD("#2251ff"), redHi: RD("#1233b8"),
+    blue: RD("#7a45c9"), copper: RD("#b07a10"), green: RD("#008a6d"), gold: RD("#b07a10"),
+    neg: RD("#c22f4e"), accent: RD("#2251ff"), navy: RC("--ink"),
   };
   const SERIES = [PAL.red, PAL.blue, PAL.copper, PAL.green];
 
@@ -1271,7 +1249,7 @@ window.U = (() => {
   if (!canvas || !inner || !window.RPT) return;
   const ctx2 = canvas.getContext("2d");
   const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
   const MONO = 'Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace';
   const TAU = Math.PI * 2;
   const P = U.PAL;
@@ -1362,7 +1340,7 @@ window.U = (() => {
     // 中心：被改进的模型
     const cr = Math.max(R * 0.185, 30);
     ctx2.beginPath(); ctx2.arc(cx, cy, cr, 0, TAU);
-    ctx2.fillStyle = "#fff"; ctx2.fill();
+    ctx2.fillStyle = RC("--paper"); ctx2.fill();
     ctx2.lineWidth = 1.5; ctx2.strokeStyle = P.ink; ctx2.stroke();
     ctx2.beginPath(); ctx2.arc(cx, cy, cr - 5, 0, TAU);
     ctx2.lineWidth = 0.75; ctx2.strokeStyle = P.line; ctx2.stroke();
@@ -1424,7 +1402,7 @@ window.U = (() => {
         const px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r;
         ctx2.globalAlpha = al;
         ctx2.beginPath(); ctx2.arc(px, py, 5, 0, TAU);
-        ctx2.fillStyle = "#fff"; ctx2.fill();
+        ctx2.fillStyle = RC("--paper"); ctx2.fill();
         ctx2.lineWidth = 1.6; ctx2.strokeStyle = col; ctx2.stroke();
         // 标签：上半环放内侧，下半环放外侧
         const inside = Math.sin(a) < -0.25;
@@ -1433,7 +1411,7 @@ window.U = (() => {
         ctx2.font = `700 10.5px ${SERIF}`;
         ctx2.textAlign = Math.cos(a) > 0.35 ? "left" : (Math.cos(a) < -0.35 ? "right" : "center");
         ctx2.textBaseline = inside ? "bottom" : (Math.sin(a) > 0.25 ? "top" : "middle");
-        ctx2.lineWidth = 3.5; ctx2.strokeStyle = "#fff"; ctx2.lineJoin = "round";
+        ctx2.lineWidth = 3.5; ctx2.strokeStyle = RC("--paper"); ctx2.lineJoin = "round";
         ctx2.strokeText(nm, lx, ly);
         ctx2.fillStyle = dim ? P.inkLo : P.inkMd; ctx2.fillText(nm, lx, ly);
       });
@@ -1466,7 +1444,7 @@ window.U = (() => {
     const gx = cx + Math.cos(mid) * (r + 16), gy = cy + Math.sin(mid) * (r + 16);
     ctx2.font = `700 12.5px ${SERIF}`;
     ctx2.textAlign = "center"; ctx2.textBaseline = "top";
-    ctx2.lineWidth = 4; ctx2.strokeStyle = "#fff"; ctx2.lineJoin = "round";
+    ctx2.lineWidth = 4; ctx2.strokeStyle = RC("--paper"); ctx2.lineJoin = "round";
     ctx2.strokeText("监督缺口", gx, gy);
     ctx2.fillStyle = P.neg; ctx2.fillText("监督缺口", gx, gy);
     ctx2.font = `400 8.5px ${MONO}`;
@@ -1509,7 +1487,7 @@ window.U = (() => {
       // 文本（右对齐）
       ctx2.textAlign = "right";
       ctx2.font = `700 ${fs1}px ${SERIF}`;
-      ctx2.lineWidth = 3.5; ctx2.strokeStyle = "#fff"; ctx2.lineJoin = "round";
+      ctx2.lineWidth = 3.5; ctx2.strokeStyle = RC("--paper"); ctx2.lineJoin = "round";
       ctx2.strokeText(t1, lx, y - 6);
       ctx2.fillStyle = hover === L.def.id ? L.def.color : P.ink;
       ctx2.fillText(t1, lx, y - 6);
@@ -1525,7 +1503,7 @@ window.U = (() => {
         ctx2.textAlign = "left";
         ctx2.font = `700 11.5px ${SERIF}`;
         const t = `${L.def.id} ${L.def.label}`;
-        ctx2.lineWidth = 3.5; ctx2.strokeStyle = "#fff"; ctx2.lineJoin = "round";
+        ctx2.lineWidth = 3.5; ctx2.strokeStyle = RC("--paper"); ctx2.lineJoin = "round";
         ctx2.strokeText(t, ax + 8, ay);
         ctx2.fillStyle = P.ink; ctx2.fillText(t, ax + 8, ay);
       });
@@ -1605,7 +1583,7 @@ window.U = (() => {
   const host = document.getElementById("l1-chart");
   if (!host || !window.RPT) return;
   const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
   const MONO = 'Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace';
   const TAU = Math.PI * 2, P = U.PAL;
   const cv = document.createElement("canvas");
@@ -1645,7 +1623,7 @@ window.U = (() => {
 
   function halo(txt, x, y, font, fill, align = "left", base = "middle") {
     ctx.font = font; ctx.textAlign = align; ctx.textBaseline = base;
-    ctx.lineWidth = 3.5; ctx.strokeStyle = "#fff"; ctx.lineJoin = "round";
+    ctx.lineWidth = 3.5; ctx.strokeStyle = RC("--paper"); ctx.lineJoin = "round";
     ctx.strokeText(txt, x, y);
     ctx.fillStyle = fill; ctx.fillText(txt, x, y);
   }
@@ -1687,7 +1665,7 @@ window.U = (() => {
         ctx.lineTo(x + n.w / 2 - 22, y + n.h / 2);
         ctx.lineTo(x - n.w / 2 + 22, y + n.h / 2);
         ctx.closePath();
-        ctx.fillStyle = "#fff"; ctx.fill();
+        ctx.fillStyle = RC("--paper"); ctx.fill();
         ctx.lineWidth = 1.8; ctx.strokeStyle = P.red; ctx.stroke();
         halo(n.name, x, y - 3, `700 13px ${SERIF}`, P.ink, "center");
         halo("工程师设计", x, y + 12, `400 8.5px ${MONO}`, P.red, "center");
@@ -1700,7 +1678,7 @@ window.U = (() => {
         ctx.arcTo(x - n.w / 2, y + n.h / 2, x - n.w / 2, y - n.h / 2, r);
         ctx.arcTo(x - n.w / 2, y - n.h / 2, x + n.w / 2, y - n.h / 2, r);
         ctx.closePath();
-        ctx.fillStyle = "#fff"; ctx.fill();
+        ctx.fillStyle = RC("--paper"); ctx.fill();
         ctx.lineWidth = 1.5; ctx.strokeStyle = P.ink; ctx.stroke();
         halo(n.name, x, y - 4, `700 13px ${SERIF}`, P.ink, "center");
         halo(n.sub, x, y + 11, `400 8.5px ${MONO}`, P.inkLo, "center");
@@ -1799,7 +1777,7 @@ window.U = (() => {
 <script>
 // chart-l2.js · L2 奖励闭环：RLVR 红利 vs 开放任务三重税 vs RLSVR 任务变换
 (function () {
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
   const MONO = 'Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace';
   const P = U.PAL;
   const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1849,7 +1827,7 @@ window.U = (() => {
   }
   function halo(txt, x, y, font, fill, align = "left", base = "middle") {
     ctx.font = font; ctx.textAlign = align; ctx.textBaseline = base;
-    ctx.lineWidth = 3.5; ctx.strokeStyle = "#fff"; ctx.lineJoin = "round";
+    ctx.lineWidth = 3.5; ctx.strokeStyle = RC("--paper"); ctx.lineJoin = "round";
     ctx.strokeText(txt, x, y); ctx.fillStyle = fill; ctx.fillText(txt, x, y);
   }
   function arrow(x0, y0, x1, y1, col, dash) {
@@ -1875,7 +1853,7 @@ window.U = (() => {
       a === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     }
     ctx.closePath();
-    ctx.fillStyle = "rgba(5,28,44,.05)"; ctx.fill();
+    ctx.fillStyle = RA("--ink", .05); ctx.fill();
     ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5; ctx.strokeStyle = P.inkMd; ctx.stroke();
     ctx.setLineDash([]);
     halo("开放任务", BLOB.x, BLOB.y - 8, `700 15px ${SERIF}`, P.ink, "center");
@@ -1889,7 +1867,7 @@ window.U = (() => {
     ctx.lineTo(GATE.x + GATE.w / 2 - 18, GATE.y + GATE.h / 2);
     ctx.lineTo(GATE.x - GATE.w / 2 + 18, GATE.y + GATE.h / 2);
     ctx.closePath();
-    ctx.fillStyle = "#fff"; ctx.fill();
+    ctx.fillStyle = RC("--paper"); ctx.fill();
     ctx.lineWidth = 2; ctx.strokeStyle = P.red; ctx.stroke();
     halo("任务变换", GATE.x, GATE.y - 14, `700 14.5px ${SERIF}`, P.ink, "center");
     halo("pretext task", GATE.x, GATE.y + 4, `400 9px ${MONO}`, P.red, "center");
@@ -1906,7 +1884,7 @@ window.U = (() => {
     ctx.arcTo(BOX.x, BOX.y + BOX.h, BOX.x, BOX.y, r);
     ctx.arcTo(BOX.x, BOX.y, BOX.x + BOX.w, BOX.y, r);
     ctx.closePath();
-    ctx.fillStyle = "rgba(34,81,255,.04)"; ctx.fill();
+    ctx.fillStyle = RA("#2251ff", .04); ctx.fill();
     ctx.lineWidth = 1.8; ctx.strokeStyle = P.red; ctx.stroke();
     // 验证格：4×3 对勾矩阵（确定性检查）
     for (let rr2 = 0; rr2 < 3; rr2++) {
@@ -1987,7 +1965,7 @@ window.U = (() => {
 <script>
 // chart-l3.js · L3 系统闭环：监督缺口曲线 + 剪刀差（均为概念示意，非实测）
 (function () {
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
   const MONO = 'Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace';
   const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const P = U.PAL;
@@ -2010,7 +1988,7 @@ window.U = (() => {
   }
   function halo(ctx, txt, x, y, font, fill, align = "left", base = "middle") {
     ctx.font = font; ctx.textAlign = align; ctx.textBaseline = base;
-    ctx.lineWidth = 3.5; ctx.strokeStyle = "#fff"; ctx.lineJoin = "round";
+    ctx.lineWidth = 3.5; ctx.strokeStyle = RC("--paper"); ctx.lineJoin = "round";
     ctx.strokeText(txt, x, y); ctx.fillStyle = fill; ctx.fillText(txt, x, y);
   }
   function axis(ctx, x0, y0, x1, y1) {
@@ -2062,7 +2040,7 @@ window.U = (() => {
         ptsM.forEach(([x, y], i) => i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y));
         for (let i = ptsH.length - 1; i >= 0; i--) ctx.lineTo(ptsH[i][0], ptsH[i][1]);
         ctx.closePath();
-        ctx.fillStyle = "rgba(194,47,78,.09)"; ctx.fill();
+        ctx.fillStyle = RA("#c22f4e", .09); ctx.fill();
       }
       // 人类评估能力（平）
       ctx.beginPath();
@@ -2095,12 +2073,12 @@ window.U = (() => {
           let x = X(yr); x = Math.max(x, mL + 102); x = Math.min(x, W0 - mR - 102);
           const y = Y(D.model[D.years.indexOf(yr)]);
           ctx.beginPath(); ctx.arc(X(yr), y, 4, 0, Math.PI * 2);
-          ctx.fillStyle = "#fff"; ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = P.red; ctx.stroke();
+          ctx.fillStyle = RC("--paper"); ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = P.red; ctx.stroke();
           const py = up ? y - 46 : y + 34;
           ctx.beginPath(); ctx.moveTo(X(yr), y + (up ? -6 : 6)); ctx.lineTo(x, py + (up ? -12 : 12));
           ctx.lineWidth = 0.8; ctx.strokeStyle = P.inkLo; ctx.stroke();
           const tw = 196;
-          ctx.fillStyle = "#fff";
+          ctx.fillStyle = RC("--paper");
           ctx.strokeStyle = P.ink; ctx.lineWidth = 1.2;
           ctx.strokeRect(x - tw / 2, py - 14, tw, 30);
           ctx.fillRect(x - tw / 2, py - 14, tw, 30);
@@ -2187,7 +2165,7 @@ window.U = (() => {
         for (let i = fork; i < n; i++) ctx.lineTo(pi[i][0], pi[i][1]);
         for (let i = n - 1; i >= fork; i--) ctx.lineTo(po[i][0], po[i][1]);
         ctx.closePath();
-        ctx.fillStyle = "rgba(194,47,78,.10)"; ctx.fill();
+        ctx.fillStyle = RA("#c22f4e", .10); ctx.fill();
         // 分叉点标注
         halo(ctx, "分叉点", X(fork), Y(S.inLoop[fork]) - 16, `400 9px ${MONO}`, P.neg, "center");
       }
@@ -2450,7 +2428,5 @@ window.U = (() => {
 })();
 
 </script>
-
-<script src="../report-shell.js" defer></script>
 </body>
 </html>

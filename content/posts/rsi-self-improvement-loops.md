@@ -3,9 +3,10 @@ title: "「模型自己把自己练强」：RSI 与三个闭环"
 date: 2026-09-01T12:30:00+08:00
 draft: false
 tags: ["rl", "post-training", "agentic-rl", "rsi", "self-improvement"]
-categories: ["AI"]
-summary: "RSI（递归自我改进）这个词在 2025-2026 年重新变热，但它指的东西经常被混为一谈。本文按从业者的两分法（改 harness 不改权重 vs 直接改权重）切入，把「自我改进」拆成数据闭环、奖励闭环、系统闭环三个层次，各自的成立条件、兑现程度和失效模式并不相同。"
+summary: "RSI（递归自我改进）常被混为一谈。把自我改进拆成数据、奖励、系统三个闭环，各自的成立条件和失效模式并不相同。"
 ---
+
+RSI（递归自我改进）这个词在 2025-2026 年重新变热，但它指的东西经常被混为一谈。本文按从业者的两分法（改 harness 不改权重 vs 直接改权重）切入，把「自我改进」拆成数据闭环、奖励闭环、系统闭环三个层次，各自的成立条件、兑现程度和失效模式并不相同。
 
 > 本文有配套的[交互报告](/reports/rsi-self-improvement-loops/)，含三闭环嵌套交互图、三层次考卷矩阵与剪刀差示意图。
 
@@ -66,4 +67,4 @@ summary: "RSI（递归自我改进）这个词在 2025-2026 年重新变热，�
 - WebSailor：[arXiv:2507.02592](https://arxiv.org/abs/2507.02592)、[V2 2509.13305](https://arxiv.org/abs/2509.13305)（标题与系列定位）；DeepResearcher [arXiv:2504.03160](https://arxiv.org/abs/2504.03160)
 - 递归奖励建模：Leike et al. [arXiv:1811.07871](https://arxiv.org/abs/1811.07871)；Scalable Oversight [arXiv:2211.03540](https://arxiv.org/abs/2211.03540)（教材 hands-on-modern-rl：[`docs/chapter30_alignment_failures/scaling-and-defenses.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter30_alignment_failures/scaling-and-defenses.md)）
 - Test-Time Training 经典：Sun et al. [arXiv:1909.13231](https://arxiv.org/abs/1909.13231)；test-time scaling：s1 [arXiv:2501.19393](https://arxiv.org/abs/2501.19393)
-- 前篇：[7 轮交互失败了该怪谁：多轮轨迹的奖励归因](/posts/turn-level-reward-credit-assignment/)（昨天：局内归因；今天：跨局闭环）
+- 前篇：[7 轮交互失败了该怪谁：多轮轨迹的奖励归因](/posts/turn-level-reward-credit-assignment/)（前篇：局内归因；本文：跨局闭环）

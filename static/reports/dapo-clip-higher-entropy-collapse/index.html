@@ -3,22 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-(function () {
-  var saved;
-  try {
-    saved = localStorage.getItem('pref-theme');
-  } catch (_) {
-    // 禁用站点存储时回退到系统主题。
-  }
-  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.dataset.theme =
-    saved === 'dark' || (saved !== 'light' && prefersDark) ? 'dark' : 'light';
-})();
-</script>
 <title>熵是怎么塌掉的 · DAPO Clip-Higher 交互研报</title>
 <meta name="description" content="naive GRPO 复现 R1 时熵快速坍缩，DAPO 的 Clip-Higher 只把裁剪上界从 0.2 抬到 0.28。这一个数背后，是 PPO-Clip 在概率轴上的结构性不对称。">
-<!-- Inlined ET Book removed; reports use the shared blog font stack. -->
 <style>
 /* ═══════════════════════════════════════════════════════════
    Sixty-Six Years of Inference Silicon · Professional English Edition
@@ -42,8 +28,8 @@
   --green: #008a6d;
   --gold: #b07a10;
   --neg: #c22f4e;           /* semantic negative — declines, risk, missing */
-  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --mono: Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
   --shadow: 0 1px 2px rgba(5,28,44,.05), 0 8px 28px rgba(5,28,44,.07);
 }
@@ -569,31 +555,23 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
 }
 
 </style>
-
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<!-- njx-report-theme -->
+<style>:root[data-theme="dark"]{--blue-soft:#b1c3ff;--copper:#d0af70;--gold:#d0af70;--green:#66b9a7;--neg:#da8295;}</style>
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Njx&#x27;Log">
+<meta property="og:title" content="熵是怎么塌掉的 · DAPO Clip-Higher 交互研报">
+<meta property="og:url" content="https://njx-njx.github.io/reports/dapo-clip-higher-entropy-collapse/">
+<meta property="og:image" content="https://njx-njx.github.io/blog-cover.jpg">
+<meta property="og:description" content="naive GRPO 复现 R1 时熵快速坍缩，DAPO 的 Clip-Higher 只把裁剪上界从 0.2 抬到 0.28。这一个数背后，是 PPO-Clip 在概率轴上的结构性不对称。">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon-32x32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="../report-shell.css">
+<link rel="stylesheet" href="/reports/report.css">
+<script src="/reports/report.js"></script>
+<!-- njx-report-theme -->
 </head>
-<body class="rpt-shell">
-<header class="rpt-site-header" data-report-shell>
-  <a class="rpt-home" href="/" aria-label="返回 Njx'Log 首页">
-    <img src="/blog-icon.png" alt="" width="28" height="28">
-    <span>Njx'Log</span>
-  </a>
-  <nav class="rpt-nav" aria-label="站点导航">
-    <a href="/posts/">文章</a>
-    <a href="/reports/" aria-current="page">报告</a>
-    <a href="/archives/">归档</a>
-    <a href="/search/">搜索</a>
-    <a href="/about/">关于</a>
-  </nav>
-  <div class="rpt-actions">
-    <button class="rpt-theme" type="button" data-report-theme-toggle aria-label="切换浅色或深色主题" title="切换主题">
-      <svg class="rpt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      <svg class="rpt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-    </button>
-  </div>
-</header>
+<body>
+<header id="njx-bar"></header>
 
 <!-- ═══ 封面 · 工程蓝图线稿（COVER.md 变体 C）：比率裁剪窗 × 概率分布 ═══ -->
 <header id="cover">
@@ -960,10 +938,10 @@ window.U = (() => {
   // accent usages recolor automatically; true negatives (declines/crashes/missing)
   // must use PAL.neg — audited per chart.
   const PAL = {
-    paper: "#ffffff", hi: "#f7f9fc", ink: "#051c2c", inkMd: "#42566a", inkLo: "#8595a6",
-    line: "#dbe2ea", lineLo: "#eef1f6", red: "#2251ff", redHi: "#1233b8",
-    blue: "#7a45c9", copper: "#b07a10", green: "#008a6d", gold: "#b07a10",
-    neg: "#c22f4e", accent: "#2251ff", navy: "#051c2c",
+    paper: RC("--paper"), hi: RC("--paper-hi"), ink: RC("--ink"), inkMd: RC("--ink-md"), inkLo: RC("--ink-lo"),
+    line: RC("--line"), lineLo: RC("--line-lo"), red: RD("#2251ff"), redHi: RD("#1233b8"),
+    blue: RD("#7a45c9"), copper: RD("#b07a10"), green: RD("#008a6d"), gold: RD("#b07a10"),
+    neg: RD("#c22f4e"), accent: RD("#2251ff"), navy: RC("--ink"),
   };
   const SERIES = [PAL.red, PAL.blue, PAL.copper, PAL.green];
 
@@ -1162,9 +1140,9 @@ window.RPT_SOURCES = [
   const ctx = canvas.getContext("2d");
   const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const MONO = 'Menlo, Consolas, monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
-  const INK = "#051c2c", INK_M = "#42566a", INK_L = "#8595a6";
-  const BLUE = "#2251ff", BLUE_S = "#7d9bff", LINE = "#dbe2ea", PAPER = "#ffffff";
+  const SERIF = RS("--serif");
+  const INK = RC("--ink"), INK_M = RC("--ink-md"), INK_L = RC("--ink-lo");
+  const BLUE = RD("#2251ff"), BLUE_S = RD("#7d9bff"), LINE = RC("--line"), PAPER = RC("--paper");
 
   let W = 0, H = 0;
   let epsH = REDUCE ? 0.28 : 0.20;   // 当前上界（动画值）
@@ -1177,10 +1155,10 @@ window.RPT_SOURCES = [
   // ── 蓝图底纹：十字网格 + 四角对位标 ──
   function grid() {
     ctx.save();
-    ctx.strokeStyle = "rgba(5,28,44,.05)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = RA("--ink", .05); ctx.lineWidth = 1;
     for (let x = 26; x < W; x += 52) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
     for (let y = 26; y < H; y += 52) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-    ctx.strokeStyle = "rgba(34,81,255,.55)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = RA("#2251ff", .55); ctx.lineWidth = 1;
     const m = 22, l = 12;
     [[m, m, 1, 1], [W - m, m, -1, 1], [m, H - m, 1, -1], [W - m, H - m, -1, -1]].forEach(([x, y, sx, sy]) => {
       ctx.beginPath(); ctx.moveTo(x, y + sy * l); ctx.lineTo(x, y); ctx.lineTo(x + sx * l, y); ctx.stroke();
@@ -1191,9 +1169,9 @@ window.RPT_SOURCES = [
   // 左侧白晕，保文字列可读（COVER.md：0 → 0.62W 白渐变）
   function wash() {
     const g = ctx.createLinearGradient(0, 0, W * 0.66, 0);
-    g.addColorStop(0, "rgba(255,255,255,.96)");
-    g.addColorStop(0.72, "rgba(255,255,255,.82)");
-    g.addColorStop(1, "rgba(255,255,255,0)");
+    g.addColorStop(0, RA("--paper", .96));
+    g.addColorStop(0.72, RA("--paper", .82));
+    g.addColorStop(1, RA("--paper", 0));
     ctx.fillStyle = g; ctx.fillRect(0, 0, W * 0.66, H);
   }
 
@@ -1255,7 +1233,7 @@ window.RPT_SOURCES = [
     // 窗内斜纹（蓝，低透明）
     ctx.save();
     ctx.beginPath(); ctx.rect(xr(lo), yR - 30, xr(hi) - xr(lo), 30); ctx.clip();
-    ctx.strokeStyle = "rgba(34,81,255,.14)"; ctx.lineWidth = 1;
+    ctx.strokeStyle = RA("#2251ff", .14); ctx.lineWidth = 1;
     for (let x = xr(lo) - 30; x < xr(hi) + 30; x += 7) {
       ctx.beginPath(); ctx.moveTo(x, yR + 2); ctx.lineTo(x + 20, yR - 32); ctx.stroke();
     }
@@ -1372,11 +1350,11 @@ window.RPT_SOURCES = [
 (() => {
 const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const SVGNS = "http://www.w3.org/2000/svg";
-const INK = "#051c2c", INK_M = "#42566a", INK_L = "#8595a6";
-const BLUE = "#2251ff", BLUE_S = "#7d9bff", NEG = "#c22f4e";
-const LINE = "#dbe2ea", LINE_LO = "#eef1f6", PAPER = "#ffffff";
+const INK = RC("--ink"), INK_M = RC("--ink-md"), INK_L = RC("--ink-lo");
+const BLUE = RD("#2251ff"), BLUE_S = RD("#7d9bff"), NEG = RD("#c22f4e");
+const LINE = RC("--line"), LINE_LO = RC("--line-lo"), PAPER = RC("--paper");
 const MONO = "Menlo, Consolas, monospace";
-const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+const SERIF = RS("--serif");
 
 function el(tag, attrs, parent) {
   const n = document.createElementNS(SVGNS, tag);
@@ -1567,7 +1545,7 @@ function growLine(path, dur = 900) {
     if (epsH > 0.201) {
       el("path", {
         d: `M ${xr(pA, 1.2)} ${yA(1.2)} L ${xr(pA, hi)} ${yA(hi)} L ${xr(pA, 1.9)} ${yA(hi)} L ${xr(pA, 1.9)} ${yA(1.2)} Z`,
-        fill: "rgba(34,81,255,.10)", stroke: "none",
+        fill: RA("#2251ff", .10), stroke: "none",
       }, gDyn);
       txt(gDyn, (xr(pA, hi) + xr(pA, 1.9)) / 2, (yA(hi) + yA(1.2)) / 2 + 3, "Clip-Higher 放出的梯度", { size: 9, fill: BLUE, anchor: "middle" });
     }
@@ -1575,8 +1553,8 @@ function growLine(path, dur = 900) {
     const hatchId = "hatchA";
     const defs = el("defs", {}, gDyn);
     const pat = el("pattern", { id: hatchId, width: 7, height: 7, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, defs);
-    el("rect", { width: 7, height: 7, fill: "rgba(34,81,255,.07)" }, pat);
-    el("line", { x1: 0, y1: 0, x2: 0, y2: 7, stroke: "rgba(34,81,255,.30)", "stroke-width": 1 }, pat);
+    el("rect", { width: 7, height: 7, fill: RA("#2251ff", .07) }, pat);
+    el("line", { x1: 0, y1: 0, x2: 0, y2: 7, stroke: RA("#2251ff", .30), "stroke-width": 1 }, pat);
     el("rect", { x: xr(pA, hi), y: yA(hi), width: xr(pA, 1.9) - xr(pA, hi), height: bot - yA(hi), fill: `url(#${hatchId})` }, gDyn);
     txt(gDyn, (xr(pA, hi) + xr(pA, 1.9)) / 2, yA(hi) - 8, "平台 · 梯度 = 0", { size: 9.5, fill: BLUE, anchor: "middle", bold: true });
     // 拐点（可点）
@@ -1636,7 +1614,7 @@ function growLine(path, dur = 900) {
   const X = p => mL + (Math.log10(p) - Math.log10(pMin)) / (Math.log10(pMax) - Math.log10(pMin)) * (W - mL - mR);
 
   // 低概率区 tint（p < 0.2）
-  el("rect", { x: X(pMin), y: 52, width: X(0.2) - X(pMin), height: 312, fill: "rgba(34,81,255,.05)" }, svg);
+  el("rect", { x: X(pMin), y: 52, width: X(0.2) - X(pMin), height: 312, fill: RA("#2251ff", .05) }, svg);
   const regionLab = txt(svg, X(0.011), 68, "p < 0.2 · 被上界裁住的 token 平均概率在此区（图 3a）", { size: 9, fill: BLUE });
   drillOn(regionLab, {
     title: "被按住的是谁", value: "p̄ < 0.2",
@@ -1785,7 +1763,7 @@ function growLine(path, dur = 900) {
       const on = k <= cur;
       nd.c.setAttribute("fill", on ? BLUE : PAPER);
       nd.c.setAttribute("stroke", on ? BLUE : (nd.turn === 1 ? INK : INK_L));
-      nd.n.setAttribute("fill", on ? "#ffffff" : INK);
+      nd.n.setAttribute("fill", on ? RC("--paper") : INK);
     });
     if (cur < 0) {
       count.textContent = "未开始 · 共 8 步（两圈）";
@@ -1842,7 +1820,7 @@ function growLine(path, dur = 900) {
   const gSteps = el("g", {}, svg);
   data.forEach((d, i) => {
     const isClip = i === 2;
-    const fill = isClip ? "rgba(34,81,255,.14)" : "rgba(5,28,44,.06)";
+    const fill = isClip ? RA("#2251ff", .14) : RA("--ink", .06);
     const stroke = isClip ? BLUE : INK_M;
     const g = el("g", {}, gSteps);
     const rect = el("rect", { x: X(i) + 1, y: Y(d.score), width: cw - 2, height: bot - Y(d.score), fill, stroke, "stroke-width": isClip ? 1.8 : 1.1 }, g);
@@ -1912,7 +1890,7 @@ function growLine(path, dur = 900) {
       const x = p.x0 + i * (bw + gap), on = i === p.hot;
       const rect = el("rect", {
         x, y: Y(v), width: bw, height: bot - Y(v),
-        fill: on ? "rgba(34,81,255,.16)" : "rgba(5,28,44,.12)",
+        fill: on ? RA("#2251ff", .16) : RA("--ink", .12),
         stroke: on ? BLUE : INK_M, "stroke-width": on ? 1.6 : 1,
       }, svg);
       const lab = txt(svg, x + bw / 2, Y(v) - 8, v.toFixed(2), { size: 10, fill: on ? BLUE : INK_M, anchor: "middle", bold: true });
@@ -2104,7 +2082,5 @@ function growLine(path, dur = 900) {
 })();
 
 </script>
-
-<script src="../report-shell.js" defer></script>
 </body>
 </html>

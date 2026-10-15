@@ -3,9 +3,11 @@ title: "One Model, Two Probabilities: Cost of Mismatch"
 date: 2026-08-27T13:00:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "tis", "precision"]
-categories: ["AI"]
-summary: "Rollouts run on an inference engine and training runs on a training engine, and the same model's numbers don't match across the two: the distribution you actually sample from deviates from the policy you assume, and nominally on-policy training quietly becomes off-policy. This post breaks down where the discrepancy comes from, its two consequences (biased gradients and a deployment gap), the lineage of algorithmic patches, and Sea AI Lab's conclusion tracing the root cause to BF16 precision."
+series: ["grpo"]
+summary: "Rollout and training engines compute different probabilities for one model, so on-policy RL quietly turns off-policy. Where it comes from and how to fix it."
 ---
+
+Rollouts run on an inference engine and training runs on a training engine, and the same model's numbers don't match across the two: the distribution you actually sample from deviates from the policy you assume, and nominally on-policy training quietly becomes off-policy. This post breaks down where the discrepancy comes from, its two consequences (biased gradients and a deployment gap), the lineage of algorithmic patches, and Sea AI Lab's conclusion tracing the root cause to BF16 precision.
 
 > This post has a companion [interactive report](/reports/tis-train-inference-mismatch/) (in Chinese), with a drill-down diagram of the two-engine mechanism, a comparison of the patch lineage, and a bit-field breakdown of the precision formats.
 
@@ -24,7 +26,7 @@ But because their engineering implementations differ, the engines don't compute 
 - **Different computation patterns**. Inference generates autoregressively, token by token; training runs a parallel forward pass over the whole sequence under teacher forcing. For the same token string, the different computation processes use different floating-point reduction orders, and errors accumulate differently.
 - **Different kernel implementations**. The inference engine's RMSNorm, RoPE, and attention kernels are specially tuned for latency and throughput, and differ numerically, by tiny amounts, from the training-side implementations.
 - **Different parallel sharding**. Training and inference use different tensor-parallel and data-parallel sharding, and a different order of cross-GPU reductions changes the floating-point result.
-- **MoE top-k gating is sensitive to small changes**. Expert selection is sensitive to tiny fluctuations in the logits, so if the same weights are run once through each of the two engines, the selected experts can differ. For GSPO, covered in the previous post, the 10% expert drift occurs along the temporal dimension of “before vs. after an update”; here we mean the spatial dimension of “same weights, two engines”. Gating sensitivity introduces a discrepancy along each of the two dimensions separately.
+- **MoE top-k gating is sensitive to small changes**. Expert selection is sensitive to tiny fluctuations in the logits, so if the same weights are run once through each of the two engines, the selected experts can differ. The 10% expert drift that the [GSPO post](/en/posts/gspo-sequence-level-importance-sampling/) mentions occurs along the temporal dimension of “before vs. after an update”; here we mean the spatial dimension of “same weights, two engines”. Gating sensitivity introduces a discrepancy along each of the two dimensions separately.
 - **The precision format's mantissa is too short**. The default BF16 has only 7 mantissa bits, so none of the tiny discrepancies cited above has enough numerical precision headroom, and they end up producing noticeable deviations. This point is the crux of the whole post; more on it later.
 
 So the inference engine actually corresponds to **a numerically different policy** from the training engine's, denoted $\mu$. Data is sampled from $\mu$, but the gradient is computed under the assumption of $\pi$. The boundary between on-policy and off-policy ultimately comes down to the floating-point behavior of kernels.
@@ -53,7 +55,7 @@ At its core, the problem is “sampling from $\mu$ but taking the expectation un
 
 **Patch one: token-level truncated correction (Defog)**. For each token, compute the ratio of the training probability to the inference probability, $\rho_t = \pi(y_t|x,y_{<t},\theta')/\mu(y_t|x,y_{<t},\theta')$, truncate it at an upper bound $C$ (3 in the experiments), and multiply it into each term of the GRPO gradient. Note that the denominator $\mu$ is the inference engine's probability, so the training engine has to run one more forward pass over the same sample to obtain the numerator, adding about 25% training overhead (estimated assuming the backward pass costs roughly 2× the forward pass). Result: the collapse is delayed, but training still collapses after peaking at 82% (VeRL) / 88% (Oat).
 
-**Patch two: sequence-level masked correction** (“When Speed Kills Stability”, Liu et al.). The authors point out that the token-level correction yields a biased gradient, and change the correction to compute a single ratio for the entire sequence, $\rho = \pi(y|x,\theta')/\mu(y|x,\theta')$, masking out the gradient of the whole sequence whenever it exceeds $C$. The idea is in the same lineage as GSPO, covered in the previous post (although GSPO's $s_i$ serves only as the quantity being optimized, whereas $\rho$ here is a correction factor). It is the only algorithmic patch that does not collapse under BF16; the price is high variance in the sequence-level ratio and slow convergence, and the deployment gap remains exactly as it was—the peak is only 95%/34%.
+**Patch two: sequence-level masked correction** (“When Speed Kills Stability”, Liu et al.). The authors point out that the token-level correction yields a biased gradient, and change the correction to compute a single ratio for the entire sequence, $\rho = \pi(y|x,\theta')/\mu(y|x,\theta')$, masking out the gradient of the whole sequence whenever it exceeds $C$. The idea is in the same lineage as GSPO (although GSPO's $s_i$ serves only as the quantity being optimized, whereas $\rho$ here is a correction factor). It is the only algorithmic patch that does not collapse under BF16; the price is high variance in the sequence-level ratio and slow convergence, and the deployment gap remains exactly as it was—the peak is only 95%/34%.
 
 What the two patches have in common: both accept the fact that $\mu \neq \pi$ and compensate sample by sample, at the cost of extra compute and added variance, and neither can solve the deployment gap.
 
@@ -69,10 +71,10 @@ The most telling result is the next set of experiments: **with FP16, the perform
 
 ## Reading It Alongside the Previous Two Posts
 
-This week's three posts happen to approach the same problem at four levels:
+The three posts in this series happen to approach the same problem at four levels:
 
-- **DAPO Clip-Higher** (the post before last): assumes training and inference are consistent, and adjusts the clip bounds inside the algorithm to fix entropy collapse;
-- **GSPO** (the previous post): moves the optimization objective to sequence-level units, is naturally robust to the discrepancy in $\mu$, and also tolerates MoE routing drift;
+- **DAPO Clip-Higher**: assumes training and inference are consistent, and adjusts the clip bounds inside the algorithm to fix entropy collapse;
+- **GSPO**: moves the optimization objective to sequence-level units, is naturally robust to the discrepancy in $\mu$, and also tolerates MoE routing drift;
 - **TIS algorithmic patches** (the first half of this post): accept the fact that $\mu \neq \pi$ and apply importance-sampling compensation sample by sample;
 - **FP16 and kernel alignment** (the second half of this post): make $\mu \approx \pi$, eliminating the mismatch directly.
 

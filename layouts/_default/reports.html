@@ -1,5 +1,11 @@
 {{- define "main" }}
 
+{{- /* The static reports load these two files from fixed URLs. */}}
+{{- $reportCSS := slice (resources.Get "css/core/theme-vars.css" | minify) (resources.Get "css/common/header.css" | minify) (resources.Get "css/report.css" | minify) | resources.Concat "reports/report.css" }}
+{{- $reportJS := slice (resources.Get "js/report.js" | minify) | resources.Concat "reports/report.js" }}
+{{- $reportCSS.Publish }}
+{{- $reportJS.Publish }}
+
 <header class="page-header">
   <h1>{{ .Title }}</h1>
   {{- with .Description }}

@@ -3,9 +3,11 @@ title: "Judging Truncated Answers: DAPO's Overlong Fix"
 date: 2026-08-30T12:05:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
-categories: ["AI"]
-summary: "RL training needs a generation length cap, and truncated responses are treated as wrong by default—which misjudges 'undecidable' samples as 'wrong' ones and injects reward noise straight into the group-relative advantage. DAPO's two fixes: Overlong Filtering acknowledges that such samples are undecidable and masks their loss; Soft Overlong Punishment builds a linear buffer ramp before the cliff, turning length control into a continuous signal. This post unpacks the mechanism, the formula, and the configuration values, and fits it together with Dr.GRPO and token-mean into a complete picture of the length problem."
+series: ["grpo"]
+summary: "Scoring truncated responses as wrong injects reward noise into the advantage. DAPO either masks their loss or adds a linear penalty ramp before the length cap."
 ---
+
+RL training needs a generation length cap, and truncated responses are treated as wrong by default—which misjudges 'undecidable' samples as 'wrong' ones and injects reward noise straight into the group-relative advantage. DAPO's two fixes: Overlong Filtering acknowledges that such samples are undecidable and masks their loss; Soft Overlong Punishment builds a linear buffer ramp before the cliff, turning length control into a continuous signal. This post unpacks the mechanism, the formula, and the configuration values, and fits it together with Dr.GRPO and token-mean into a complete picture of the length problem.
 
 > This post comes with a companion [interactive report](/reports/dapo-overlong-reward-shaping/) (in Chinese), featuring a drill-down length ruler, a three-piece breakdown of Equation 13, and a switchable comparison of the three handling approaches.
 
@@ -53,11 +55,11 @@ The three pieces, one at a time:
 
 The most ingenious thing about this design: **the cliff is not removed; a buffer ramp is built in front of it**. Going past $L_{max}$ is still a hard -1 penalty, just as harsh as the naive approach; but the model starts receiving a continuous "almost over budget" signal four thousand tokens before the cliff, and the signal strength is monotonically related to how far over budget it is. After within-group normalization, two responses—"12,500 tokens, nearly over" and "16,300 tokens, about to go over"—get a distinguishable advantage gap, from which the model can learn to **wrap up early** instead of only feeling the pain once it hits the cap. Length control turns from a binary event (not over / over) into a continuous, learnable task.
 
-## Placing It in the Full "Length Problem" Picture of This Series
+## Placing It in the Full "Length Problem" Picture
 
 The previous few posts in this series all had to do with length; this post covers the final aspect:
 
-- **Gradient dilution from $1/|y|$** (Dr.GRPO, the previous post): the longer a wrong response, the smaller the penalty on each token, so the model tends to make wrong responses overly long. Fix: change the normalization term;
+- **Gradient dilution from $1/|y|$** (Dr.GRPO, see the [normalization-bias post](/en/posts/dr-grpo-length-and-difficulty-bias/)): the longer a wrong response, the smaller the penalty on each token, so the model tends to make wrong responses overly long. Fix: change the normalization term;
 - **token-mean** (DAPO §3.3): instead of averaging within each sample first and then summing over the group, average uniformly over all tokens in the batch, which keeps long responses from taking an outsized weight in the loss. Fix: change the loss aggregation;
 - **Overlong** (DAPO §3.4, this post): the truncated samples produced by the generation length cap have undecidable rewards. Fix: mask them (filtering) or change the reward function (soft punishment).
 
@@ -69,7 +71,7 @@ One can also see a design orientation in DAPO: **better to use no signal than an
 
 First, **truncated samples are "undecidable" samples, and judging them as wrong is a misjudgment at the reward level**. The premise of RLVR is that rewards are verifiable—you assign a score only if you can judge right or wrong. For a truncated sample, the verifier never got to finish its judgment at all; it is neither a 1 nor a 0. Overlong Filtering acknowledges this undecidability, while Soft Punishment introduces a new decidable dimension (length itself). Both approaches are consistent with the principle that "rewards must be verifiable", whereas the naive punitive reward violates it.
 
-Second, **the fact that entropy is more stable after overlong handling matters more than it appears**. Figure 5(b) shows that the actor's entropy curve is smoother after shaping. This indicates that the chaos near the length cap (high-quality long reasoning that suddenly gets penalized, responses forced into hasty endings) doesn't merely distort the reward; it also adds exploration noise. Read this together with the earlier post on Clip-Higher (entropy collapse): entropy can collapse when wrongly suppressed by the optimizer, and it can also swing wildly when disturbed by reward noise. Entropy monitoring has to be analyzed together with the quality of reward judgments.
+Second, **the fact that entropy is more stable after overlong handling matters more than it appears**. Figure 5(b) shows that the actor's entropy curve is smoother after shaping. This indicates that the chaos near the length cap (high-quality long reasoning that suddenly gets penalized, responses forced into hasty endings) doesn't merely distort the reward; it also adds exploration noise. Read this together with the [Clip-Higher post](/en/posts/dapo-clip-higher-entropy-collapse/) (entropy collapse): entropy can collapse when wrongly suppressed by the optimizer, and it can also swing wildly when disturbed by reward noise. Entropy monitoring has to be analyzed together with the quality of reward judgments.
 
 Third, **the cache width and the masking ratio are two hyperparameters that need monitoring, and there is currently no public basis for them**. The paper doesn't say how the buffer-ramp length of 4,096/16,384 = 25% was chosen; during training, the truncation rate (the fraction of masked samples) drifts with the model's length behavior—when the masking rate is too high, the effective batch shrinks and the share of hard problems drops; when it is too low, that indicates length control has already broken down or the cap is set too loose. The DAPO paper has no monitoring curves for either number, so reproductions have to fill them in themselves.
 

@@ -3,22 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-(function () {
-  var saved;
-  try {
-    saved = localStorage.getItem('pref-theme');
-  } catch (_) {
-    // 禁用站点存储时回退到系统主题。
-  }
-  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.dataset.theme =
-    saved === 'dark' || (saved !== 'light' && prefersDark) ? 'dark' : 'light';
-})();
-</script>
 <title>一道题采几条回答 · GRPO 组大小 G 的三重身份 交互研报</title>
 <meta name="description" content="DeepSeekMath 每题采 64 条回答，教学实现默认 8 条，最新论文 2 条也声称够用——同一个旋钮差出 32 倍。G 是 GRPO 唯一的 baseline 来源和最大的算力开关，它到底买来了什么？本报告拆解 G 的三重身份：baseline 的样本数、有效梯度组的覆盖率、std 归一化的分母质量，外加成本账与 2-GRPO 的对冲观点。">
-<!-- Inlined ET Book removed; reports use the shared blog font stack. -->
 <style>
 /* ═══════════════════════════════════════════════════════════
    GRPO 组大小 G · 三重身份 交互研报（采样预算主题）
@@ -41,8 +27,8 @@
   --green: #008a6d;
   --gold: #b07a10;
   --neg: #b42318;           /* semantic negative — declines, risk, missing */
-  --serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --sans: "et-book", "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --mono: Menlo, Consolas, "SF Mono", "Liberation Mono", "DejaVu Sans Mono", ui-monospace, monospace;
   --shadow: 0 1px 2px rgba(21,33,26,.05), 0 8px 28px rgba(21,33,26,.07);
 }
@@ -628,31 +614,23 @@ body.motion .band .prose.in, body.motion .band .wide.in, body.motion .band .wide
 }
 
 </style>
-
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<!-- njx-report-theme -->
+<style>:root[data-theme="dark"]{--alt:#8ba9df;--alt-soft:#bccbf1;--blue-soft:#afdcc5;--copper:#d0af70;--gold:#d0af70;--green:#66b9a7;--neg:#d27b74;--pos:#77af93;--pos-soft:#afdcc5;}</style>
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Njx&#x27;Log">
+<meta property="og:title" content="一道题采几条回答 · GRPO 组大小 G 的三重身份 交互研报">
+<meta property="og:url" content="https://njx-njx.github.io/reports/grpo-group-size-tradeoffs/">
+<meta property="og:image" content="https://njx-njx.github.io/blog-cover.jpg">
+<meta property="og:description" content="DeepSeekMath 每题采 64 条回答，教学实现默认 8 条，最新论文 2 条也声称够用——同一个旋钮差出 32 倍。G 是 GRPO 唯一的 baseline 来源和最大的算力开关，它到底买来了什么？本报告拆解 G 的三重身份：baseline 的样本数、有效梯度组的覆盖率、std 归一化的分母质量，外加成本账与 2-GRPO 的对冲观点。">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon-32x32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="../report-shell.css">
+<link rel="stylesheet" href="/reports/report.css">
+<script src="/reports/report.js"></script>
+<!-- njx-report-theme -->
 </head>
-<body class="rpt-shell">
-<header class="rpt-site-header" data-report-shell>
-  <a class="rpt-home" href="/" aria-label="返回 Njx'Log 首页">
-    <img src="/blog-icon.png" alt="" width="28" height="28">
-    <span>Njx'Log</span>
-  </a>
-  <nav class="rpt-nav" aria-label="站点导航">
-    <a href="/posts/">文章</a>
-    <a href="/reports/" aria-current="page">报告</a>
-    <a href="/archives/">归档</a>
-    <a href="/search/">搜索</a>
-    <a href="/about/">关于</a>
-  </nav>
-  <div class="rpt-actions">
-    <button class="rpt-theme" type="button" data-report-theme-toggle aria-label="切换浅色或深色主题" title="切换主题">
-      <svg class="rpt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      <svg class="rpt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-    </button>
-  </div>
-</header>
+<body>
+<header id="njx-bar"></header>
 
 <!-- ═══ 封面 · 采样组点阵：同一道题（p=0.9），G=2 / 8 / 64 三组 rollout 逐格点亮；
      全对或全错的组是零梯度组（红框），其余是有效组（绿框）。点击画布重采一轮。
@@ -991,13 +969,13 @@ window.U = (() => {
   // NOTE key semantics: `red` is the LEGACY ACCENT SLOT (now forest green); true negatives
   // (zero-gradient / misjudgement / gaps) must use PAL.neg — audited per chart.
   const PAL = {
-    paper: "#f9fbf7", hi: "#eff4ea", ink: "#15211a", inkMd: "#43544a", inkLo: "#87958c",
-    line: "#d8e2d9", lineLo: "#edf3ed", red: "#1c7a4b", redHi: "#115c36",
-    blue: "#115c36", blueSoft: "#79c49e", neg: "#b42318",
-    pos: "#1c7a4b", posSoft: "#79c49e",       // 正样本 / 有效梯度组
-    alt: "#3d6fc9", altSoft: "#8fa8e8",       // 第二序列（缩放因子 / 对照）
-    negSoft: "#d98a80", gold: "#a07a10", green: "#007a63",
-    accent: "#1c7a4b", navy: "#15211a",
+    paper: RC("--paper"), hi: RC("--paper-hi"), ink: RC("--ink"), inkMd: RC("--ink-md"), inkLo: RC("--ink-lo"),
+    line: RC("--line"), lineLo: RC("--line-lo"), red: RD("#1c7a4b"), redHi: RD("#115c36"),
+    blue: RD("#115c36"), blueSoft: RD("#79c49e"), neg: RD("#b42318"),
+    pos: RD("#1c7a4b"), posSoft: RD("#79c49e"),       // 正样本 / 有效梯度组
+    alt: RD("#3d6fc9"), altSoft: RD("#8fa8e8"),       // 第二序列（缩放因子 / 对照）
+    negSoft: RD("#d98a80"), gold: RD("#a07a10"), green: RD("#007a63"),
+    accent: RD("#1c7a4b"), navy: RC("--ink"),
   };
   const SERIES = [PAL.pos, PAL.alt, PAL.inkMd, PAL.posSoft];
 
@@ -1158,7 +1136,7 @@ window.RPT_SOURCES = [
   let view = C.fit();
 
   const MONO = 'Menlo, Consolas, monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
   const P = 0.9;
   const GROUPS = [
     { g: 2, cols: 2, rows: 1, pz: "82%", note: "P(零梯度) = 0.9²+0.1²" },
@@ -1239,7 +1217,7 @@ window.RPT_SOURCES = [
     haloText(ctx, `ROLLOUT GROUPS · 同一道题采 G 条回答（单次正确率 p = ${P}）· 第 ${round} 轮`,
       44, y0 + 12, { font: `700 9.5px ${MONO}`, color: U.PAL.inkLo, align: "left" });
     const bwz = 150, bx = W - bwz - 16, by = y0 + 1;
-    pill(ctx, bx, by, bwz, 24, U.PAL.pos, "rgba(28,122,75,.07)", "点击画布 · 重采一轮", U.PAL.pos);
+    pill(ctx, bx, by, bwz, 24, U.PAL.pos, RA("#1c7a4b", .07), "点击画布 · 重采一轮", U.PAL.pos);
     hits.push({ x: bx, y: by, w: bwz, h: 24, act: "resample" });
 
     GROUPS.forEach((gr, gi) => {
@@ -1353,7 +1331,7 @@ window.RPT_SOURCES = [
   const C = U.bindCanvas(canvas);
   let view = C.fit();
   const MONO = 'Menlo, Consolas, monospace';
-  const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const SERIF = RS("--serif");
 
   let winId = "cover";
   let pulse = false;
@@ -1527,7 +1505,7 @@ window.RPT_SOURCES = [
 // 图表模块群：每图一个 IIFE + 宿主 div；数据一律取自 window.RPT，下钻经 U.showDrill。
 // ① metric-strip ② baseline-chart ③ zero-lab（计算器） ④ zero-table ⑤ std-chart ⑥ verdict-chart ⑦ budget-chart
 const MONO = 'Menlo, Consolas, monospace';
-const SERIF = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+const SERIF = RS("--serif");
 const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function halo(ctx, txt, x, y, opt = {}) {
@@ -2099,7 +2077,7 @@ const zeroP = (p, G) => Math.pow(p, G) + Math.pow(1 - p, G);
         ctx.lineTo(ex - ww / 2, wy + wh + wob);
         ctx.closePath(); ctx.fill();
         ctx.beginPath(); ctx.arc(ex, wy + wob - 4, 4.5, 0, U.TAU); ctx.fill();
-        halo(ctx, wt, ex, wy + wh / 2 + 3.5 + wob, { font: `700 8.6px ${MONO}`, color: "#fff", halo: false });
+        halo(ctx, wt, ex, wy + wh / 2 + 3.5 + wob, { font: `700 8.6px ${MONO}`, color: RC("--paper"), halo: false });
         ctx.globalAlpha = 1;
         if (d >= 1) hits.push({ x: ex - ww / 2, y: wy - 8, w: ww, h: wh + 12, act: "weight", s, i });
       });
@@ -2426,7 +2404,5 @@ const zeroP = (p, G) => Math.pow(p, G) + Math.pow(1 - p, G);
 })();
 
 </script>
-
-<script src="../report-shell.js" defer></script>
 </body>
 </html>

@@ -3,9 +3,11 @@ title: "Samples per Prompt: What GRPO's Group Size Buys"
 date: 2026-08-29T12:00:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "rlvr", "dapo"]
-categories: ["AI"]
-summary: "DeepSeekMath samples 64 responses per question, a teaching implementation defaults to 8, and the latest paper claims even 2 is enough — a 32x spread on the same knob. G is GRPO's only source of a baseline and its biggest compute lever, so what does it actually buy? This post unpacks G's three roles: the sample size of the control variate, the coverage of groups with effective gradients, and the quality of the std-normalization denominator, plus why dynamic sampling can replace a larger G with filtering."
+series: ["grpo"]
+summary: "64, 8 or 2 samples per prompt? G is GRPO's only baseline and its biggest compute knob. What it buys, and why dynamic sampling can stand in for a larger G."
 ---
+
+DeepSeekMath samples 64 responses per question, a teaching implementation defaults to 8, and the latest paper claims even 2 is enough — a 32x spread on the same knob. G is GRPO's only source of a baseline and its biggest compute lever, so what does it actually buy? This post unpacks G's three roles: the sample size of the control variate, the coverage of groups with effective gradients, and the quality of the std-normalization denominator, plus why dynamic sampling can replace a larger G with filtering.
 
 > This post has a companion [interactive report](/reports/grpo-group-size-tradeoffs/) (in Chinese), with a zero-gradient-group probability calculator, a dual-curve baseline chart, and a side-by-side comparison of the three camps' choices.
 
@@ -63,7 +65,7 @@ But there is another layer of coupling between filtering and $G$ that is easy to
 
 GRPO's advantage is also divided by the group std: $\hat{A}_i = (r_i - \text{mean})/\text{std}$. This std is likewise an estimate from $G$ samples and is very noisy when $G$ is small; for a uniform group the std is exactly 0, so implementations either add an eps or skip the group (setting a divide-by-zero trap).
 
-Dr.GRPO's critique of the std (which gets a dedicated post later in this series) — that when the std of all-correct or all-wrong groups approaches zero, the advantage is inflated to unreasonable magnitudes — is at its worst with small $G$: when $G$ is small, the std is more likely to land on a small value, and extreme advantages show up frequently. Extreme advantages in turn push up how far the ratio moves, indirectly raising the clip fraction (this chain is an inference: abnormally large $\hat{A}$ → $\pi_\theta$ moves more within a single step → $w_t$ hits the clipping bound sooner). In other words, part of the claim that "large $G$ stabilizes training" is really not about the baseline but about the std — two ledgers that the literature often lumps together.
+Dr.GRPO's critique of the std (see the [dedicated post](/en/posts/dr-grpo-length-and-difficulty-bias/)) — that when the std of all-correct or all-wrong groups approaches zero, the advantage is inflated to unreasonable magnitudes — is at its worst with small $G$: when $G$ is small, the std is more likely to land on a small value, and extreme advantages show up frequently. Extreme advantages in turn push up how far the ratio moves, indirectly raising the clip fraction (this chain is an inference: abnormally large $\hat{A}$ → $\pi_\theta$ moves more within a single step → $w_t$ hits the clipping bound sooner). In other words, part of the claim that "large $G$ stabilizes training" is really not about the baseline but about the std — two ledgers that the literature often lumps together.
 
 One more theoretical result worth knowing (arXiv:2502.18548, "What is the Alignment Objective of GRPO?"): the authors give a framework characterizing GRPO's stationary policies and point out that GRPO's way of aggregating preferences differs fundamentally from the logarithmic pooling of standard RLHF — $G$ affects not only the variance of the estimate but also the fixed point of the normalized objective itself. This is analytical work, and the conditions under which its conclusions hold (stationarity, infinitely many steps) are some distance from engineering practice, but it is a reminder of one thing: understanding $G$ purely as a "sampling budget" is incomplete.
 
