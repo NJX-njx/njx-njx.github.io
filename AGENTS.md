@@ -124,9 +124,12 @@ gh run list --limit 3
 
 - Put all CSS overrides in `assets/css/extended/*.css`; PaperMod loads them
   after theme styles. Do not edit theme CSS.
-- Match the established visual language: translucent dark surfaces
-  (`rgba(255,255,255,0.06)`), 1px `var(--border)` borders, small radii
-  (10–12px), `--secondary` text / `--primary` on hover.
+- The site follows the reader's light/dark preference, so colors come from
+  PaperMod's theme tokens (`--theme`, `--entry`, `--code-bg`, `--border`,
+  `--primary`, `--secondary`, `--tertiary`), never hard-coded light or dark
+  values. The visual language: `var(--entry)` surfaces, 1px `var(--border)`
+  borders, small radii (`var(--radius)` to 12px), `--secondary` text that
+  turns `--primary` on hover.
 
 ## Configuration Gotchas
 

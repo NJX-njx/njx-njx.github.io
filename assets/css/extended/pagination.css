@@ -1,4 +1,4 @@
-/* 分页按钮：与暗色主题一致的圆角矩形风格 */
+/* Pagination buttons: rounded rectangles that match the post cards in both themes. */
 
 .pagination a {
     display: inline-flex;
@@ -9,7 +9,7 @@
     padding: 0 14px;
     font-size: 18px;
     line-height: 1;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--entry);
     border: 1px solid var(--border);
     color: var(--secondary);
     border-radius: 10px;
@@ -17,6 +17,5 @@
 
 .pagination a:hover {
     color: var(--primary);
-    background: rgba(255, 255, 255, 0.12);
     border-color: var(--secondary);
 }
