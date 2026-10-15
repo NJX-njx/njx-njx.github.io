@@ -2,7 +2,6 @@
 title: "One Model, Two Probabilities: Cost of Mismatch"
 date: 2026-08-27T13:00:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "grpo", "tis", "precision"]
 categories: ["AI"]
 summary: "Rollouts run on an inference engine and training runs on a training engine, and the same model's numbers don't match across the two: the distribution you actually sample from deviates from the policy you assume, and nominally on-policy training quietly becomes off-policy. This post breaks down where the discrepancy comes from, its two consequences (biased gradients and a deployment gap), the lineage of algorithmic patches, and Sea AI Lab's conclusion tracing the root cause to BF16 precision."

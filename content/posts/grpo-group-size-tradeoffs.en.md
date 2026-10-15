@@ -2,7 +2,6 @@
 title: "Samples per Prompt: What GRPO's Group Size Buys"
 date: 2026-08-29T12:00:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "grpo", "rlvr", "dapo"]
 categories: ["AI"]
 summary: "DeepSeekMath samples 64 responses per question, a teaching implementation defaults to 8, and the latest paper claims even 2 is enough — a 32x spread on the same knob. G is GRPO's only source of a baseline and its biggest compute lever, so what does it actually buy? This post unpacks G's three roles: the sample size of the control variate, the coverage of groups with effective gradients, and the quality of the std-normalization denominator, plus why dynamic sampling can replace a larger G with filtering."

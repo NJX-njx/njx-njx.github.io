@@ -2,7 +2,6 @@
 title: "截断的回答该怎么判：DAPO Overlong 在修什么"
 date: 2026-08-30T12:05:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
 categories: ["AI"]
 summary: "RL 训练必须有生成长度上限，被截断的回答默认按答错处理——这会把“无法判定”的样本错判成“错”样本，把奖励噪声直接注入组内 advantage。DAPO 的两个方案：Overlong Filtering 承认不可判定、屏蔽其 loss；Soft Overlong Punishment 在悬崖前修一段线性缓冲坡，让长度控制变成连续信号。本文拆解机制、公式、配置数值，并把它和 Dr.GRPO、token-mean 拼成完整的长度问题图景。"

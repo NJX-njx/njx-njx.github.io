@@ -2,7 +2,6 @@
 title: "One Vote or Ten: token-mean vs sample-mean"
 date: 2026-08-30T12:05:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "grpo", "dapo", "dr-grpo"]
 categories: ["AI"]
 summary: "In the same batch, which contributes more to the gradient: a 500-token response or a 5000-token one? GRPO says they count equally, DAPO says the long one counts ten times as much, and both can justify their answer. This is a dispute over loss aggregation: sample-mean gives each response one vote, token-mean gives each token one vote. The DAPO paper (§3.3) says long-CoT settings must switch to token level, but the switch pushes the length skew from the response level to the question level. This post unpacks the three formulas, the two camps' arguments, and a tradeoff few people talk about."

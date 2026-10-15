@@ -2,7 +2,6 @@
 title: "A 7-Turn Failure: Assigning Blame in GRPO/GSPO"
 date: 2026-08-31T12:55:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "agentic-rl", "grpo", "credit-assignment"]
 categories: ["AI"]
 summary: "In single-turn RL the whole sequence shares one advantage, and nobody has ever lost sleep over it; in multi-turn agentic RL, the same trajectory can get the turn-1 search right, send the turn-2 query off course, and end with a wrong answer—so how to split a single trajectory reward becomes a real design decision. This post unpacks the formalism (action mask, trajectory probability), the credit-assignment spectrum (ORM/PRM/turn discounting/three middle-ground routes), and the opening GSPO-token leaves for multi-turn training."

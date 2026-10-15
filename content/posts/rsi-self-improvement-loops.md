@@ -2,7 +2,6 @@
 title: "「模型自己把自己练强」：RSI 与三个闭环"
 date: 2026-09-01T12:30:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "agentic-rl", "rsi", "self-improvement"]
 categories: ["AI"]
 summary: "RSI（递归自我改进）这个词在 2025-2026 年重新变热，但它指的东西经常被混为一谈。本文按从业者的两分法（改 harness 不改权重 vs 直接改权重）切入，把「自我改进」拆成数据闭环、奖励闭环、系统闭环三个层次，各自的成立条件、兑现程度和失效模式并不相同。"

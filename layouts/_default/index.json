@@ -1,57 +1,56 @@
-{{- $.Scratch.Set "index" slice -}}
+{{- define "partials/inline/search-text.html" -}}
+  {{- /* Math is indexed as its TeX source; rendering it would emit MathML and HTML copies of every formula. */}}
+  {{- $code := "\x60$1\x60" -}}
+  {{- $md := . | replaceRE `(?s)\$\$(.+?)\$\$` $code | replaceRE `\$([^$\n]+?)\$` $code -}}
+  {{- return trim ($md | markdownify | plainify | htmlUnescape) " \t\r\n" -}}
+{{- end -}}
+
+{{- define "partials/inline/search-record.html" -}}
+  {{- $text := partial "inline/search-text.html" .content -}}
+  {{- $record := "" -}}
+  {{- if $text -}}
+    {{- $record = merge .base (dict "section" .section "anchor" .anchor "content" $text) -}}
+  {{- end -}}
+  {{- return $record -}}
+{{- end -}}
+
+{{- $index := slice -}}
 {{- range site.RegularPages -}}
   {{- if and (not .Params.searchHidden) (ne .Layout `archives`) (ne .Layout `search`) (ne .Layout `site-search`) -}}
     {{- $page := . -}}
     {{- $tags := slice -}}
-    {{- with $page.Params.tags -}}
-      {{- range . -}}
-        {{- $tags = $tags | append (printf "%s" .) -}}
-      {{- end -}}
+    {{- range $page.Params.tags -}}
+      {{- $tags = $tags | append (printf "%s" .) -}}
     {{- end -}}
     {{- $date := "" -}}
     {{- if not $page.Date.IsZero -}}
       {{- $date = $page.Date.Format "2006-01-02" -}}
     {{- end -}}
-    {{- $summary := trim ($page.Summary | plainify | htmlUnescape) " \t\r\n" -}}
+    {{- $base := dict
+      "title" $page.Title
+      "permalink" $page.Permalink
+      "summary" (trim ($page.Summary | plainify | htmlUnescape) " \t\r\n")
+      "tags" $tags
+      "date" $date
+    -}}
     {{- $section := $page.Title -}}
     {{- $anchor := "" -}}
     {{- $content := "" -}}
     {{- range split $page.RawContent "\n" -}}
-      {{- $line := . -}}
-      {{- if findRE `^#{1,6}\s+.+` $line -}}
-        {{- $plainContent := trim ($content | markdownify | plainify | htmlUnescape) " \t\r\n" -}}
-        {{- if $plainContent -}}
-          {{- $.Scratch.Add "index" (dict
-            "title" $page.Title
-            "section" $section
-            "content" $plainContent
-            "permalink" $page.Permalink
-            "anchor" $anchor
-            "summary" $summary
-            "tags" $tags
-            "date" $date
-          ) -}}
+      {{- if findRE `^#{1,6}\s+.+` . -}}
+        {{- with partial "inline/search-record.html" (dict "base" $base "section" $section "anchor" $anchor "content" $content) -}}
+          {{- $index = $index | append . -}}
         {{- end -}}
-        {{- $section = trim ($line | replaceRE `^#{1,6}\s+` "" | replaceRE `\s+\{#[-A-Za-z0-9_]+\}\s*$` "" | replaceRE "`" "" | replaceRE `\[(.*?)\]\(.*?\)` "$1" | replaceRE `[*_~]` "" | htmlUnescape) " \t\r\n" -}}
+        {{- $section = trim (. | replaceRE `^#{1,6}\s+` "" | replaceRE `\s+\{#[-A-Za-z0-9_]+\}\s*$` "" | replaceRE "`" "" | replaceRE `\[(.*?)\]\(.*?\)` "$1" | replaceRE `[*_~]` "" | htmlUnescape) " \t\r\n" -}}
         {{- $anchor = $section | anchorize -}}
         {{- $content = "" -}}
       {{- else -}}
-        {{- $content = printf "%s\n%s" $content $line -}}
+        {{- $content = printf "%s\n%s" $content . -}}
       {{- end -}}
     {{- end -}}
-    {{- $plainContent := trim ($content | markdownify | plainify | htmlUnescape) " \t\r\n" -}}
-    {{- if $plainContent -}}
-      {{- $.Scratch.Add "index" (dict
-        "title" $page.Title
-        "section" $section
-        "content" $plainContent
-        "permalink" $page.Permalink
-        "anchor" $anchor
-        "summary" $summary
-        "tags" $tags
-        "date" $date
-      ) -}}
+    {{- with partial "inline/search-record.html" (dict "base" $base "section" $section "anchor" $anchor "content" $content) -}}
+      {{- $index = $index | append . -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- $.Scratch.Get "index" | jsonify -}}
+{{- $index | jsonify -}}

@@ -2,7 +2,6 @@
 title: "一票还是十票：token-mean 与 sample-mean 在争什么"
 date: 2026-08-30T12:05:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "grpo", "dapo", "dr-grpo"]
 categories: ["AI"]
 summary: "同一个 batch 里，500 token 的回答和 5000 token 的回答，谁对梯度的贡献大？GRPO 说一样大，DAPO 说长的大十倍，两家都能给出理由。这是损失聚合方式之争——sample-mean 每条回答一票，token-mean 每个 token 一票。DAPO 论文 §3.3 说长 CoT 场景必须换 token 级，但换完会把长度倾斜从 response 级赶到 question 级。本文拆解三个公式、两家的论证和一个少有人讲的 tradeoff。"
