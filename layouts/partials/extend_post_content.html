@@ -1,0 +1,21 @@
+{{- $page := . }}
+{{- range .GetTerms "series" }}
+{{- $parts := .Pages.ByDate }}
+{{- $index := 0 }}
+{{- range $i, $p := $parts }}{{ if eq $p $page }}{{ $index = add $i 1 }}{{ end }}{{ end }}
+<nav class="series-nav" aria-label="{{ i18n "series" }}">
+  <p class="series-nav-title">
+    {{ i18n "series" }} · <a href="{{ .Permalink }}">{{ .LinkTitle }}</a>
+    <span>{{ i18n "series_position" (dict "Index" $index "Count" (len $parts)) }}</span>
+  </p>
+  <ol>
+    {{- range $parts }}
+    {{- if eq . $page }}
+    <li aria-current="page">{{ .Title }}</li>
+    {{- else }}
+    <li><a href="{{ .Permalink }}">{{ .Title }}</a></li>
+    {{- end }}
+    {{- end }}
+  </ol>
+</nav>
+{{- end }}

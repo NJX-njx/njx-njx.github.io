@@ -1,15 +1,15 @@
 {{- define "main" }}
 
-{{- $headers := findRE "<h[1-6].*?>(.|\n])+?</h[1-6]>" .Content -}}
-{{- $hasToc := and (.Param "ShowToc") (ge (len $headers) 1) -}}
+{{- $hasToc := and (.Param "ShowToc") (ge (len .Fragments.HeadingsMap) 2) -}}
 {{- if $hasToc }}
 {{- $tocJs := resources.Get "js/toc-drawer.js" | minify | fingerprint }}
 <script src="{{ $tocJs.RelPermalink }}" integrity="{{ $tocJs.Data.Integrity }}" defer></script>
 {{- end }}
 
-<div class="{{ if $hasToc }}post-layout has-side-toc{{ else }}post-layout{{ end }}">
+<div class="post-layout{{ if $hasToc }} has-side-toc{{ end }}">
   {{- if $hasToc }}
-  <aside class="post-toc-sidebar" aria-label="Table of contents">
+  <aside class="post-toc" id="post-toc" aria-label="{{ i18n "toc" }}">
+    <button class="toc-close" type="button" aria-label="{{ i18n "toc_close" }}" data-toc-close>×</button>
     {{- partial "toc.html" . }}
   </aside>
   {{- end }}
@@ -36,7 +36,6 @@
       {{- if not (.Param "hideMeta") }}
       <div class="post-meta">
         {{- partial "post_meta.html" . -}}
-        {{- partial "translation_list.html" . -}}
         {{- partial "edit_post.html" . -}}
         {{- partial "post_canonical.html" . -}}
       </div>
@@ -46,12 +45,14 @@
     {{- partial "cover.html" (dict "cxt" . "IsSingle" true "isHidden" $isHidden) }}
 
     {{- if .Content }}
-    <div class="post-content">
+    <div class="post-content md-content">
       {{- if not (.Param "disableAnchoredHeadings") }}
       {{- partial "anchored_headings.html" .Content -}}
       {{- else }}{{ .Content }}{{ end }}
     </div>
     {{- end }}
+
+    {{- partial "extend_post_content.html" . }}
 
     <footer class="post-footer">
       {{- $tags := .Language.Params.Taxonomies.tag | default "tags" }}
@@ -75,16 +76,8 @@
 </div>
 
 {{- if $hasToc }}
-<button class="toc-drawer-toggle" type="button" aria-expanded="false" aria-controls="toc-drawer">
-  Contents
-</button>
-<div class="toc-drawer-backdrop" data-toc-close></div>
-<aside class="toc-drawer" id="toc-drawer" aria-label="Table of contents" aria-hidden="true">
-  <button class="toc-drawer-close" type="button" aria-label="Close table of contents" data-toc-close>
-    ×
-  </button>
-  {{- partial "toc.html" . }}
-</aside>
+<button class="toc-toggle" type="button" aria-expanded="false" aria-controls="post-toc">{{ i18n "toc" }}</button>
+<div class="toc-backdrop" data-toc-close></div>
 {{- end }}
 
 {{- end }}{{/* end main */}}

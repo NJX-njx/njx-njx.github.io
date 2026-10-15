@@ -1,0 +1,20 @@
+- id: toc_close
+  translation: "关闭目录"
+
+- id: search_input_label
+  translation: "搜索"
+
+- id: search_results_label
+  translation: "搜索结果"
+
+- id: search_no_results
+  translation: "没有找到相关内容"
+
+- id: open_report
+  translation: "打开报告"
+
+- id: series
+  translation: "系列"
+
+- id: series_position
+  translation: "第 {{ .Index }} 篇，共 {{ .Count }} 篇"
