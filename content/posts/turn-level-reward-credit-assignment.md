@@ -3,7 +3,6 @@ title: "7 轮交互失败了该怪谁：奖励归因怎么进 GRPO/GSPO"
 date: 2026-08-31T12:55:00+08:00
 draft: false
 tags: ["rl", "post-training", "agentic-rl", "grpo", "credit-assignment"]
-categories: ["AI"]
 summary: "单轮 RL 里 advantage 整条序列共享，从没人为难过；到了多轮 agentic RL，同一条轨迹里第 1 轮搜索做对了、第 2 轮 query 跑偏、最后答错——单一 trajectory reward 该怎么分摊，变成一个真实的设计决策。本文拆解形式化层（action mask、轨迹概率）、归因谱系（ORM/PRM/turn 折扣/三条中间路线）、以及 GSPO-token 为多轮留的那个口子。"
 ---
 

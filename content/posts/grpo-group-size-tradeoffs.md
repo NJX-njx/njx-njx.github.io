@@ -3,7 +3,6 @@ title: "一道题采几条回答：GRPO 组大小 G 买来了什么"
 date: 2026-08-29T12:00:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "rlvr", "dapo"]
-categories: ["AI"]
 summary: "DeepSeekMath 每题采 64 条回答，教学实现默认 8 条，最新论文 2 条也声称够用——同一个旋钮差出 32 倍。G 是 GRPO 唯一的 baseline 来源和最大的算力开关，它到底买来了什么？本文拆解 G 的三重身份：控制变量的样本数、有效梯度组的覆盖率、std 归一化的分母质量，以及动态采样为什么能用过滤代替加大 G。"
 ---
 

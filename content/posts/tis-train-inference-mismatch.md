@@ -3,7 +3,6 @@ title: "同一个模型，两个概率：训练推理不一致的代价"
 date: 2026-08-27T13:00:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "tis", "precision"]
-categories: ["AI"]
 summary: "rollout 用推理引擎、训练用训练引擎，同一个模型在两边的数值对不上：实际采样的分布与你假设的策略存在偏差，名义上的 on-policy 悄悄变成 off-policy。本文拆解差异来源、有偏梯度与部署差距两个后果、算法补丁谱系，以及 Sea AI Lab 归到 BF16 精度上的根源结论。"
 ---
 

@@ -3,7 +3,6 @@ title: "“答错就写长一点”：GRPO 归一化项在扭曲什么"
 date: 2026-08-29T12:05:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dr-grpo", "normalization"]
-categories: ["AI"]
 summary: "R1-Zero 的‘长度与奖励齐涨’被当成了推理涌现的标志性曲线，Sea AI Lab 的 Dr.GRPO 论文指出其中一半涨幅可能是优化器自己的偏好：1/|y| 让模型在答错时倾向于写长，除以 std 让极端难度的题拿走更多权重。两个归一化项、两种偏差的机制拆解，外加一个藏在 masked_mean 里的实现层偏差。"
 ---
 

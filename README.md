@@ -94,7 +94,6 @@ title: "Post Title"
 date: 2026-02-07T08:00:00+08:00
 draft: false
 tags: ["hugo", "blog"]
-categories: ["Tech"]
 summary: "Short description for lists and search results."
 ---
 ```

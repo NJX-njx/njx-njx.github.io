@@ -6,6 +6,8 @@ defaultContentLanguageInSubdir: false
 hasCJKLanguage: true
 
 enableRobotsTXT: true
+taxonomies:
+  tag: tags
 buildDrafts: false
 buildFuture: false
 buildExpired: false
@@ -113,7 +115,6 @@ languages:
 
 params:
   env: production
-  title: Njx's Blog
   keywords: [Harness, Model Architecture, Mid-training, Post-training, Evals, Benchmarks, Reasoning RL, Agentic RL, RSI, Rollout System, Data Synthesis]
   author: njx
   defaultTheme: auto
@@ -127,7 +128,6 @@ params:
   ShowCodeCopyButtons: true
   ShowWordCount: true
   ShowRssButtonInSectionTermList: true
-  UseHugoToc: true
   disableSpecial1stPost: false
   disableScrollToTop: false
   disableAnchoredHeadings: true
@@ -135,7 +135,6 @@ params:
   hidemeta: false
   hideSummary: false
   showtoc: true
-  tocopen: true
 
   assets:
     favicon: "/blog-icon.png"

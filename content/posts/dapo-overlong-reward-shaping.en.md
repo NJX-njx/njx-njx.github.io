@@ -3,7 +3,6 @@ title: "Judging Truncated Answers: DAPO's Overlong Fix"
 date: 2026-08-30T12:05:00+08:00
 draft: false
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
-categories: ["AI"]
 summary: "RL training needs a generation length cap, and truncated responses are treated as wrong by default—which misjudges 'undecidable' samples as 'wrong' ones and injects reward noise straight into the group-relative advantage. DAPO's two fixes: Overlong Filtering acknowledges that such samples are undecidable and masks their loss; Soft Overlong Punishment builds a linear buffer ramp before the cliff, turning length control into a continuous signal. This post unpacks the mechanism, the formula, and the configuration values, and fits it together with Dr.GRPO and token-mean into a complete picture of the length problem."
 ---
 

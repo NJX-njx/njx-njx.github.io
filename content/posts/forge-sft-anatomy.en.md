@@ -3,7 +3,6 @@ title: "Anatomy of a Minimal SFT Trainer: Every Decision"
 date: 2026-08-28T20:12:53+08:00
 draft: false
 tags: ["sft", "post-training", "forge", "engineering", "llm"]
-categories: ["AI"]
 summary: "TRL's SFTTrainer can train in a single line, so why does anyone still hand-write an SFT loop? I put every Stage 1 decision in the forge repo on the table one by one (chat template, prompt masking, collate and loss, bf16, LR schedule, data, validation) and check each against two textbooks (rlhf-book, hands-on-modern-rl), four production frameworks (alignment-handbook, trl, open-instruct, OpenRLHF), and six information sources: which decisions have consensus, which are genuine recipe disputes, and which the two textbooks each gloss over."
 ---
 
