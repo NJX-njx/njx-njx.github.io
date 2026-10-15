@@ -1,6 +1,7 @@
 ---
 title: "关于"
 summary: "关于 Jiaxing Ni"
+aliases: ["/faq/"]
 hidemeta: true
 ShowToc: true
 ShowReadingTime: false
@@ -62,9 +63,19 @@ ShowShareButtons: false
 
 一本关于 LLM 训练背后机制的田野笔记：一个旋钮到底做了什么，拧动它时什么会坏，指标又说了什么。
 
-话题围绕 **harness 与 rollout 系统、模型架构、mid-training 与后训练、评测与 benchmark、推理 RL 与 agentic RL、RSI、数据合成** 展开。较长的文章通常配有交互报告版，见[报告](/reports/)。
+话题围绕 **harness 与 rollout 系统、模型架构、mid-training 与后训练、评测与 benchmark、推理 RL 与 agentic RL、RSI、数据合成** 展开。较长的文章通常配有交互报告版，公式变成滑杆，曲线变成探针，见[报告](/reports/)。
 
 博客用 [Hugo](https://gohugo.io/) 和 [PaperMod](https://github.com/adityatelange/hugo-PaperMod) 搭建，托管在 [GitHub Pages](https://pages.github.com/)，源码公开在 [GitHub](https://github.com/NJX-njx/njx-njx.github.io)。
+
+---
+
+## 常见问题
+
+**哪些内容不会写在这里？** 我尽量不写泛泛的 AI 评论。如果一篇文章没有代码、没有实验痕迹、没有评测细节，也没有诚实交代的不确定性，它大概属于别的地方。
+
+**可以引用、翻译或转发文章吗？** 可以。请保留原文链接，也欢迎告诉我它流传到了哪里。我喜欢看到笔记出现在另一张书桌上。
+
+**愿意合作或交流吗？** 愿意，尤其是 RL 基础设施（rollout 与 serving）、后训练配方、评测设计、agent 系统，以及那些让研究更好用的奇怪小工具。
 
 ---
 

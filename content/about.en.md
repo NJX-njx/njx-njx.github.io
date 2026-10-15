@@ -1,6 +1,7 @@
 ---
 title: "About"
 summary: "About Jiaxing Ni"
+aliases: ["/faq/"]
 hidemeta: true
 ShowToc: true
 ShowReadingTime: false
@@ -62,9 +63,19 @@ Tools are not ornaments here. A tool earns its place when the next experiment be
 
 A field notebook on the mechanisms behind LLM training: what a knob actually does, what breaks when you turn it, and what the metric said.
 
-Topics orbit **harness and rollout systems, model architecture, mid-training and post-training, evals and benchmarks, reasoning RL and agentic RL, RSI, and data synthesis**. Longer posts often come with an interactive report edition — see [Reports](/reports/).
+Topics orbit **harness and rollout systems, model architecture, mid-training and post-training, evals and benchmarks, reasoning RL and agentic RL, RSI, and data synthesis**. Longer posts often come with an interactive report edition, where formulas become sliders and curves become probes — see [Reports](/en/reports/).
 
 Built with [Hugo](https://gohugo.io/) and [PaperMod](https://github.com/adityatelange/hugo-PaperMod), hosted on [GitHub Pages](https://pages.github.com/), and open source on [GitHub](https://github.com/NJX-njx/njx-njx.github.io).
+
+---
+
+## FAQ
+
+**What will you not write here?** I try not to write generic AI commentary. If a post has no code, no experiment trace, no eval detail, or no honest uncertainty, it probably belongs somewhere else.
+
+**Can I cite, translate, or share a post?** Yes. Keep a link to the original post, and feel free to tell me where it traveled. I like seeing notes find another desk.
+
+**Are you open to collaboration or conversation?** Yes, especially around RL infrastructure (rollout and serving), post-training recipes, eval design, agentic systems, and strange little tools that make research easier to use.
 
 ---
 
