@@ -34,19 +34,28 @@ content/about(.en).md       About page（包含 FAQ）
 content/search(.en).md      Search page (layout: site-search)
 content/archives(.en).md    Archive page (layout: archives)
 content/reports(.en).md     Reports listing (layout: reports)
+content/series/<key>/       Series titles (_index.md / _index.en.md); tags/ and
+                            posts/ hold plain _index(.en).md section pages
 hugo.yaml                   Site configuration; per-language menus/params
 i18n/zh.yaml, i18n/en.yaml  Strings used by our own templates
-layouts/partials/header.html  Theme header + page-level language switch
 layouts/_default/           Layout overrides:
   reports.html              Reports cards: posts that have static/reports/<slug>/
-  site-search.html          Chunk-based search UI
+  site-search.html          Chunk-based search UI (loads site-search.css below)
   index.json                Chunk-based search index (heading-section records)
-  _markup/render-passthrough.html  Build-time math rendering (KaTeX)
   single.html               Theme single page + side TOC and drawer
-  partials/                 header.html, social_icons.html (X logo), toc.html, ...
+  _markup/render-passthrough.html      Build-time math rendering (KaTeX)
+  _markup/render-passthrough.rss.xml   Same math rendering for RSS (MathML)
+  _markup/render-link.rss.xml          Site links made absolute in RSS
+layouts/partials/           header.html (theme header + page-level language
+                            switch), social_icons.html (X logo), toc.html,
+                            extend_head.html (KaTeX CSS on pages with math),
+                            extend_post_content.html (series nav box)
 assets/css/extended/        Auto-loaded after theme styles:
   pagination.css            Pagination button overrides
   side-toc.css              Side TOC layout + drawer (desktop/mobile)
+  math.css                  Display formulas scroll sideways on narrow screens
+  series.css                Series nav box styling
+assets/css/site-search.css  Search page styles (loaded only by site-search.html)
 assets/js/                  site-search.js (search page, bundled with js.Build),
                             search-core.js (ranking, shared with the test),
                             toc-drawer.js, report.js (report theme helpers)
@@ -57,7 +66,8 @@ scripts/                    search_quality.mjs (ranking test),
                             adapt_report.py (fits a report into the blog theme)
 static/reports/<slug>/      中文交互报告 HTML（依赖共享 report.css/report.js）
 static/blog-icon.png        Site logo + favicon source (avatar from cover art)
-static/favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png
+static/favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png,
+  safari-pinned-tab.svg     Theme head links mask-icon by default convention
 static/blog-cover.jpg       OG share image
 .github/workflows/hugo.yaml Deploy workflow
 .github/copilot-instructions.md  Pointer to this file (do not duplicate content there)

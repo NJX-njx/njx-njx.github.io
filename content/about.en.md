@@ -11,31 +11,28 @@ ShowShareButtons: false
 ---
 ## Jiaxing Ni
 
-19, post-training researcher @ ByteDance. CS at Beijing Institute of Technology, Xu Teli Elite Class.
+19, working on the engineering side of LLM training — harness, evals, post-training, and every pipeline where the three meet.
 
-I work where **harness, eval, and post-training** meet — the engineering side of modern LLM training. Good systems feel quiet on the surface. Underneath, there are rollout pipelines, reward traces, eval slices, and a few scripts watching the night shift.
-
----
-
-## Now
-
-Post-train researcher @ ByteDance. Current research threads:
-
-- A full **harness–eval–post-train rollout system**
-- **Interpretable generalization** in evals
-- High-quality **SFT data synthesis**
-- **Agentic RL** environment construction
+Good systems feel quiet on the surface. Underneath: rollout pipelines, reward traces, eval slices, and a few scripts watching the night shift. Most of my work is making those things tell the truth.
 
 ---
 
-## Before
+## What I Work On
 
-- **Moonshot AI (Kimi)** — researcher: harness (swarm, Kimi work memory), post-training (rollout system), eval (science / multi-turn / single-turn).
-- **paperboy** — agent engineer: a context OS built on user-context modeling.
-- **ByteDance Xpert** — expert data pipeline and translation bench.
-- **Maxagent** — eval research: deterministic evidence extraction from transcripts, and why an eval generalizes.
-- **PKU Wangxuan Institute** — research intern on fine-grained sports video understanding: 3D pose reconstruction, action localization.
-- Earlier fragments: quadruped robot simulation training and vision models (Baidu Software Cup), PaddlePaddle / PaddleDetection modules, and a series of agent architectures — AI notes, research reading assistant, code generation, video, companion.
+One through-line: turn real-world usage traces into signals that training can learn from.
+
+- Dig model failure patterns out of production sessions and user feedback, then forge them into benches and multi-turn data
+- Build executable verifiers for agent tasks — layered scoring gates, mutation-test self-checks, judging noise that can be peeled out
+- An eval owes more than a score; it should answer why it generalizes
+- RL environments, rollout systems, SFT data synthesis — every gram of post-training signal should have a provenance
+
+---
+
+## Traces
+
+Every stop so far circles the same problem: agent harness and swarm evals, distilling a model's recurring failure modes out of a hundred-thousand-odd multi-turn sessions; a pretraining data foundation, plus an attempt to give a base model the "taste" to judge training recipes; the mechanics of evaluation itself — scores anchored to evidence, user satisfaction made interpretable through the geometry of a conversation; and further back, a system that gathered personal context scattered across macOS into something trustworthy, permissioned, and actionable.
+
+Which banners these happened under, I'll leave off the page — the work matters more than the names. Details are for offline conversation.
 
 ---
 
@@ -43,19 +40,7 @@ Post-train researcher @ ByteDance. Current research threads:
 
 - **Identity:** researcher, builder, engineer.
 - **Base:** Beijing / Shanghai.
-- **Current focus:** rollout systems, post-training recipes, evals and benchmarks, reasoning RL and agentic RL.
 - **Taste:** prototype quickly, measure honestly, keep only what survives contact with real edges.
-
----
-
-## Toolkit
-
-- **Languages:** Python, C++.
-- **ML:** PyTorch, PaddlePaddle, Transformers, DeepSpeed.
-- **Infra:** Docker, Git, distributed training/inference.
-- **Agents:** harness design, tool loops, context engineering, eval pipelines.
-
-Tools are not ornaments here. A tool earns its place when the next experiment becomes less vague.
 
 ---
 
@@ -84,3 +69,4 @@ Built with [Hugo](https://gohugo.io/) and [PaperMod](https://github.com/adityate
 - [GitHub](https://github.com/NJX-njx)
 - [Hugging Face](https://huggingface.co/NJX-njx)
 - [X](https://x.com/NJX_njx_ai)
+- Email: [njxnjxai@gmail.com](mailto:njxnjxai@gmail.com)
