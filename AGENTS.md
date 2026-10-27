@@ -171,6 +171,10 @@ gh run list --limit 3
   and no client-side KaTeX script.
 - The Search page must keep `layout: "site-search"` (not `search`) so
   PaperMod's built-in fastsearch script does not double-bind the input.
+- Goldmark's taskList extension is disabled (`taskList: false` in
+  `hugo.yaml`): it parses any list item starting with `[X]`/`[ ]` as a
+  checkbox even without a trailing space, which silently ate the X link on
+  the about page. No content uses task lists; re-enable with care.
 - Social icons are customized in `layouts/partials/social_icons.html`;
   the `x`/`twitter` name renders the current X logo.
 - Favicon/logo/OG image are generated from the cover artwork; regenerate
