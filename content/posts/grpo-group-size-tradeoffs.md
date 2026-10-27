@@ -2,11 +2,12 @@
 title: "一道题采几条回答：GRPO 组大小 G 买来了什么"
 date: 2026-08-29T12:00:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "grpo", "rlvr", "dapo"]
-categories: ["AI"]
-summary: "DeepSeekMath 每题采 64 条回答，教学实现默认 8 条，最新论文 2 条也声称够用——同一个旋钮差出 32 倍。G 是 GRPO 唯一的 baseline 来源和最大的算力开关，它到底买来了什么？本文拆解 G 的三重身份：控制变量的样本数、有效梯度组的覆盖率、std 归一化的分母质量，以及动态采样为什么能用过滤代替加大 G。"
+series: ["grpo"]
+summary: "每题采 64、8 还是 2 条回答？G 是 GRPO 唯一的 baseline 来源和最大的算力开关，它到底买来了什么？"
 ---
+
+DeepSeekMath 每题采 64 条回答，教学实现默认 8 条，最新论文 2 条也声称够用——同一个旋钮差出 32 倍。G 是 GRPO 唯一的 baseline 来源和最大的算力开关，它到底买来了什么？本文拆解 G 的三重身份：控制变量的样本数、有效梯度组的覆盖率、std 归一化的分母质量，以及动态采样为什么能用过滤代替加大 G。
 
 > 本文有配套的[交互报告](/reports/grpo-group-size-tradeoffs/)，含零梯度组概率计算器、baseline 双曲线与三家取值对照。
 
@@ -64,7 +65,7 @@ $$0 < \left|\{o_i \mid \texttt{is\_equivalent}(a, o_i)\}\right| < G$$
 
 GRPO 的 advantage 还要除以组内 std：$\hat{A}_i = (r_i - \text{mean})/\text{std}$。这个 std 同样是 $G$ 个样本的估计，$G$ 小时噪声很大；全同组 std 直接是 0，实现上要么加 eps 要么跳过（埋下除零的坑）。
 
-Dr.GRPO（本周后面会专门写）对 std 的批评——全对全错组 std 趋零时 advantage 被放大到不合理量级——在小 $G$ 时最严重：$G$ 小，std 落在小值的概率高，极端 advantage 出现得频繁。极端 advantage 又会推高 ratio 的移动幅度，间接抬高 clip 触发率（此链条为推断：$\hat{A}$ 异常大 → 单步内 $\pi_\theta$ 移动多 → $w_t$ 更快碰到裁剪边界）。也就是说，"大 $G$ 稳定训练"的说法有一部分其实不是 baseline 的事，是 std 的事——这两笔账在文献里经常被混在一起。
+Dr.GRPO（见[专门的一篇](/posts/dr-grpo-length-and-difficulty-bias/)）对 std 的批评——全对全错组 std 趋零时 advantage 被放大到不合理量级——在小 $G$ 时最严重：$G$ 小，std 落在小值的概率高，极端 advantage 出现得频繁。极端 advantage 又会推高 ratio 的移动幅度，间接抬高 clip 触发率（此链条为推断：$\hat{A}$ 异常大 → 单步内 $\pi_\theta$ 移动多 → $w_t$ 更快碰到裁剪边界）。也就是说，"大 $G$ 稳定训练"的说法有一部分其实不是 baseline 的事，是 std 的事——这两笔账在文献里经常被混在一起。
 
 另外值得知道的一个理论结果（arXiv:2502.18548，"What is the Alignment Objective of GRPO?"）：作者给出了刻画 GRPO 稳态策略的框架，指出 GRPO 的偏好聚合方式与 RLHF 标准的对数池化有本质差异——$G$ 影响的不只是估计的方差，还涉及归一化目标本身的不动点。这篇是分析性工作，结论的适用边界（稳态、无穷步）与工程实践有距离，但它提醒一点：把 $G$ 纯粹当成"采样预算"来理解是不完整的。
 
@@ -80,7 +81,7 @@ Dr.GRPO（本周后面会专门写）对 std 的批评——全对全错组 std 
 
 我的判断：**$G$ 没有普适最优，因为它同时在三张预算表上花钱**——baseline 精度（$\sigma_r/\sqrt{G}$，收益边际递减最快）、有效组覆盖（$p^G$，在边界难度上收益最持久）、探索预算（组内含正样本的概率，硬题上几乎是线性的）。实践默认值（8–16）是在"中等难度分布 + 动态采样兜底"下的平衡点；64 是 DeepSeekMath 时代没有动态采样、没有 clip 改造时的朴素选择；2 是"对比目标"视角下的理论极限值，工程上还没人敢在生产规模用。选 $G$ 之前先问自己三张表里哪张是瓶颈：题太难（探索预算紧）就加大 $G$ 或上动态采样，题太杂（prompt 多样性紧）就把预算让给 prompt 数，训练不稳先查 std 和 clip 触发率，别急着加 $G$。
 
-本周前四篇正好连成一条线：Clip-Higher 修 token 级裁剪边界，GSPO 换比率单位，TIS 堵训推数值缝，本篇回到信号的源头——采样预算怎么分。GRPO 的每个"显然如此"的默认配置，拆开来都有一笔自己的账。
+这个系列的前四篇正好连成一条线：Clip-Higher 修 token 级裁剪边界，GSPO 换比率单位，TIS 堵训推数值缝，本篇回到信号的源头——采样预算怎么分。GRPO 的每个"显然如此"的默认配置，拆开来都有一笔自己的账。
 
 ## 未决问题
 
@@ -94,6 +95,6 @@ Dr.GRPO（本周后面会专门写）对 std 的批评——全对全错组 std 
 - DAPO 论文：[arXiv:2503.14476](https://arxiv.org/abs/2503.14476)，Dynamic Sampling 约束见公式 8，奖励 ±1 见公式 7
 - It Takes Two: Your GRPO Is Secretly DPO：[arXiv:2510.00977](https://arxiv.org/abs/2510.00977)
 - What is the Alignment Objective of GRPO?：[arXiv:2502.18548](https://arxiv.org/abs/2502.18548)
-- RLHF Book 第 6 章（baseline 无偏条件、RLOO 留一公式）：本地仓库 `book-zh/chapters/06-policy-gradients.md`；教学代码默认 `num_rollouts: 8`：`code/policy_gradients/configs/`
+- RLHF Book 第 6 章（baseline 无偏条件、RLOO 留一公式）：[`book/chapters/06-policy-gradients.md`](https://github.com/natolambert/rlhf-book/blob/main/book/chapters/06-policy-gradients.md)；教学代码默认 `num_rollouts: 8`：[`code/policy_gradients/configs/`](https://github.com/natolambert/rlhf-book/tree/main/code/policy_gradients/configs)
 - 零梯度组概率表、误判丢弃、clip 触发率链条为本文推算/推断，文中已逐处标注
 - 前篇：[比率用错了单位：GSPO 把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)

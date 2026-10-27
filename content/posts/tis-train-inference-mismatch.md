@@ -2,11 +2,12 @@
 title: "同一个模型，两个概率：训练推理不一致的代价"
 date: 2026-08-27T13:00:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "grpo", "tis", "precision"]
-categories: ["AI"]
-summary: "rollout 用推理引擎、训练用训练引擎，同一个模型在两边的数值对不上：实际采样的分布与你假设的策略存在偏差，名义上的 on-policy 悄悄变成 off-policy。本文拆解差异来源、有偏梯度与部署差距两个后果、算法补丁谱系，以及 Sea AI Lab 归到 BF16 精度上的根源结论。"
+series: ["grpo"]
+summary: "rollout 与训练用不同引擎，同一个模型算出两个概率，on-policy 悄悄变成 off-policy。差异从哪来、代价是什么、怎么补。"
 ---
+
+rollout 用推理引擎、训练用训练引擎，同一个模型在两边的数值对不上：实际采样的分布与你假设的策略存在偏差，名义上的 on-policy 悄悄变成 off-policy。本文拆解差异来源、有偏梯度与部署差距两个后果、算法补丁谱系，以及 Sea AI Lab 归到 BF16 精度上的根源结论。
 
 > 本文有配套的[交互报告](/reports/tis-train-inference-mismatch/)，含可下钻的双引擎机制图、补丁谱系对比与精度位域拆解。
 
@@ -25,7 +26,7 @@ Defog（Feng Yao，字节 Seed）2025 年 8 月的技术报告《Your Efficient 
 - **计算方式不同**。推理是自回归逐 token 生成；训练是 teacher-forcing 下将整段序列并行前向计算。对于同一串 token，不同的计算过程采用不同的浮点归约顺序，误差累积方式也不一样。
 - **kernel 实现不同**。推理引擎的 RMSNorm、RoPE、attention kernel 针对延迟和吞吐量做过专门调优，与训练侧实现存在微小数值差。
 - **并行切分不同**。训练和推理采用不同的 tensor 并行与数据并行切分，跨卡归约的顺序不同会改变浮点结果。
-- **MoE 的 top-k 门控对细微变化敏感**。专家选择对 logits 的微小波动敏感，使用同一权重、两种引擎各计算一遍，选出的专家也可能不同。昨天介绍的 GSPO，其 10% 专家漂移出现在“更新前与更新后”的时间维度上；这里指的是“同一权重、两种引擎”的空间维度。门控敏感性会在两个维度分别引发一次差异。
+- **MoE 的 top-k 门控对细微变化敏感**。专家选择对 logits 的微小波动敏感，使用同一权重、两种引擎各计算一遍，选出的专家也可能不同。[GSPO 那篇](/posts/gspo-sequence-level-importance-sampling/)提到的 10% 专家漂移出现在“更新前与更新后”的时间维度上；这里指的是“同一权重、两种引擎”的空间维度。门控敏感性会在两个维度分别引发一次差异。
 - **精度格式的尾数太短**。默认的 BF16 只有 7 位尾数，这些引文涉及的各处微小差异都没有足够的数值精度余量，最终造成明显偏差。这一条是全文关键，后面细说。
 
 于是推理引擎实际对应一个与训练引擎**数值上不同的策略**，记作 $\mu$。数据从 $\mu$ 采样，梯度却按 $\pi$ 的假设来算。on-policy 与 off-policy 的边界，最终取决于 kernel 的浮点行为。
@@ -54,7 +55,7 @@ $$\arg\max_\theta \mathbb{E}_{y\sim\mu}R \neq \arg\max_\theta \mathbb{E}_{y\sim\
 
 **补丁一，token 级截断校正（Defog）**。对每个 token 计算训练概率与推理概率之比 $\rho_t = \pi(y_t|x,y_{<t},\theta')/\mu(y_t|x,y_{<t},\theta')$，截断到上限 $C$（实验取 3）后，乘进 GRPO 的每一项梯度。注意分母 $\mu$ 是推理引擎的概率，因此必须让训练引擎对同一条样本重新进行一次前向计算，才能得到分子，额外带来约 25% 的训练开销（按照反向传播的计算量约等于 2 倍前向计算量来估算）。效果：崩溃被推迟，峰值到 82%（VeRL）/ 88%（Oat）后照崩。
 
-**补丁二，序列级掩码校正**（《When Speed Kills Stability》，Liu 等）。作者指出 token 级校正的梯度有偏，将校正方式改为对整条序列只计算一个比率 $\rho = \pi(y|x,\theta')/\mu(y|x,\theta')$，超过 $C$ 就把整条序列的梯度掩掉。思路与昨天介绍的 GSPO 一脉相承（不过，GSPO 的 $s_i$ 只作为优化对象，这里的 $\rho$ 则是校正因子）。它是 BF16 下唯一未崩溃的算法补丁，代价是序列级比率方差大、收敛慢，部署差距同样原样存在——峰值只有 95%/34%。
+**补丁二，序列级掩码校正**（《When Speed Kills Stability》，Liu 等）。作者指出 token 级校正的梯度有偏，将校正方式改为对整条序列只计算一个比率 $\rho = \pi(y|x,\theta')/\mu(y|x,\theta')$，超过 $C$ 就把整条序列的梯度掩掉。思路与 GSPO 一脉相承（不过，GSPO 的 $s_i$ 只作为优化对象，这里的 $\rho$ 则是校正因子）。它是 BF16 下唯一未崩溃的算法补丁，代价是序列级比率方差大、收敛慢，部署差距同样原样存在——峰值只有 95%/34%。
 
 两个补丁的共同点：都接受 $\mu \neq \pi$ 的事实并逐样本补偿，而要付出新的算力成本并引入方差，而且都无法解决部署差距。
 
@@ -70,12 +71,12 @@ BF16 与 FP16 同样 16 位，分配不同。BF16 用 8 位指数 + 7 位尾数�
 
 ## 与前两篇对照着看
 
-本周三篇文章恰好能从四个层面看待同一问题：
+这个系列的三篇文章恰好能从四个层面看待同一问题：
 
-- **DAPO Clip-Higher**（前天）：在假定训练与推理一致的前提下，调整算法内部的 clip 边界来解决熵坍缩；
-- **GSPO**（昨天）：将优化目标改为使用序列级单位，并对 $\mu$ 的差异具有天然鲁棒性，同时还能容忍 MoE 路由漂移；
-- **TIS 算法补丁**（今天上半篇）：接受 $\mu \neq \pi$ 的事实，逐样本做重要性采样补偿；
-- **FP16 与 kernel 对齐**（今天下半篇）：让 $\mu \approx \pi$，直接消除不一致。
+- **DAPO Clip-Higher**：在假定训练与推理一致的前提下，调整算法内部的 clip 边界来解决熵坍缩；
+- **GSPO**：将优化目标改为使用序列级单位，并对 $\mu$ 的差异具有天然鲁棒性，同时还能容忍 MoE 路由漂移；
+- **TIS 算法补丁**（本文上半篇）：接受 $\mu \neq \pi$ 的事实，逐样本做重要性采样补偿；
+- **FP16 与 kernel 对齐**（本文下半篇）：让 $\mu \approx \pi$，直接消除不一致。
 
 对照这个脉络，GSPO §5.4 “序列级似然对训练与推理的精度差异有很高容忍度”不再只是附带好处——它是算法层面对训练与推理不一致（TIS）问题的直接回应。
 
@@ -99,5 +100,5 @@ BF16 与 FP16 同样 16 位，分配不同。BF16 用 8 位指数 + 7 位尾数�
 - Defog（Feng Yao 等）：《Your Efficient RL Framework Secretly Brings You Off-Policy RL Training》，2025-08，Notion 发布；原报告受技术限制无法直接获取，其 token 级校正公式转述自 FP16 论文 §2.1
 - Liu 等：《When Speed Kills Stability: Demystifying RL Collapse from the Inference-Training Mismatch》，2025，Notion 发布；序列级掩码校正，同上转述
 - 工程路线：[Unified FP8: Moving Beyond Mixed Precision for Stable and Accelerated MoE RL](https://www.lmsys.org/blog/2025-11-25-fp8-rl/)（LMSYS）；Miles/slime：All-In-One Solution to Training-Inference Mismatch
-- 本地教材 hands-on-modern-rl 附录 B.1：rollout engine 产出 old logprob 的两种工程处理（直接采用推理端返回的结果，或在训练端重新计算并核对其准确性）
+- 教材 [hands-on-modern-rl](https://github.com/walkinglabs/hands-on-modern-rl) 附录 B.1：rollout engine 产出 old logprob 的两种工程处理（直接采用推理端返回的结果，或在训练端重新计算并核对其准确性）
 - 前篇：[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/) 与 [比率用错了单位：GSPO 把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)

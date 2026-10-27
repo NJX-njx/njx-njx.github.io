@@ -1,11 +1,16 @@
 baseURL: "https://njx-njx.github.io/"
-locale: "zh"
-defaultContentLanguage: "zh"
-hasCJKLanguage: true
 title: "Njx'Log"
 theme: "PaperMod"
+defaultContentLanguage: "zh"
+defaultContentLanguageInSubdir: false
+hasCJKLanguage: true
+capitalizeListTitles: false
 
 enableRobotsTXT: true
+enableGitInfo: true
+taxonomies:
+  tag: tags
+  series: series
 buildDrafts: false
 buildFuture: false
 buildExpired: false
@@ -14,15 +19,94 @@ minify:
   disableXML: true
   minifyOutput: true
 
+markup:
+  goldmark:
+    extensions:
+      passthrough:
+        enable: true
+        delimiters:
+          block: [["$$", "$$"], ["\\[", "\\]"]]
+          inline: [["$", "$"], ["\\(", "\\)"]]
+
+languages:
+  zh:
+    label: "中文"
+    locale: "zh"
+    weight: 1
+    params:
+      description: "大模型训练工程的田野笔记：harness 与 rollout 系统、后训练、评测、推理 RL 与 agentic RL。"
+      DateFormat: "2006-01-02"
+      homeInfoParams:
+        Title: "👋 欢迎来到 Njx'Log"
+        Content: >
+            我是 Jiaxing Ni。这里写 harness 与 rollout 系统、模型架构、mid-training 与后训练、评测与 benchmark、推理 RL 与 agentic RL、RSI、数据合成，以及把想法做成系统的工程细节。
+
+            文章会随着理解加深持续更新。
+    menus:
+      main:
+        - identifier: posts
+          name: 文章
+          url: /posts/
+          weight: 10
+        - identifier: reports
+          name: 报告
+          url: /reports/
+          weight: 15
+        - identifier: archives
+          name: 归档
+          url: /archives/
+          weight: 20
+        - identifier: search
+          name: 搜索
+          url: /search/
+          weight: 30
+        - identifier: about
+          name: 关于
+          url: /about/
+          weight: 50
+  en:
+    label: "English"
+    locale: "en"
+    weight: 2
+    params:
+      description: "Field notes on the engineering of LLM training: harness and rollout systems, post-training, evals, reasoning RL and agentic RL."
+      DateFormat: "January 2, 2006"
+      homeInfoParams:
+        Title: "👋 Welcome to Njx'Log"
+        Content: >
+            Hi, this is Jiaxing Ni. I write about harness and rollout systems, model architecture, mid-training and post-training, evals and benchmarks, reasoning RL and agentic RL, RSI, data synthesis, and the engineering work of turning ideas into systems.
+
+            Posts are updated as I learn more.
+    menus:
+      main:
+        - identifier: posts
+          name: Posts
+          url: /posts/
+          weight: 10
+        - identifier: reports
+          name: Reports
+          url: /reports/
+          weight: 15
+        - identifier: archives
+          name: Archive
+          url: /archives/
+          weight: 20
+        - identifier: search
+          name: Search
+          url: /search/
+          weight: 30
+        - identifier: about
+          name: About
+          url: /about/
+          weight: 50
+
 params:
   env: production
-  title: Njx's Blog
-  description: "记录 AI/ML 与工程实践的学习笔记。"
   keywords: [Harness, Model Architecture, Mid-training, Post-training, Evals, Benchmarks, Reasoning RL, Agentic RL, RSI, Rollout System, Data Synthesis]
   author: njx
-  DateFormat: "January 2, 2006"
   defaultTheme: auto
   disableThemeToggle: false
+  displayFullLangName: true
 
   ShowReadingTime: true
   ShowShareButtons: false
@@ -30,8 +114,8 @@ params:
   ShowBreadCrumbs: true
   ShowCodeCopyButtons: true
   ShowWordCount: true
+  ShowFullTextinRSS: true
   ShowRssButtonInSectionTermList: true
-  UseHugoToc: true
   disableSpecial1stPost: false
   disableScrollToTop: false
   disableAnchoredHeadings: true
@@ -39,11 +123,6 @@ params:
   hidemeta: false
   hideSummary: false
   showtoc: true
-  tocopen: true
-
-  aiAssistant:
-    enabled: true
-    endpoint: "https://njx-log-ai-assistant.njx-log.workers.dev/ask"
 
   assets:
     favicon: "/blog-icon.png"
@@ -55,14 +134,6 @@ params:
     text: "Njx'Log"
     icon: "/blog-icon.png"
     iconHeight: 35
-
-  # home-info mode
-  homeInfoParams:
-    Title: "👋 Welcome to Njx'Log"
-    Content: >
-        Hi, this is Jiaxing Ni. I write about harness and rollout systems, model architecture, mid-training and post-training, evals and benchmarks, reasoning RL and agentic RL, RSI, data synthesis, and the engineering work of turning ideas into systems.
-        
-        Posts started in 2024 and are updated as I learn more.
 
   images:
     - "/blog-cover.jpg"
@@ -76,37 +147,6 @@ params:
     - name: huggingface
       title: Hugging Face
       url: "https://huggingface.co/NJX-njx"
-
-menu:
-  main:
-    - identifier: posts
-      name: Posts
-      url: /posts/
-      weight: 10
-    - identifier: reports
-      name: Reports
-      url: /reports/
-      weight: 15
-    - identifier: archives
-      name: Archive
-      url: /archives/
-      weight: 20
-    - identifier: search
-      name: Search
-      url: /search/
-      weight: 30
-    - identifier: tags
-      name: Tags
-      url: /tags/
-      weight: 40
-    - identifier: about
-      name: About
-      url: /about/
-      weight: 50
-    - identifier: faq
-      name: FAQ
-      url: /faq/
-      weight: 60
 
 outputs:
   home:

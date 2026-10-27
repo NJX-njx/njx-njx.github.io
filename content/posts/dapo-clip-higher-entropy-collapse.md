@@ -2,11 +2,12 @@
 title: "熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么"
 date: 2026-08-26T14:30:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "grpo", "dapo", "rlvr"]
-categories: ["AI"]
-summary: "naive GRPO 复现 R1 时熵快速坍缩、组内样本趋同，DAPO 的 Clip-Higher 只把裁剪上界从 0.2 抬到 0.28。这一个数背后，是 PPO-Clip 在概率轴上的结构性不对称。本文拆解失效链条、机制、证据与边界。"
+series: ["grpo"]
+summary: "naive GRPO 训练中熵会快速坍缩。DAPO 只把裁剪上界从 0.2 抬到 0.28，背后是 PPO-Clip 在概率轴上的结构性不对称。"
 ---
+
+naive GRPO 复现 R1 时熵快速坍缩、组内样本趋同，DAPO 的 Clip-Higher 只把裁剪上界从 0.2 抬到 0.28。这一个数背后，是 PPO-Clip 在概率轴上的结构性不对称。本文拆解失效链条、机制、证据与边界。
 
 > 本文有配套的[交互报告](/reports/dapo-clip-higher-entropy-collapse/)，含可下钻的公式拆解与消融数据图表。
 
@@ -123,7 +124,7 @@ $$\text{clip}\left(r_t(\theta),\ 1-\varepsilon_{low},\ 1+\varepsilon_{high}\righ
 
 $$D_{KL}(\pi_\theta \| \pi_{ref}) = \mathbb{E}_{x \sim \pi_\theta}\left[\log \pi_\theta(x) - \log \pi_{ref}(x)\right]$$
 
-经典 RLHF 把它作为惩罚项放进目标函数（$-\beta D_{KL}}$），动机有二：一是**防 reward hacking**——奖励模型是有漏洞的代理，策略跑得够偏就能找到 RM 没见过、瞎打高分的输出，KL 把搜索拴在 RM 见过的分布范围内；二是保住初始模型的语言能力，防止格式崩坏。工程代价是显存里要常驻一个冻结参考模型，每个 token 算两边的前向。
+经典 RLHF 把它作为惩罚项放进目标函数（$-\beta D_{KL}$），动机有二：一是**防 reward hacking**——奖励模型是有漏洞的代理，策略跑得够偏就能找到 RM 没见过、瞎打高分的输出，KL 把搜索拴在 RM 见过的分布范围内；二是保住初始模型的语言能力，防止格式崩坏。工程代价是显存里要常驻一个冻结参考模型，每个 token 算两边的前向。
 
 DAPO 把它整个去掉了（$\beta=0$，参考模型不用加载），论文 §2.3 的理由：KL 惩罚的初衷是"对齐但不要偏离初始模型太远"，而长 CoT 训练的目的**恰恰是大幅偏离初始模型**——base 模型本来不会写长思维链、不会自我反思，这些行为全靠 RL 重塑分布，拴着锚等于不让船开。还有一个没明说的配套条件：RLVR 的奖励是规则判定，**没有 RM 可以 hack**，KL 防 hacking 的那一半动机直接消失。
 
@@ -160,16 +161,16 @@ DAPO 把它整个去掉了（$\beta=0$，参考模型不用加载），论文 §
 
 1. **熵没有目标区间。** 论文的经验结论是"熵缓慢上升有利"，但同样承认熵过高对应 gibberish 和重复。那么 ε_high 是否应该跟着熵曲线自适应调整，而不是固定 0.28？我没看到有人系统做过。
 2. **消融的顺序效应。** 表 1 是累加链，Clip-Higher 排在 Overlong Filtering 之后测，+2 分是在已有改动的底座上量的。它干净的独立贡献是多少，未知。
-3. **和序列级裁剪的兼容性。** GSPO 把重要性采样比率提到序列级（解决 MoE 模型 token 级比率的数值不稳），那时"抬 token 级上界"的逻辑还成不成立？本周后续选题会专门拆 GSPO。
+3. **和序列级裁剪的兼容性。** GSPO 把重要性采样比率提到序列级（解决 MoE 模型 token 级比率的数值不稳），那时"抬 token 级上界"的逻辑还成不成立？[GSPO 那篇](/posts/gspo-sequence-level-importance-sampling/)专门拆了这个问题。
 4. **异步训练下的稳健性。** 异步 RL 的比率分布漂移更大、更偏，固定 0.28 在不同 off-policy 程度下是否都合适，论文没有覆盖。
 
 ## 参考来源
 
 - DAPO 论文：[arXiv:2503.14476](https://arxiv.org/abs/2503.14476)（机制、数值例子、消融数据、训练细节的一手来源）
-- RLHF Book 第 6 章及配套实现：`code/policy_gradients/loss.py`、`configs/dapo.yaml`（本地仓库，含 [book-zh 中文对照](https://github.com/natolambert/rlhf-book)）
+- RLHF Book 第 6 章及配套实现：[`code/policy_gradients/loss.py`](https://github.com/natolambert/rlhf-book/blob/main/code/policy_gradients/loss.py)、[`code/policy_gradients/configs/dapo.yaml`](https://github.com/natolambert/rlhf-book/blob/main/code/policy_gradients/configs/dapo.yaml)（[natolambert/rlhf-book](https://github.com/natolambert/rlhf-book)）
 - verl 生产实现：[`verl/trainer/ppo/core_algos.py`](https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py)（clip_ratio_low/high、dual-clip）
 - B 站视频：[GRPO loss/objective 分析及 biases 分析（DAPO，Dr. GRPO），BV1LgXbY5EFD](https://www.bilibili.com/video/BV1LgXbY5EFD)（注意：该集主要讲动态采样与长度 bias、Dr. GRPO 的标准差问题，Clip-Higher 着墨很少）
-- hands-on-modern-rl `docs/chapter18_grpo/deepseek-dapo.md`（中文讲解，Clip-Higher 一节有表述混乱，正文已标注）
+- hands-on-modern-rl [`docs/chapter18_grpo/deepseek-dapo.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter18_grpo/deepseek-dapo.md)（中文讲解，Clip-Higher 一节有表述混乱，正文已标注）
 - Notion「共同语言」笔记页（GRPO 三轮工业改造线：DAPO / Dr.GRPO / GSPO）
 
 ---

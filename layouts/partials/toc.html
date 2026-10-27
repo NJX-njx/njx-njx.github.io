@@ -1,9 +1,6 @@
-{{- $headers := findRE "<h[1-6].*?>(.|\n])+?</h[1-6]>" .Content -}}
-{{- if ge (len $headers) 1 -}}
 <div class="toc">
-    <div class="toc-title">{{- i18n "toc" | default "Table of Contents" -}}</div>
+    <div class="toc-title">{{ i18n "toc" }}</div>
     <div class="inner">
-        {{- replaceRE "id=\"TableOfContents\"" "" .TableOfContents | safeHTML -}}
+        {{- replaceRE `id="TableOfContents"` "" .TableOfContents | safeHTML -}}
     </div>
 </div>
-{{- end -}}

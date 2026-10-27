@@ -1,0 +1,161 @@
+/* ===== Search Box Styles ===== */
+.page-header {
+    margin: 26px 0 30px;
+}
+
+.page-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    font-size: clamp(2.35rem, 5vw, 3.45rem);
+    line-height: 1.04;
+}
+
+.page-header h1 svg {
+    width: 0.62em;
+    height: 0.62em;
+    opacity: 0.78;
+    stroke-width: 1.8;
+}
+
+.page-header .post-description {
+    color: var(--secondary);
+    font-size: 1.02rem;
+    line-height: 1.45;
+}
+
+#searchbox {
+    max-width: 860px;
+    margin-bottom: 18px;
+}
+
+#searchbox input {
+    padding: 0 16px;
+    width: 100%;
+    min-height: 52px;
+    color: var(--primary);
+    font-weight: 500;
+    font-size: 0.98rem;
+    line-height: 52px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--theme) 88%, var(--code-bg));
+    font-family: inherit;
+    transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+
+#searchbox input::placeholder {
+    color: var(--secondary);
+    opacity: 0.72;
+}
+
+#searchbox input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--theme);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+#searchResults {
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+#searchResults li {
+    list-style: none;
+    border-radius: var(--radius);
+    padding: 0;
+    margin: 8px 0;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    transition: transform 0.1s, border-color 0.2s;
+}
+
+#searchResults li:hover {
+    border-color: var(--primary);
+}
+
+#searchResults li:active {
+    transform: scale(0.98);
+}
+
+#searchResults li a {
+    display: block;
+    position: static;
+    top: auto;
+    left: auto;
+    width: auto;
+    height: auto;
+    box-sizing: border-box;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: var(--primary);
+}
+
+#searchResults li a .title {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+#searchResults li a .section {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--primary);
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+#searchResults li a .summary {
+    display: block;
+    font-size: 0.85em;
+    color: var(--secondary);
+    line-height: 1.4;
+}
+
+#searchResults li a .meta {
+    display: block;
+    margin-top: 8px;
+    color: var(--tertiary);
+    font-size: 0.75em;
+    line-height: 1.35;
+}
+
+#searchResults mark {
+    padding: 0 2px;
+    border-radius: 3px;
+    background: rgba(120, 120, 120, 0.18);
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+    color: var(--primary);
+}
+
+#searchResults .no-results {
+    padding: 15px;
+    color: var(--secondary);
+    text-align: center;
+    font-style: italic;
+}
+
+@media (max-width: 600px) {
+    .page-header {
+        margin: 18px 0 24px;
+    }
+
+    .page-header h1 {
+        gap: 10px;
+        margin-bottom: 12px;
+        font-size: 2.25rem;
+    }
+
+    .page-header .post-description {
+        font-size: 0.95rem;
+    }
+
+    #searchbox input {
+        min-height: 48px;
+        font-size: 0.95rem;
+        line-height: 48px;
+    }
+}

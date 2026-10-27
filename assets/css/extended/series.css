@@ -1,0 +1,46 @@
+.series-nav {
+    margin: 40px 0 8px;
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--entry);
+    font-size: 15px;
+}
+
+.series-nav-title {
+    margin-bottom: 10px;
+    color: var(--secondary);
+}
+
+.series-nav-title a {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.series-nav-title span {
+    margin-inline-start: 8px;
+}
+
+.series-nav ol {
+    margin: 0;
+    padding-inline-start: 22px;
+    color: var(--secondary);
+}
+
+.series-nav li {
+    margin: 4px 0;
+    line-height: 1.5;
+}
+
+.series-nav li a {
+    color: var(--secondary);
+}
+
+.series-nav li a:hover {
+    color: var(--primary);
+}
+
+.series-nav li[aria-current] {
+    color: var(--primary);
+    font-weight: 600;
+}

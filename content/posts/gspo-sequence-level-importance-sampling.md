@@ -2,11 +2,12 @@
 title: "比率用错了单位：GSPO 把重要性采样提到序列级"
 date: 2026-08-26T17:40:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "grpo", "gspo", "moe"]
-categories: ["AI"]
-summary: "GRPO 沿用 PPO 的 token 级重要性比率，Qwen 团队认定这是对重要性采样的根本误用，会在 MoE 长回答训练中导致不可逆崩溃。GSPO 把比率、裁剪、优化全部提到序列级，被裁掉的 token 多两个数量级，训练反而更高效。本文拆解这条论证链，以及论文没点破的前提与代价。"
+series: ["grpo"]
+summary: "GRPO 沿用 token 级重要性比率，Qwen 认为这是误用，会让 MoE 长回答训练崩溃。GSPO 把比率、裁剪和优化都提到序列级。"
 ---
+
+GRPO 沿用 PPO 的 token 级重要性比率，Qwen 团队认定这是对重要性采样的根本误用，会在 MoE 长回答训练中导致不可逆崩溃。GSPO 把比率、裁剪、优化全部提到序列级，被裁掉的 token 多两个数量级，训练反而更高效。本文拆解这条论证链，以及论文没点破的前提与代价。
 
 > 本文有配套的[交互报告](/reports/gspo-sequence-level-importance-sampling/)，含可下钻的公式拆解、裁剪带对比与稀释效应计算器。
 
@@ -50,7 +51,7 @@ $$\mathcal{J}_{GSPO}(\theta)=\mathbb{E}_{x\sim\mathcal{D},\{y_i\}_{i=1}^G\sim\pi
 
 $$s_i(\theta)=\left(\frac{\pi_\theta(y_i|x)}{\pi_{\theta_{old}}(y_i|x)}\right)^{\frac{1}{|y_i|}}=\exp\left(\frac{1}{|y_i|}\sum_{t=1}^{|y_i|}\log\frac{\pi_\theta(y_{i,t}|x,y_{i,<t})}{\pi_{\theta_{old}}(y_{i,t}|x,y_{i,<t})}\right)$$
 
-即整条序列似然比的几何平均，等价于逐 token 对数比率的算术平均再取 exp。$1/|y_i|$ 这个长度归一化不能省：不归一化，几千个比率连乘，少数几个 token 的似然变化就能让总比率剧烈波动，而且不同长度的 response 需要不同的裁剪范围，$\varepsilon$ 根本没法设。归一化之后，$s_i$ 的数值范围与序列长度解耦，一个 $\varepsilon$ 通吃。（本地教材 hands-on-modern-rl 第 16.4 节介绍 GSPO 时公式漏了这个 $1/|y_i|$，以论文公式 7 为准——漏掉它，整条论证链条就断了。）
+即整条序列似然比的几何平均，等价于逐 token 对数比率的算术平均再取 exp。$1/|y_i|$ 这个长度归一化不能省：不归一化，几千个比率连乘，少数几个 token 的似然变化就能让总比率剧烈波动，而且不同长度的 response 需要不同的裁剪范围，$\varepsilon$ 根本没法设。归一化之后，$s_i$ 的数值范围与序列长度解耦，一个 $\varepsilon$ 通吃。（教材 hands-on-modern-rl 第 16.4 节介绍 GSPO 时公式漏了这个 $1/|y_i|$，以论文公式 7 为准——漏掉它，整条论证链条就断了。）
 
 裁剪的含义也随之改变。GRPO 的裁剪是把单个 token 的梯度清零——信号被切碎，但样本还在；GSPO 的裁剪是把整条 response 从梯度估计中剔除——样本要么整个用，要么整个不用。这和"奖励给整条序列"在粒度上对齐了。
 
@@ -117,6 +118,6 @@ $$\varepsilon \approx k \cdot \frac{\sigma}{\sqrt{L}}$$
 ## 参考来源
 
 - GSPO 论文：[arXiv:2507.18071v2](https://arxiv.org/abs/2507.18071)，本文公式编号与实验数据均出自其 v2 版
-- RLHF Book 第 6 章（重要性采样背景、GSPO/CISPO 小节）：[rlhfbook.com](https://rlhfbook.com/)，本地仓库 `book-zh/chapters/06-policy-gradients.md`
-- hands-on-modern-rl 第 16.4 节（GRPO 改进家族对比；注意其 GSPO 公式遗漏长度归一化）：本地仓库 `docs/chapter18_grpo/grpo-family.md`
+- RLHF Book 第 6 章（重要性采样背景、GSPO/CISPO 小节）：[rlhfbook.com](https://rlhfbook.com/)，[`book/chapters/06-policy-gradients.md`](https://github.com/natolambert/rlhf-book/blob/main/book/chapters/06-policy-gradients.md)
+- hands-on-modern-rl 第 16.4 节（GRPO 改进家族对比；注意其 GSPO 公式遗漏长度归一化）：[`docs/chapter18_grpo/grpo-family.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter18_grpo/grpo-family.md)
 - 前篇：[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/)

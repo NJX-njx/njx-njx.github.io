@@ -2,11 +2,11 @@
 title: "7 轮交互失败了该怪谁：奖励归因怎么进 GRPO/GSPO"
 date: 2026-08-31T12:55:00+08:00
 draft: false
-math: true
 tags: ["rl", "post-training", "agentic-rl", "grpo", "credit-assignment"]
-categories: ["AI"]
-summary: "单轮 RL 里 advantage 整条序列共享，从没人为难过；到了多轮 agentic RL，同一条轨迹里第 1 轮搜索做对了、第 2 轮 query 跑偏、最后答错——单一 trajectory reward 该怎么分摊，变成一个真实的设计决策。本文拆解形式化层（action mask、轨迹概率）、归因谱系（ORM/PRM/turn 折扣/三条中间路线）、以及 GSPO-token 为多轮留的那个口子。"
+summary: "多轮 agentic RL 里一条轨迹只有一个最终奖励，第几轮的错该怎么分摊？形式化、归因谱系，以及 GSPO-token 留的口子。"
 ---
+
+单轮 RL 里 advantage 整条序列共享，从没人为难过；到了多轮 agentic RL，同一条轨迹里第 1 轮搜索做对了、第 2 轮 query 跑偏、最后答错——单一 trajectory reward 该怎么分摊，变成一个真实的设计决策。本文拆解形式化层（action mask、轨迹概率）、归因谱系（ORM/PRM/turn 折扣/三条中间路线）、以及 GSPO-token 为多轮留的那个口子。
 
 > 本文有配套的[交互报告](/reports/turn-level-reward-credit-assignment/)，含可切换的 ORM/PRM 归因对照、γ 滑杆反向折扣与 GSPO-token 公式拆解。
 
@@ -26,7 +26,7 @@ $$\rho_\theta(x \mid s_0, c) = \mathbb{I}(s_0, x) \prod_{t \in a(x)} p_\theta(x_
 
 连乘**只在模型生成的 token 位置集合 $a(x)$ 上进行**；环境返回的 observation token 由环境动力学决定，不在连乘里。翻译成 loss 就是 action mask：与轨迹等长的 0/1 向量，模型 token 标 1、prompt 和工具返回标 0。SearchR1 的实现把这件事做得非常直白：`<think>` 和 `<search>` 的内容参与训练，检索器返回的 `<information>` 段整体 mask。如果让环境 token 也参与梯度，等于逼模型"学习预测搜索引擎返回什么网页"，策略梯度被污染。
 
-这一点决定了今天的答案骨架：turn 级 reward 进入训练的方式，**不是给环境 token 加权，而是给每个 turn 的模型 token 构造各自的 advantage**。
+这一点决定了本文的答案骨架：turn 级 reward 进入训练的方式，**不是给环境 token 加权，而是给每个 turn 的模型 token 构造各自的 advantage**。
 
 ## 三层信号：reward 怎么从轨迹走到权重
 
@@ -59,7 +59,7 @@ PRM 太贵，ORM 太糙，2025–2026 年的中间路线按"信号从哪来"分�
 
 ## GRPO/GSPO 家族在这张地图上的位置
 
-上周 GSPO 那篇留下的尾巴今天兑现。GSPO 的"优化单位应匹配奖励单位"原则在多轮场景会遇到真实张力：GSPO 的目标函数把整条 response 当一个 action，适合 outcome 级奖励；多轮 RL 想要 turn 级归因，等于要求比序列更细的粒度。GSPO 论文 §4.3 为此设计的 GSPO-token 变体，公式很能说明问题：
+[GSPO 那篇](/posts/gspo-sequence-level-importance-sampling/)留下的尾巴在这里兑现。GSPO 的"优化单位应匹配奖励单位"原则在多轮场景会遇到真实张力：GSPO 的目标函数把整条 response 当一个 action，适合 outcome 级奖励；多轮 RL 想要 turn 级归因，等于要求比序列更细的粒度。GSPO 论文 §4.3 为此设计的 GSPO-token 变体，公式很能说明问题：
 
 $$s_{i,t}(\theta) = \mathrm{sg}[s_i(\theta)] \cdot \frac{\pi_\theta(y_{i,t}|x,y_{i,<t})}{\mathrm{sg}[\pi_\theta(y_{i,t}|x,y_{i,<t})]}$$
 
@@ -69,7 +69,7 @@ GRPO 家族走对称的另一条路：组内比较多条轨迹的机制不动，
 
 ## 我的三个判断
 
-一、**轮数决定档位，算法决定不了。** 教材的选型建议按轮数分档：3–5 轮纯 ORM/GRPO 就够（episode 短，稀疏性不致命）；5–15 轮上里程碑奖励或 SALT/GiGPO 这类无标注方法；15 轮以上必须 PRM 或 progress reward 加树搜索。这个分档比任何单项技术都重要——reward 密度撑不起学习时，换更强的 RL 算法收益为零。今天那条 5 轮轨迹，其实正处在第一档和第二档的边界上。
+一、**轮数决定档位，算法决定不了。** 教材的选型建议按轮数分档：3–5 轮纯 ORM/GRPO 就够（episode 短，稀疏性不致命）；5–15 轮上里程碑奖励或 SALT/GiGPO 这类无标注方法；15 轮以上必须 PRM 或 progress reward 加树搜索。这个分档比任何单项技术都重要——reward 密度撑不起学习时，换更强的 RL 算法收益为零。本文那条 5 轮轨迹，其实正处在第一档和第二档的边界上。
 
 二、**归因质量和熵的关系比想象中直接。** ORM 下失败轨迹全员受罚，模型学到的最省事的对策是降低行为多样性（少做动作、早点给答案）——熵坍缩在多轮下不是副产品，是错误归因的直接后果。反过来，PRM 或 IGPO 这类细粒度信号允许模型"保住对的步骤、只改错的"，探索才得以保留。观察多轮训练时 agent 的 turn 数分布和工具调用多样性，比看 reward 曲线更早暴露归因问题。
 
@@ -83,8 +83,8 @@ GRPO 家族走对称的另一条路：组内比较多条轨迹的机制不动，
 
 ## 参考来源
 
-- 本地教材 hands-on-modern-rl：22.2 多轮 RL 形式化（AppWorld POMDP、action mask、reward 四类）与 22.3 轨迹信用分配（三层信号、ORM/PRM 实验、三条中间路线、turn-level discounting、选型分档），本地仓库 `docs/chapter22_agentic/formulation.md` 与 `docs/chapter22_agentic/credit-assignment.md`
+- 教材 [hands-on-modern-rl](https://github.com/walkinglabs/hands-on-modern-rl)：22.2 多轮 RL 形式化（AppWorld POMDP、action mask、reward 四类）与 22.3 轨迹信用分配（三层信号、ORM/PRM 实验、三条中间路线、turn-level discounting、选型分档），[`docs/chapter22_agentic/formulation.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter22_agentic/formulation.md) 与 [`docs/chapter22_agentic/credit-assignment.md`](https://github.com/walkinglabs/hands-on-modern-rl/blob/main/docs/chapter22_agentic/credit-assignment.md)
 - GSPO 论文：[arXiv:2507.18071](https://arxiv.org/abs/2507.18071) §4.3（GSPO-token 公式与等价性论证）
-- AppWorld：[Executable Code Actions Elicit Better LLM Agents](https://arxiv.org/abs/2404.14394)；ORM/PRM 原始框架：[Let's Verify Step by Step](https://arxiv.org/abs/2305.20050)（Lightman et al., 2023）
-- 中间路线：SALT [2510.20022]、GiGPO/HGPO [2604.18401]、SPA-RL [2505.20732]、IGPO [2504.05678]、Turn-PPO [2512.17008]、StepPO [2604.18401]（arXiv id 均转引自教材）
+- AppWorld：[AppWorld: A Controllable World of Apps and People for Benchmarking Interactive Coding Agents](https://arxiv.org/abs/2407.18901)；ORM/PRM 原始框架：[Let's Verify Step by Step](https://arxiv.org/abs/2305.20050)（Lightman et al., 2023）
+- 中间路线：SALT [2510.20022]、GiGPO [2505.10978]、HGPO [2602.22817]、SPA-RL [2505.20732]、IGPO [2510.14967]、Turn-PPO [2512.17008]、StepPO（教材给出的编号指向另一篇论文，未能核实原文）（arXiv id 已逐一对照 arXiv 核对）
 - 前篇：[比率用错了单位：GSPO 把重要性采样提到序列级](/posts/gspo-sequence-level-importance-sampling/)、[熵是怎么塌掉的：DAPO 的 Clip-Higher 在修什么](/posts/dapo-clip-higher-entropy-collapse/)
